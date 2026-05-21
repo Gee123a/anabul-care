@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB12FBEE81E00097208 /* SSOT.md */; };
 		56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */; };
+		56A9FDB52FBEE91B00097208 /* GEMINI.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB42FBEE91B00097208 /* GEMINI.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,14 +27,32 @@
 			remoteGlobalIDString = 566ACB772FBEE4D80046B347;
 			remoteInfo = "anabul-care";
 		};
+		56A9FDD62FBEED5E00097208 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 566ACB702FBEE4D80046B347 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56A9FDC82FBEED5B00097208;
+			remoteInfo = "watchos-petcare Watch App";
+		};
+		56A9FDE02FBEED5E00097208 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 566ACB702FBEE4D80046B347 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56A9FDC82FBEED5B00097208;
+			remoteInfo = "watchos-petcare Watch App";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "anabul-care.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "anabul-care.app"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-care.app"; sourceTree = "<absolute>"; };
+		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "anabul-careTests.xctest"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-care.app/PlugIns/anabul-careTests.xctest"; sourceTree = "<absolute>"; };
+		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "anabul-careUITests.xctest"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-careUITests-Runner.app/PlugIns/anabul-careUITests.xctest"; sourceTree = "<absolute>"; };
 		56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SRSnRefrence.md; sourceTree = "<group>"; };
 		56A9FDB12FBEE81E00097208 /* SSOT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SSOT.md; sourceTree = "<group>"; };
+		56A9FDB42FBEE91B00097208 /* GEMINI.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GEMINI.md; sourceTree = "<group>"; };
+		56A9FDC92FBEED5B00097208 /* watchos-petcare Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "watchos-petcare Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A9FDD52FBEED5E00097208 /* watchos-petcare Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "watchos-petcare Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A9FDDF2FBEED5E00097208 /* watchos-petcare Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "watchos-petcare Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -50,6 +69,21 @@
 		566ACB942FBEE4E00046B347 /* anabul-careUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "anabul-careUITests";
+			sourceTree = "<group>";
+		};
+		56A9FDCA2FBEED5B00097208 /* watchos-petcare Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "watchos-petcare Watch App";
+			sourceTree = "<group>";
+		};
+		56A9FDD82FBEED5E00097208 /* watchos-petcare Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "watchos-petcare Watch AppTests";
+			sourceTree = "<group>";
+		};
+		56A9FDE22FBEED5E00097208 /* watchos-petcare Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "watchos-petcare Watch AppUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -76,29 +110,46 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		56A9FDC62FBEED5B00097208 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDD22FBEED5E00097208 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDDC2FBEED5E00097208 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		566ACB6F2FBEE4D80046B347 = {
 			isa = PBXGroup;
 			children = (
+				56A9FDB42FBEE91B00097208 /* GEMINI.md */,
 				566ACB7A2FBEE4D90046B347 /* anabul-care */,
 				566ACB8A2FBEE4E00046B347 /* anabul-careTests */,
 				566ACB942FBEE4E00046B347 /* anabul-careUITests */,
-				566ACB792FBEE4D90046B347 /* Products */,
 				56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */,
 				56A9FDB12FBEE81E00097208 /* SSOT.md */,
+				56A9FDC92FBEED5B00097208 /* watchos-petcare Watch App.app */,
+				56A9FDCA2FBEED5B00097208 /* watchos-petcare Watch App */,
+				56A9FDD52FBEED5E00097208 /* watchos-petcare Watch AppTests.xctest */,
+				56A9FDD82FBEED5E00097208 /* watchos-petcare Watch AppTests */,
+				56A9FDDF2FBEED5E00097208 /* watchos-petcare Watch AppUITests.xctest */,
+				56A9FDE22FBEED5E00097208 /* watchos-petcare Watch AppUITests */,
 			);
-			sourceTree = "<group>";
-		};
-		566ACB792FBEE4D90046B347 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				566ACB782FBEE4D90046B347 /* anabul-care.app */,
-				566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */,
-				566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,6 +223,74 @@
 			productReference = 566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		56A9FDC82FBEED5B00097208 /* watchos-petcare Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56A9FDE72FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch App" */;
+			buildPhases = (
+				56A9FDC52FBEED5B00097208 /* Sources */,
+				56A9FDC62FBEED5B00097208 /* Frameworks */,
+				56A9FDC72FBEED5B00097208 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				56A9FDCA2FBEED5B00097208 /* watchos-petcare Watch App */,
+			);
+			name = "watchos-petcare Watch App";
+			packageProductDependencies = (
+			);
+			productName = "watchos-petcare Watch App";
+			productReference = 56A9FDC92FBEED5B00097208 /* watchos-petcare Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		56A9FDD42FBEED5E00097208 /* watchos-petcare Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56A9FDEA2FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch AppTests" */;
+			buildPhases = (
+				56A9FDD12FBEED5E00097208 /* Sources */,
+				56A9FDD22FBEED5E00097208 /* Frameworks */,
+				56A9FDD32FBEED5E00097208 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56A9FDD72FBEED5E00097208 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				56A9FDD82FBEED5E00097208 /* watchos-petcare Watch AppTests */,
+			);
+			name = "watchos-petcare Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "watchos-petcare Watch AppTests";
+			productReference = 56A9FDD52FBEED5E00097208 /* watchos-petcare Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		56A9FDDE2FBEED5E00097208 /* watchos-petcare Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56A9FDED2FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch AppUITests" */;
+			buildPhases = (
+				56A9FDDB2FBEED5E00097208 /* Sources */,
+				56A9FDDC2FBEED5E00097208 /* Frameworks */,
+				56A9FDDD2FBEED5E00097208 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56A9FDE12FBEED5E00097208 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				56A9FDE22FBEED5E00097208 /* watchos-petcare Watch AppUITests */,
+			);
+			name = "watchos-petcare Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "watchos-petcare Watch AppUITests";
+			productReference = 56A9FDDF2FBEED5E00097208 /* watchos-petcare Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -193,6 +312,17 @@
 						CreatedOnToolsVersion = 26.2;
 						TestTargetID = 566ACB772FBEE4D80046B347;
 					};
+					56A9FDC82FBEED5B00097208 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					56A9FDD42FBEED5E00097208 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 56A9FDC82FBEED5B00097208;
+					};
+					56A9FDDE2FBEED5E00097208 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 56A9FDC82FBEED5B00097208;
+					};
 				};
 			};
 			buildConfigurationList = 566ACB732FBEE4D80046B347 /* Build configuration list for PBXProject "anabul-care" */;
@@ -205,13 +335,16 @@
 			mainGroup = 566ACB6F2FBEE4D80046B347;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 566ACB792FBEE4D90046B347 /* Products */;
+			productRefGroup = 566ACB6F2FBEE4D80046B347;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				566ACB772FBEE4D80046B347 /* anabul-care */,
 				566ACB862FBEE4E00046B347 /* anabul-careTests */,
 				566ACB902FBEE4E00046B347 /* anabul-careUITests */,
+				56A9FDC82FBEED5B00097208 /* watchos-petcare Watch App */,
+				56A9FDD42FBEED5E00097208 /* watchos-petcare Watch AppTests */,
+				56A9FDDE2FBEED5E00097208 /* watchos-petcare Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -221,6 +354,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56A9FDB52FBEE91B00097208 /* GEMINI.md in Resources */,
 				56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */,
 				56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */,
 			);
@@ -234,6 +368,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		566ACB8F2FBEE4E00046B347 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDC72FBEED5B00097208 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDD32FBEED5E00097208 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDDD2FBEED5E00097208 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -264,6 +419,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		56A9FDC52FBEED5B00097208 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDD12FBEED5E00097208 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A9FDDB2FBEED5E00097208 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -276,6 +452,16 @@
 			isa = PBXTargetDependency;
 			target = 566ACB772FBEE4D80046B347 /* anabul-care */;
 			targetProxy = 566ACB922FBEE4E00046B347 /* PBXContainerItemProxy */;
+		};
+		56A9FDD72FBEED5E00097208 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56A9FDC82FBEED5B00097208 /* watchos-petcare Watch App */;
+			targetProxy = 56A9FDD62FBEED5E00097208 /* PBXContainerItemProxy */;
+		};
+		56A9FDE12FBEED5E00097208 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56A9FDC82FBEED5B00097208 /* watchos-petcare Watch App */;
+			targetProxy = 56A9FDE02FBEED5E00097208 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -549,6 +735,162 @@
 			};
 			name = Release;
 		};
+		56A9FDE82FBEED5E00097208 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "watchos-petcare";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = .watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		56A9FDE92FBEED5E00097208 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "watchos-petcare";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = .watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		56A9FDEB2FBEED5E00097208 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.watchos-petcare-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/watchos-petcare Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/watchos-petcare Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		56A9FDEC2FBEED5E00097208 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.watchos-petcare-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/watchos-petcare Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/watchos-petcare Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		56A9FDEE2FBEED5E00097208 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.watchos-petcare-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "watchos-petcare Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		56A9FDEF2FBEED5E00097208 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.watchos-petcare-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "watchos-petcare Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -584,6 +926,33 @@
 			buildConfigurations = (
 				566ACBA22FBEE4E00046B347 /* Debug */,
 				566ACBA32FBEE4E00046B347 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56A9FDE72FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56A9FDE82FBEED5E00097208 /* Debug */,
+				56A9FDE92FBEED5E00097208 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56A9FDEA2FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56A9FDEB2FBEED5E00097208 /* Debug */,
+				56A9FDEC2FBEED5E00097208 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56A9FDED2FBEED5E00097208 /* Build configuration list for PBXNativeTarget "watchos-petcare Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56A9FDEE2FBEED5E00097208 /* Debug */,
+				56A9FDEF2FBEED5E00097208 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
