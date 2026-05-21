@@ -45,11 +45,12 @@ struct ToxicityShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: ToxicityIntent(),
             phrases: [
-                "Apakah \(\.$item) aman untuk \(\.$species) di \(.applicationName)?",
-                "Cek keamanan \(\.$item) untuk \(\.$species)"
+                "Cek keamanan {item} di \(.applicationName)",
+                "Apakah aman untuk {species} di \(.applicationName)"
             ],
             shortTitle: "Keamanan Makanan",
             systemImageName: "exclamationmark.shield"
         )
     }
 }
+

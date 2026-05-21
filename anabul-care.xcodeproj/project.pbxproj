@@ -6,12 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB12FBEE81E00097208 /* SSOT.md */; };
-		56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */; };
-		56A9FDB52FBEE91B00097208 /* GEMINI.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB42FBEE91B00097208 /* GEMINI.md */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		566ACB882FBEE4E00046B347 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -44,12 +38,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "anabul-care.app"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-care.app"; sourceTree = "<absolute>"; };
-		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "anabul-careTests.xctest"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-care.app/PlugIns/anabul-careTests.xctest"; sourceTree = "<absolute>"; };
-		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "anabul-careUITests.xctest"; path = "/Users/mynamegee/Documents/anabul-care/build/Debug-iphoneos/anabul-careUITests-Runner.app/PlugIns/anabul-careUITests.xctest"; sourceTree = "<absolute>"; };
-		56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SRSnRefrence.md; sourceTree = "<group>"; };
-		56A9FDB12FBEE81E00097208 /* SSOT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SSOT.md; sourceTree = "<group>"; };
-		56A9FDB42FBEE91B00097208 /* GEMINI.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GEMINI.md; sourceTree = "<group>"; };
+		56A5A0552FBF38C90000AC7E /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "anabul-care.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A5A0562FBF38C90000AC7E /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A5A0572FBF38C90000AC7E /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56A9FDC92FBEED5B00097208 /* watchos-petcare Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "watchos-petcare Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56A9FDD52FBEED5E00097208 /* watchos-petcare Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "watchos-petcare Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56A9FDDF2FBEED5E00097208 /* watchos-petcare Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "watchos-petcare Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -137,18 +128,18 @@
 		566ACB6F2FBEE4D80046B347 = {
 			isa = PBXGroup;
 			children = (
-				56A9FDB42FBEE91B00097208 /* GEMINI.md */,
 				566ACB7A2FBEE4D90046B347 /* anabul-care */,
 				566ACB8A2FBEE4E00046B347 /* anabul-careTests */,
 				566ACB942FBEE4E00046B347 /* anabul-careUITests */,
-				56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */,
-				56A9FDB12FBEE81E00097208 /* SSOT.md */,
 				56A9FDC92FBEED5B00097208 /* watchos-petcare Watch App.app */,
 				56A9FDCA2FBEED5B00097208 /* watchos-petcare Watch App */,
 				56A9FDD52FBEED5E00097208 /* watchos-petcare Watch AppTests.xctest */,
 				56A9FDD82FBEED5E00097208 /* watchos-petcare Watch AppTests */,
 				56A9FDDF2FBEED5E00097208 /* watchos-petcare Watch AppUITests.xctest */,
 				56A9FDE22FBEED5E00097208 /* watchos-petcare Watch AppUITests */,
+				56A5A0552FBF38C90000AC7E /* anabul-care.app */,
+				56A5A0562FBF38C90000AC7E /* anabul-careTests.xctest */,
+				56A5A0572FBF38C90000AC7E /* anabul-careUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -174,7 +165,7 @@
 			packageProductDependencies = (
 			);
 			productName = "anabul-care";
-			productReference = 566ACB782FBEE4D90046B347 /* anabul-care.app */;
+			productReference = 56A5A0552FBF38C90000AC7E /* anabul-care.app */;
 			productType = "com.apple.product-type.application";
 		};
 		566ACB862FBEE4E00046B347 /* anabul-careTests */ = {
@@ -197,7 +188,7 @@
 			packageProductDependencies = (
 			);
 			productName = "anabul-careTests";
-			productReference = 566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */;
+			productReference = 56A5A0562FBF38C90000AC7E /* anabul-careTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		566ACB902FBEE4E00046B347 /* anabul-careUITests */ = {
@@ -220,7 +211,7 @@
 			packageProductDependencies = (
 			);
 			productName = "anabul-careUITests";
-			productReference = 566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */;
+			productReference = 56A5A0572FBF38C90000AC7E /* anabul-careUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		56A9FDC82FBEED5B00097208 /* watchos-petcare Watch App */ = {
@@ -354,9 +345,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56A9FDB52FBEE91B00097208 /* GEMINI.md in Resources */,
-				56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */,
-				56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -602,6 +590,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -634,6 +623,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

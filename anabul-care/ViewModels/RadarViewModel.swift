@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 import SwiftUI
 import MapKit
+import Combine
 
 @MainActor
 class RadarViewModel: ObservableObject {
