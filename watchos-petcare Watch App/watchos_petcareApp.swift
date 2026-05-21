@@ -1,17 +1,26 @@
-//
-//  watchos_petcareApp.swift
-//  watchos-petcare Watch App
-//
-//  Created by Stevanus Ivan Santoso on 21/05/26.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct watchos_petcare_Watch_AppApp: App {
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            PetProfile.self,
+            ActivityLog.self,
+        ])
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(sharedModelContainer)
     }
 }

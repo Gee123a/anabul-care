@@ -12,7 +12,11 @@ import SwiftData
 struct anabul_careApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            PetProfile.self,
+            ActivityLog.self,
+            SpeciesRuleModel.self,
+            TidbitModel.self,
+            ToxicityModel.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,6 +30,11 @@ struct anabul_careApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    LocationManager.shared.requestPermission()
+                    LocationManager.shared.start()
+                    ClimateManager.shared.requestNotificationPermission()
+                }
         }
         .modelContainer(sharedModelContainer)
     }

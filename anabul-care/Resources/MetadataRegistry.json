@@ -1,0 +1,59 @@
+{
+  "species_rules": [
+    {
+      "species": "dog",
+      "rer_constant": 70,
+      "heat_threshold_celsius": 34.0,
+      "toxic_hazards": [
+        {
+          "keyword_id": "bawang",
+          "danger_level": "High",
+          "alternative_id": "none"
+        },
+        {
+          "keyword_id": "cokelat",
+          "danger_level": "Critical",
+          "alternative_id": "none"
+        }
+      ]
+    },
+    {
+      "species": "cat",
+      "rer_constant": 70,
+      "heat_threshold_celsius": 34.0,
+      "toxic_hazards": [
+        {
+          "keyword_id": "bawang",
+          "danger_level": "High",
+          "alternative_id": "none"
+        },
+        {
+          "keyword_id": "cokelat",
+          "danger_level": "Critical",
+          "alternative_id": "none"
+        }
+      ]
+    },
+    {
+      "species": "hamster",
+      "rer_constant": 145,
+      "heat_threshold_celsius": 26.0,
+      "toxic_hazards": [
+        {
+          "keyword_id": "bawang",
+          "danger_level": "Critical",
+          "alternative_id": "none"
+        }
+      ]
+    }
+  ],
+  "behavioral_tidbits": [
+    {
+      "id": "tip_1",
+      "species_target": "dog",
+      "title_id": "Sosialisasi Dini",
+      "body_id": "Mulailah sosialisasi anjing Anda sejak usia dini untuk mencegah kecemasan.",
+      "citation": "Chen dkk., 2026"
+    }
+  ]
+}
