@@ -27,12 +27,16 @@ struct MetadataRegistry: Codable {
     let behavioral_tidbits: [BehavioralTidbit]
 }
 
-class DataManager {
+/// Actor-based DataManager to ensure thread-safe, background data operations.
+actor DataManager {
     static let shared = DataManager()
     
     private init() {}
     
-    func seedData(context: ModelContext) {
+    /// Seeds the database from JSON on a background thread.
+    func seedData(modelContainer: ModelContainer) async {
+        let context = ModelContext(modelContainer)
+        
         // Check if we've already seeded rules
         let descriptor = FetchDescriptor<SpeciesRuleModel>()
         if let count = try? context.fetchCount(descriptor), count > 0 {
@@ -41,7 +45,6 @@ class DataManager {
         
         guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
-            print("Failed to find or read MetadataRegistry.json")
             return
         }
         
@@ -79,29 +82,9 @@ class DataManager {
             }
             
             try context.save()
-            print("Successfully seeded data from MetadataRegistry.json")
+            print("Successfully seeded data on background actor.")
         } catch {
-            print("Failed to decode or save MetadataRegistry: \(error)")
-        }
-    }
-    
-    // MARK: - Math Engine
-    
-    func calculateRER(weightKg: Double, species: PetSpecies) -> Double {
-        let constant: Double = (species == .hamster) ? 145.0 : 70.0
-        return constant * pow(weightKg, 0.75)
-    }
-    
-    func calculateMER(rer: Double, species: PetSpecies, ageMonths: Int, isNeutered: Bool) -> Double {
-        switch species {
-        case .dog:
-            if ageMonths < 12 { return rer * 3.0 }
-            return isNeutered ? rer * 1.6 : rer * 1.8
-        case .cat:
-            if ageMonths < 12 { return rer * 2.5 }
-            return isNeutered ? rer * 1.2 : rer * 1.4
-        case .hamster:
-            return ageMonths < 6 ? rer * 1.2 : rer * 1.0
+            print("Failed to seed MetadataRegistry: \(error)")
         }
     }
 }

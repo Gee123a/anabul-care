@@ -21,8 +21,8 @@ struct ContentView: View {
                     Label("Radar", systemImage: "map.fill")
                 }
         }
-        .onAppear {
-            DataManager.shared.seedData(context: modelContext)
+        .task {
+            await DataManager.shared.seedData(modelContainer: modelContext.container)
         }
     }
 }
@@ -31,6 +31,7 @@ struct PetListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PetProfile.name) private var pets: [PetProfile]
     @Query private var tidbits: [TidbitModel]
+    @StateObject private var viewModel = PetViewModel()
     @State private var showingAddPet = false
     
     var body: some View {
@@ -95,7 +96,11 @@ struct PetListView: View {
                                     .padding(.vertical, 4)
                                 }
                             }
-                            .onDelete(perform: deletePets)
+                            .onDelete { offsets in
+                                for index in offsets {
+                                    viewModel.deletePet(pets[index], in: modelContext)
+                                }
+                            }
                         } header: {
                             Text("Anabul Anda")
                         }
@@ -118,14 +123,6 @@ struct PetListView: View {
             }
         } detail: {
             ContentUnavailableView("Pilih Anabul", systemImage: "pawprint", description: Text("Pilih salah satu anabul dari daftar di samping untuk melihat detail kesehatan."))
-        }
-    }
-    
-    private func deletePets(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(pets[index])
-            }
         }
     }
 }
@@ -165,19 +162,15 @@ struct PetDetailView: View {
             }
             
             Section {
-                let rer = DataManager.shared.calculateRER(weightKg: pet.weightKg, species: pet.species)
-                let ageMonths = Calendar.current.dateComponents([.month], from: pet.dateOfBirth, to: Date()).month ?? 0
-                let mer = DataManager.shared.calculateMER(rer: rer, species: pet.species, ageMonths: ageMonths, isNeutered: pet.isNeutered)
-                
                 LabeledContent {
-                    Text("\(Int(rer)) kCal")
+                    Text("\(Int(pet.rer)) kCal")
                         .fontWeight(.semibold)
                 } label: {
                     Label("RER", systemImage: "bolt.fill")
                 }
                 
                 LabeledContent {
-                    Text("\(Int(mer)) kCal")
+                    Text("\(Int(pet.dailyTargetCalories)) kCal")
                         .fontWeight(.bold)
                         .foregroundColor(.accentColor)
                 } label: {

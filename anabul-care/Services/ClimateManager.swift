@@ -2,12 +2,48 @@ import Foundation
 import WeatherKit
 import UserNotifications
 import SwiftData
+import BackgroundTasks
 
 class ClimateManager {
     static let shared = ClimateManager()
+    static let backgroundTaskId = "com.anabulcare.climateCheck"
     private let weatherService = WeatherService.shared
     
     private init() {}
+    
+    func registerBackgroundTask(modelContainer: ModelContainer) {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.backgroundTaskId, using: nil) { task in
+            self.handleBackgroundTask(task: task as! BGAppRefreshTask, modelContainer: modelContainer)
+        }
+    }
+    
+    func scheduleNextCheck() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.backgroundTaskId)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60) // Check every 15 mins
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule background task: \(error)")
+        }
+    }
+    
+    private func handleBackgroundTask(task: BGAppRefreshTask, modelContainer: ModelContainer) {
+        scheduleNextCheck()
+        
+        let taskContext = ModelContext(modelContainer)
+        let descriptor = FetchDescriptor<PetProfile>()
+        
+        task.expirationHandler = {
+            // Cleanup logic if needed
+        }
+        
+        Task {
+            let pets = (try? taskContext.fetch(descriptor)) ?? []
+            await checkClimate(for: pets)
+            task.setTaskCompleted(success: true)
+        }
+    }
     
     func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in

@@ -3,19 +3,11 @@ import SwiftData
 
 struct ToxicityLookupView: View {
     @Query(sort: \ToxicityModel.keyword) private var hazards: [ToxicityModel]
-    @State private var searchText = ""
-    
-    var filteredHazards: [ToxicityModel] {
-        if searchText.isEmpty {
-            return hazards
-        } else {
-            return hazards.filter { $0.keyword.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
+    @StateObject private var viewModel = ToxicityViewModel()
     
     var body: some View {
         NavigationStack {
-            List(filteredHazards) { hazard in
+            List(viewModel.filterHazards(hazards)) { hazard in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -36,12 +28,12 @@ struct ToxicityLookupView: View {
                             .fontWeight(.bold)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(colorForDangerLevel(hazard.dangerLevel).opacity(0.2))
-                            .foregroundColor(colorForDangerLevel(hazard.dangerLevel))
+                            .background(viewModel.colorForDangerLevel(hazard.dangerLevel).opacity(0.2))
+                            .foregroundColor(viewModel.colorForDangerLevel(hazard.dangerLevel))
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
-                                    .stroke(colorForDangerLevel(hazard.dangerLevel).opacity(0.5), lineWidth: 1)
+                                    .stroke(viewModel.colorForDangerLevel(hazard.dangerLevel).opacity(0.5), lineWidth: 1)
                             )
                             .accessibilityLabel("Tingkat bahaya: \(hazard.dangerLevel)")
                     }
@@ -61,17 +53,7 @@ struct ToxicityLookupView: View {
                 .accessibilityElement(children: .combine)
             }
             .navigationTitle("Cek Toksisitas")
-            .searchable(text: $searchText, prompt: "Cari bahan makanan...")
-        }
-    }
-    
-    private func colorForDangerLevel(_ level: String) -> Color {
-        switch level.lowercased() {
-        case "low": return .yellow
-        case "moderate": return .orange
-        case "high": return .red
-        case "critical": return .purple
-        default: return .gray
+            .searchable(text: $viewModel.searchText, prompt: "Cari bahan makanan...")
         }
     }
 }

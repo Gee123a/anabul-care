@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct anabul_careApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             PetProfile.self,
@@ -21,7 +23,9 @@ struct anabul_careApp: App {
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            ClimateManager.shared.registerBackgroundTask(modelContainer: container)
+            return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
@@ -37,5 +41,10 @@ struct anabul_careApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .background {
+                ClimateManager.shared.scheduleNextCheck()
+            }
+        }
     }
 }
