@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB12FBEE81E00097208 /* SSOT.md */; };
+		56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */ = {isa = PBXBuildFile; fileRef = 56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		566ACB882FBEE4E00046B347 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "anabul-care.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SRSnRefrence.md; sourceTree = "<group>"; };
+		56A9FDB12FBEE81E00097208 /* SSOT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SSOT.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +86,8 @@
 				566ACB8A2FBEE4E00046B347 /* anabul-careTests */,
 				566ACB942FBEE4E00046B347 /* anabul-careUITests */,
 				566ACB792FBEE4D90046B347 /* Products */,
+				56A9FDB02FBEE81E00097208 /* SRSnRefrence.md */,
+				56A9FDB12FBEE81E00097208 /* SSOT.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +221,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56A9FDB22FBEE81E00097208 /* SSOT.md in Resources */,
+				56A9FDB32FBEE81E00097208 /* SRSnRefrence.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
