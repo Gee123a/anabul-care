@@ -6,6 +6,7 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import Combine
 
 @Observable
 final class PetViewModel {
@@ -31,7 +32,7 @@ final class PetViewModel {
     }
     
     func addNewPet(name: String, species: PetSpecies, breed: String, weight: Double, dob: Date) {
-        let newPet = PetProfile(name: name, species: species, breed: breed, dateOfBirth: dob, weightKg: weight)
+        let newPet = PetProfile(name: name, species: species.rawValue, breed: breed, dateOfBirth: dob, weightKg: weight)
         do {
             try repository.addPet(newPet)
             fetchPets()

@@ -41,11 +41,7 @@ class SafetyService {
         }
     }
     
-    /// Checks a query string against the toxicity database for a specific species
-    /// - Parameters:
-    ///   - species: "dog", "cat", or "hamster"
-    ///   - query: The food or item name (e.g., "Is chocolate safe?")
-    /// - Returns: A list of matching toxic items found
+
     func checkSafety(for species: String, query: String) -> [ToxicItem] {
         guard let db = database else { return [] }
         
@@ -59,7 +55,7 @@ class SafetyService {
         
         let lowerQuery = query.lowercased()
         
-        // Intelligent Fuzzy Matcher: Checks if any of our toxic keywords exist in the user's query
+
         return items.filter { item in
             item.match_keywords.contains { keyword in
                 lowerQuery.contains(keyword.lowercased())
