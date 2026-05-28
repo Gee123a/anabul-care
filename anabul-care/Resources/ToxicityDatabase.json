@@ -1,0 +1,145 @@
+[
+  {
+    "species": "dog",
+    "toxic_items": [
+      {
+        "name": "Chocolate",
+        "local_name": "Cokelat",
+        "severity": "critical",
+        "symptom": "Vomiting, rapid heart rate, seizures.",
+        "emoji": "🍫",
+        "match_keywords": ["chocolate", "cocoa", "cacao", "theobromine"]
+      },
+      {
+        "name": "Xylitol",
+        "local_name": "Xylitol / Gula Birch",
+        "severity": "fatal",
+        "symptom": "Vomiting, weakness, liver failure.",
+        "emoji": "🍬",
+        "match_keywords": ["xylitol", "birch sugar", "sugar-free", "gum", "sweetener"]
+      },
+      {
+        "name": "Grapes & Raisins",
+        "local_name": "Anggur & Kismis",
+        "severity": "fatal",
+        "symptom": "Sudden kidney failure.",
+        "emoji": "🍇",
+        "match_keywords": ["grape", "raisin", "kismis", "anggur"]
+      },
+      {
+        "name": "Onions & Garlic",
+        "local_name": "Bawang Merah & Putih",
+        "severity": "severe",
+        "symptom": "Anemia, red/brown urine.",
+        "emoji": "🧅",
+        "match_keywords": ["onion", "garlic", "bawang", "shallot", "leek", "chive"]
+      },
+      {
+        "name": "Macadamia Nuts",
+        "local_name": "Kacang Makadamia",
+        "severity": "moderate",
+        "symptom": "Weakness in hind legs, tremors.",
+        "emoji": "🥜",
+        "match_keywords": ["macadamia"]
+      },
+      {
+        "name": "Caffeine",
+        "local_name": "Kafein",
+        "severity": "critical",
+        "symptom": "Rapid breathing, heart palpitations.",
+        "emoji": "☕️",
+        "match_keywords": ["coffee", "tea", "caffeine", "energy drink", "kafein", "kopi", "teh"]
+      },
+      {
+        "name": "Alcohol",
+        "local_name": "Alkohol",
+        "severity": "fatal",
+        "symptom": "Disorientation, breathing trouble, coma.",
+        "emoji": "🍺",
+        "match_keywords": ["alcohol", "ethanol", "liquor", "beer", "wine", "alkohol", "bir"]
+      }
+    ]
+  },
+  {
+    "species": "cat",
+    "toxic_items": [
+      {
+        "name": "Lilies",
+        "local_name": "Bunga Lili",
+        "severity": "fatal",
+        "symptom": "Acute kidney failure from even trace amounts.",
+        "emoji": "🪷",
+        "match_keywords": ["lily", "lili", "peace lily", "easter lily"]
+      },
+      {
+        "name": "Onions & Garlic",
+        "local_name": "Bawang Merah & Putih",
+        "severity": "critical",
+        "symptom": "Severe red blood cell damage (anemia).",
+        "emoji": "🧄",
+        "match_keywords": ["onion", "garlic", "bawang", "shallot", "leek", "chive"]
+      },
+      {
+        "name": "Grapes & Raisins",
+        "local_name": "Anggur & Kismis",
+        "severity": "fatal",
+        "symptom": "Repeated vomiting, kidney failure.",
+        "emoji": "🍇",
+        "match_keywords": ["grape", "raisin", "kismis", "anggur"]
+      },
+      {
+        "name": "Essential Oils",
+        "local_name": "Minyak Atsiri",
+        "severity": "severe",
+        "symptom": "Drooling, tremors, liver failure.",
+        "emoji": "🧴",
+        "match_keywords": ["essential oil", "eucalyptus", "tea tree", "peppermint", "citrus oil"]
+      }
+    ]
+  },
+  {
+    "species": "hamster",
+    "toxic_items": [
+      {
+        "name": "Apple Seeds",
+        "local_name": "Biji Apel",
+        "severity": "fatal",
+        "symptom": "Sudden death from cyanide poisoning.",
+        "emoji": "🍎",
+        "match_keywords": ["apple seed", "biji apel", "cyanide"]
+      },
+      {
+        "name": "Bitter Almonds",
+        "local_name": "Almond Pahit",
+        "severity": "fatal",
+        "symptom": "Gasping for air, collapse.",
+        "emoji": "🥜",
+        "match_keywords": ["bitter almond", "almond pahit"]
+      },
+      {
+        "name": "Raw Potatoes",
+        "local_name": "Kentang Mentah",
+        "severity": "severe",
+        "symptom": "Severe diarrhea, gastric upset.",
+        "emoji": "🥔",
+        "match_keywords": ["raw potato", "kentang mentah", "potato skin", "solanine"]
+      },
+      {
+        "name": "Citrus Fruits",
+        "local_name": "Buah Sitrus",
+        "severity": "moderate",
+        "symptom": "Stomach irritation, skin sores.",
+        "emoji": "🍋",
+        "match_keywords": ["lemon", "orange", "lime", "citrus", "jeruk", "sitrun"]
+      },
+      {
+        "name": "Rhubarb",
+        "local_name": "Rhubarb",
+        "severity": "severe",
+        "symptom": "Kidney stones, gut irritation.",
+        "emoji": "🥬",
+        "match_keywords": ["rhubarb"]
+      }
+    ]
+  }
+]

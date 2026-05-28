@@ -1,26 +1,26 @@
+//
+//  ActivityLog.swift
+//  anabul-care
+//
+
 import Foundation
 import SwiftData
 
 @Model
-public final class ActivityLog {
-    @Attribute(.unique) public var id: UUID
-    public var timestamp: Date
-    public var logTypeRaw: String
-    public var durationMinutes: Int
-    public var details: String
-    public var pet: PetProfile?
+final class ActivityLog {
+    var id: UUID
+    var timestamp: Date
+    var type: String // "feeding", "grooming", "walk", "play", "hydration"
+    var durationMinutes: Int
+    var detail: String
     
-    @Transient
-    public var logType: LogType {
-        get { LogType(rawValue: logTypeRaw) ?? .feeding }
-        set { logTypeRaw = newValue.rawValue }
-    }
+    var pet: PetProfile?
     
-    public init(id: UUID = UUID(), timestamp: Date = Date(), logType: LogType, durationMinutes: Int = 0, details: String = "") {
+    init(id: UUID = UUID(), timestamp: Date = Date(), type: String, durationMinutes: Int = 0, detail: String = "") {
         self.id = id
         self.timestamp = timestamp
-        self.logTypeRaw = logType.rawValue
+        self.type = type
         self.durationMinutes = durationMinutes
-        self.details = details
+        self.detail = detail
     }
 }
