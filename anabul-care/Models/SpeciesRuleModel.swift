@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 public final class SpeciesRuleModel {
-    @Attribute(.unique) public var species: String
+    public var species: String
     public var rerConstant: Int
     public var heatThresholdCelsius: Double
     

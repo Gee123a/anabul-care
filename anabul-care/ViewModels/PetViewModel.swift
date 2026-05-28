@@ -1,35 +1,47 @@
+//
+//  PetViewModel.swift
+//  anabul-care
+//
+
 import Foundation
-import SwiftData
 import SwiftUI
+import SwiftData
 import Combine
 
-@MainActor
-class PetViewModel: ObservableObject {
-    @Published var pets: [PetProfile] = []
+@Observable
+final class PetViewModel {
+    var pets: [PetProfile] = []
+    var isLoading = false
     
-    func addPet(name: String, species: PetSpecies, breed: String, dateOfBirth: Date, weightKg: Double, isNeutered: Bool, in context: ModelContext) {
-        let newPet = PetProfile(
-            name: name,
-            species: species,
-            breed: breed,
-            dateOfBirth: dateOfBirth,
-            weightKg: weightKg,
-            isNeutered: isNeutered
-        )
-        context.insert(newPet)
+    private let repository: PetRepositoryProtocol
+    private let metabolismEngine = MetabolismEngine()
+    
+    init(repository: PetRepositoryProtocol) {
+        self.repository = repository
+        fetchPets()
     }
     
-    func deletePet(_ pet: PetProfile, in context: ModelContext) {
-        context.delete(pet)
+    func fetchPets() {
+        isLoading = true
+        do {
+            self.pets = try repository.fetchPets()
+        } catch {
+            print("Error fetching pets: \(error)")
+        }
+        isLoading = false
     }
     
-    func addActivity(to pet: PetProfile, type: LogType, duration: Int, details: String, in context: ModelContext) {
-        let newLog = ActivityLog(
-            logType: type,
-            durationMinutes: duration,
-            details: details
-        )
-        newLog.pet = pet
-        pet.activityLogs.append(newLog)
+    func addNewPet(name: String, species: PetSpecies, breed: String, weight: Double, dob: Date) {
+        let newPet = PetProfile(name: name, species: species.rawValue, breed: breed, dateOfBirth: dob, weightKg: weight)
+        do {
+            try repository.addPet(newPet)
+            fetchPets()
+        } catch {
+            print("Error adding pet: \(error)")
+        }
+    }
+    
+    func getDailyCalories(for pet: PetProfile) -> Double {
+        return MetabolismEngine.calculateMER(pet: pet)
     }
 }

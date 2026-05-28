@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 public final class TidbitModel {
-    @Attribute(.unique) public var id: String
+    public var id: String
     public var speciesTarget: String
     public var title: String
     public var bodyText: String
