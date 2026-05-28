@@ -6,19 +6,23 @@ import Combine
 
 @MainActor
 class RadarViewModel: ObservableObject {
-    @Published var position: MapCameraPosition = .userLocation(fallback: .automatic)
-    @Published var results: [MKMapItem] = []
+    @Published var position: MapCameraPosition = .camera(MapCamera(
+        centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
+        distance: 4000
+    ))
+    @Published var clinics: [ClinicModel] = []
+    @Published var selectedClinic: ClinicModel?
+    @Published var searchText: String = ""
     
-    func searchNearby() async {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = "Puskeswan Klinik Hewan"
-        
-        let search = MKLocalSearch(request: request)
-        do {
-            let response = try await search.start()
-            results = response.mapItems
-        } catch {
-            print("Search error: \(error.localizedDescription)")
-        }
+    private let radarService: RadarServiceProtocol
+    
+    init(radarService: RadarServiceProtocol = RadarService()) {
+        self.radarService = radarService
+        self.clinics = radarService.getNearbyClinics()
+        self.selectedClinic = clinics.first
+    }
+    
+    func loadClinics() {
+        clinics = radarService.getNearbyClinics()
     }
 }
