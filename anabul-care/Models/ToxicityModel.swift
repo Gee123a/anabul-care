@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 public final class ToxicityModel {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var keyword: String
     public var dangerLevel: String
     public var alternative: String
