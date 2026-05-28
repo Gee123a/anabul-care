@@ -2,12 +2,20 @@ import SwiftUI
 import MapKit
 import Combine
 
+enum POICategory: String, CaseIterable {
+    case all = "Semua Kategori"
+    case vet = "Klinik Hewan & Puskeswan"
+    case hotel = "Pet Hotel"
+    case park = "Taman Hewan"
+}
+
 struct LocalClinic: Identifiable, Hashable {
     let id = UUID()
     let name: String
     let coordinate: CLLocationCoordinate2D
     let distance: String
     let statusText: String
+    let category: POICategory
 
     static func == (lhs: LocalClinic, rhs: LocalClinic) -> Bool {
         lhs.id == rhs.id
@@ -24,19 +32,44 @@ class LocalRadarViewModel: ObservableObject {
         centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
         distance: 4000
     ))
-    @Published var clinics: [LocalClinic] = [
+    
+    @Published var allClinics: [LocalClinic] = [
         LocalClinic(
             name: "Puskeswan Wonokromo",
             coordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
             distance: "0.6 km",
-            statusText: "Open until 8 PM"
+            statusText: "Buka sampai 20:00",
+            category: .vet
+        ),
+        LocalClinic(
+            name: "Surabaya Pet Hotel",
+            coordinate: CLLocationCoordinate2D(latitude: -7.2800, longitude: 112.7400),
+            distance: "2.1 km",
+            statusText: "Buka 24 Jam",
+            category: .hotel
+        ),
+        LocalClinic(
+            name: "Taman Bungkul (Pet Zone)",
+            coordinate: CLLocationCoordinate2D(latitude: -7.2910, longitude: 112.7400),
+            distance: "1.2 km",
+            statusText: "Buka sampai 17:00",
+            category: .park
         )
     ]
+    
     @Published var selectedClinic: LocalClinic?
     @Published var searchText: String = ""
+    @Published var selectedCategory: POICategory = .all
+    
+    var filteredClinics: [LocalClinic] {
+        if selectedCategory == .all {
+            return allClinics
+        }
+        return allClinics.filter { $0.category == selectedCategory }
+    }
     
     init() {
-        self.selectedClinic = clinics.first
+        self.selectedClinic = allClinics.first
     }
 }
 
@@ -46,7 +79,7 @@ struct PuskeswanRadarView: View {
     var body: some View {
         ZStack {
             Map(position: $viewModel.position, selection: $viewModel.selectedClinic) {
-                ForEach(viewModel.clinics) { clinic in
+                ForEach(viewModel.filteredClinics) { clinic in
                     Annotation(clinic.name, coordinate: clinic.coordinate) {
                         ZStack {
                             Circle()
@@ -67,10 +100,11 @@ struct PuskeswanRadarView: View {
                 }
                 UserAnnotation()
             }
-            .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
             .ignoresSafeArea()
             
             VStack(spacing: 12) {
+                // Search Bar and Filter Menu
                 HStack(spacing: 12) {
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -84,7 +118,13 @@ struct PuskeswanRadarView: View {
                     .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
                     
-                    Button(action: {}) {
+                    Menu {
+                        Picker("Kategori", selection: $viewModel.selectedCategory) {
+                            ForEach(POICategory.allCases, id: \.self) { category in
+                                Text(category.rawValue).tag(category)
+                            }
+                        }
+                    } label: {
                         Image(systemName: "slider.horizontal.3")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white)
@@ -111,49 +151,14 @@ struct PuskeswanRadarView: View {
                 
                 Spacer()
                 
-                HStack {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        Button(action: {}) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 54, height: 54)
-                                .background(Color(hex: "FF6B33"))
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
-                        }
-                        
-                        Button(action: {}) {
-                            Image(systemName: "tree.fill")
-                                .font(.system(size: 18))
-                                .foregroundColor(.black)
-                                .frame(width: 54, height: 54)
-                                .background(.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
-                        }
-                        
-                        Button(action: {}) {
-                            Image(systemName: "storefront.fill")
-                                .font(.system(size: 18))
-                                .foregroundColor(.black)
-                                .frame(width: 54, height: 54)
-                                .background(.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
-                        }
-                    }
-                    .padding(.trailing, 20)
-                }
-                
                 if let clinic = viewModel.selectedClinic {
                     HStack(spacing: 16) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(Color(hex: "FF6B33"))
                                 .frame(width: 52, height: 52)
-                            Image(systemName: "cross.case.fill")
+                            
+                            Image(systemName: iconForCategory(clinic.category))
                                 .foregroundColor(.white)
                                 .font(.system(size: 22))
                         }
@@ -191,9 +196,17 @@ struct PuskeswanRadarView: View {
             .padding(.top, 60)
         }
     }
+    
+    private func iconForCategory(_ category: POICategory) -> String {
+        switch category {
+        case .vet: return "cross.case.fill"
+        case .hotel: return "house.lodge.fill"
+        case .park: return "tree.fill"
+        case .all: return "mappin"
+        }
+    }
 }
 
-// MARK: - Color Extension Implementation
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
