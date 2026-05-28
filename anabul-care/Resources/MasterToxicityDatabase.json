@@ -1,0 +1,98 @@
+{
+  "dog": [
+    {
+      "name": "Chocolate",
+      "severity": "critical",
+      "symptoms": "Vomiting, rapid heart rate, seizures.",
+      "match_keywords": ["chocolate", "cocoa", "cacao", "theobromine", "cokelat"]
+    },
+    {
+      "name": "Xylitol",
+      "severity": "fatal",
+      "symptoms": "Vomiting, weakness, liver failure.",
+      "match_keywords": ["xylitol", "birch sugar", "sugar-free", "gum", "pemanis", "permen"]
+    },
+    {
+      "name": "Grapes & Raisins",
+      "severity": "fatal",
+      "symptoms": "Sudden kidney failure.",
+      "match_keywords": ["grape", "raisin", "kismis", "anggur"]
+    },
+    {
+      "name": "Onions & Garlic",
+      "severity": "severe",
+      "symptoms": "Anemia, red/brown urine.",
+      "match_keywords": ["onion", "garlic", "bawang", "shallot", "leek", "chive"]
+    },
+    {
+      "name": "Macadamia Nuts",
+      "severity": "moderate",
+      "symptoms": "Weakness in hind legs, tremors.",
+      "match_keywords": ["macadamia", "makadamia"]
+    },
+    {
+      "name": "Sago Palm",
+      "severity": "fatal",
+      "symptoms": "Vomiting, bloody stools, liver failure.",
+      "match_keywords": ["sago palm", "cycas", "rumbia"]
+    },
+    {
+      "name": "Aloe Vera",
+      "severity": "moderate",
+      "symptoms": "Vomiting, diarrhea, lethargy.",
+      "match_keywords": ["aloe", "lidah buaya"]
+    }
+  ],
+  "cat": [
+    {
+      "name": "Lilies",
+      "severity": "fatal",
+      "symptoms": "Acute kidney failure from even trace amounts (pollen).",
+      "match_keywords": ["lily", "lili", "pollen", "peace lily", "easter lily"]
+    },
+    {
+      "name": "Chocolate",
+      "severity": "critical",
+      "symptoms": "Vomiting, seizures.",
+      "match_keywords": ["chocolate", "cocoa", "cokelat"]
+    },
+    {
+      "name": "Onions & Garlic",
+      "severity": "critical",
+      "symptoms": "Severe red blood cell damage.",
+      "match_keywords": ["onion", "garlic", "bawang", "bawang putih"]
+    },
+    {
+      "name": "Tulips",
+      "severity": "severe",
+      "symptoms": "Drooling, vomiting, heart issues.",
+      "match_keywords": ["tulip"]
+    }
+  ],
+  "hamster": [
+    {
+      "name": "Apple Seeds",
+      "severity": "fatal",
+      "symptoms": "Sudden death from cyanide poisoning.",
+      "match_keywords": ["apple seed", "biji apel", "cyanide"]
+    },
+    {
+      "name": "Bitter Almonds",
+      "severity": "fatal",
+      "symptoms": "Gasping for air, collapse.",
+      "match_keywords": ["bitter almond", "almond pahit"]
+    },
+    {
+      "name": "Raw Potatoes",
+      "severity": "severe",
+      "symptoms": "Severe diarrhea, gastric upset.",
+      "match_keywords": ["raw potato", "kentang mentah", "solanine"]
+    },
+    {
+      "name": "Citrus Fruits",
+      "severity": "moderate",
+      "symptoms": "Stomach irritation, skin sores.",
+      "match_keywords": ["lemon", "orange", "lime", "citrus", "jeruk"]
+    }
+  ]
+}

@@ -1,33 +1,35 @@
+//
+//  PetProfile.swift
+//  anabul-care
+//
+
 import Foundation
 import SwiftData
 
 @Model
-public final class PetProfile {
-    @Attribute(.unique) public var id: UUID
-    public var name: String
-    public var speciesRaw: String
-    public var breed: String
-    public var dateOfBirth: Date
-    public var weightKg: Double
-    public var isNeutered: Bool
+final class PetProfile {
+    var id: UUID
+    var name: String
+    var species: String // "dog", "cat", "hamster"
+    var breed: String
+    var dateOfBirth: Date
+    var weightKg: Double
     
-    @Relationship(deleteRule: .cascade, inverse: \ActivityLog.pet) 
-    public var activityLogs: [ActivityLog] = []
+    @Relationship(deleteRule: .cascade, inverse: \ActivityLog.pet)
+    var activities: [ActivityLog] = []
     
-    // Computed property for strict type enforcement across extensions
-    @Transient
-    public var species: PetSpecies {
-        get { PetSpecies(rawValue: speciesRaw) ?? .dog }
-        set { speciesRaw = newValue.rawValue }
-    }
-    
-    public init(id: UUID = UUID(), name: String, species: PetSpecies, breed: String, dateOfBirth: Date, weightKg: Double, isNeutered: Bool = false) {
+    init(id: UUID = UUID(), name: String, species: String, breed: String, dateOfBirth: Date, weightKg: Double) {
         self.id = id
         self.name = name
-        self.speciesRaw = species.rawValue
+        self.species = species
         self.breed = breed
         self.dateOfBirth = dateOfBirth
         self.weightKg = weightKg
-        self.isNeutered = isNeutered
+    }
+    
+    // Metabolic Calculations
+    var rmr: Double {
+        let constant = species.lowercased() == "hamster" ? 145.0 : 70.0
+        return constant * pow(weightKg, 0.75)
     }
 }

@@ -1,3 +1,8 @@
+//
+//  ToxicityIntent.swift
+//  anabul-care
+//
+
 import AppIntents
 import SwiftData
 
@@ -17,40 +22,13 @@ struct ToxicityIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        let container = try ModelContainer(for: ToxicityModel.self, SpeciesRuleModel.self)
-        let context = container.mainContext
+        let results = SafetyService.shared.checkSafety(for: species, query: item)
         
-        let searchText = item.lowercased()
-        let searchSpecies = species.lowercased()
-        
-        let descriptor = FetchDescriptor<ToxicityModel>()
-        let allHazards = (try? context.fetch(descriptor)) ?? []
-        
-        let match = allHazards.first { hazard in
-            hazard.keyword.lowercased() == searchText &&
-            hazard.speciesRule?.species.lowercased() == searchSpecies
-        }
-        
-        if let match = match {
-            let message = "Bahaya \(match.keyword) untuk \(searchSpecies) adalah \(match.dangerLevel). \(match.alternative != "none" ? "Coba berikan \(match.alternative) sebagai alternatif." : "")"
-            return .result(value: match.dangerLevel, dialog: "\(message)")
+        if let match = results.first {
+            let message = "Bahaya \(match.name) untuk \(species) adalah \(match.severity). Gejalanya meliputi \(match.symptoms)."
+            return .result(value: match.severity, dialog: "\(message)")
         } else {
             return .result(value: "Aman", dialog: "Sepertinya \(item) aman untuk \(species), tapi tetap berhati-hatilah.")
         }
     }
 }
-
-struct ToxicityShortcuts: AppShortcutsProvider {
-    static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: ToxicityIntent(),
-            phrases: [
-                "Cek keamanan {item} di \(.applicationName)",
-                "Apakah aman untuk {species} di \(.applicationName)"
-            ],
-            shortTitle: "Keamanan Makanan",
-            systemImageName: "exclamationmark.shield"
-        )
-    }
-}
-
