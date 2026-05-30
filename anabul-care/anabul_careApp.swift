@@ -15,6 +15,9 @@ struct anabul_careApp: App {
             Item.self,
             PetProfile.self,
             ActivityLog.self,
+            SpeciesRuleModel.self,
+            ToxicityModel.self,
+            TidbitModel.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -28,6 +31,9 @@ struct anabul_careApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    await DataManager.shared.seedData(modelContainer: sharedModelContainer)
+                }
         }
         .modelContainer(sharedModelContainer)
     }
