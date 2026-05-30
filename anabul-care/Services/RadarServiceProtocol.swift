@@ -8,5 +8,5 @@
 import Foundation
 
     protocol RadarServiceProtocol {
-        func getNearbyClinics() -> [ClinicModel]
+        func getNearbyClinics() async -> [ClinicModel]
     }

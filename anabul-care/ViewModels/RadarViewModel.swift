@@ -18,11 +18,16 @@ class RadarViewModel: ObservableObject {
     
     init(radarService: RadarServiceProtocol = RadarService()) {
         self.radarService = radarService
-        self.clinics = radarService.getNearbyClinics()
-        self.selectedClinic = clinics.first
+        loadClinics()
     }
     
     func loadClinics() {
-        clinics = radarService.getNearbyClinics()
+        Task {
+            let fetchedClinics = await radarService.getNearbyClinics()
+            await MainActor.run {
+                self.clinics = fetchedClinics
+                self.selectedClinic = fetchedClinics.first
+            }
+        }
     }
 }
