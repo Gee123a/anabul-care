@@ -74,7 +74,7 @@ class ClimateManager {
         let isCritical: Bool
         let threshold: Double
         
-        switch pet.species {
+        switch pet.petSpecies {
         case .dog, .cat:
             threshold = 34.0
             isCritical = temperature >= threshold
@@ -91,7 +91,7 @@ class ClimateManager {
     private func sendAlert(for pet: PetProfile, temperature: Double) {
         let content = UNMutableNotificationContent()
         
-        if pet.species == .hamster {
+        if pet.petSpecies == .hamster {
             content.title = "Peringatan Stres Panas Hamster!"
             content.body = "Suhu ruangan terdeteksi kritis (\(Int(temperature))°C). Segera nyalakan pendingin atau pindahkan \(pet.name) ke area sejuk."
             content.interruptionLevel = .critical
