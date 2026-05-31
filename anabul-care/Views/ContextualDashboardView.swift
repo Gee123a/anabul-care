@@ -193,3 +193,11 @@ struct EmptyPetStateView: View {
         .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 5)
     }
 }
+
+struct PressedScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
