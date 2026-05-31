@@ -96,7 +96,7 @@ struct ContextualDashboardView: View {
                                 .font(.system(size: 15, weight: .medium, design: .rounded))
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Image(systemName: "shield.alert.fill")
+                            Image(systemName: "exclamationmark.shield.fill")
                                 .foregroundColor(.red)
                                 .padding(8)
                                 .background(Color.red.opacity(0.12))

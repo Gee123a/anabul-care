@@ -290,7 +290,12 @@ struct QueueRow: View {
                     pet.activities.remove(at: index)
                 }
             } else {
-                let newLog = ActivityLog(type: type.rawValue, timestamp: date, durationMinutes: 15, detail: detail)
+                let newLog = ActivityLog(
+                    timestamp: date,
+                    type: type.rawValue,
+                    durationMinutes: 15,
+                    detail: detail
+                )
                 newLog.pet = pet
                 modelContext.insert(newLog)
                 pet.activities.append(newLog)
