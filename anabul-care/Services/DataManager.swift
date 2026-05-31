@@ -35,16 +35,18 @@ actor DataManager {
     
     /// Seeds the database from JSON on a background thread.
     func seedData(modelContainer: ModelContainer) {
-        // Use detached task to ensure this runs completely in background
+        // Use detached task with background priority to move work off the Main Actor
         Task.detached(priority: .background) {
+            // Create a dedicated context for this background work
             let context = ModelContext(modelContainer)
             
-            // Check if we've already seeded rules
+            // 1. Initial check: If rules already exist, we don't need to seed.
             let descriptor = FetchDescriptor<SpeciesRuleModel>()
             if let count = try? context.fetchCount(descriptor), count > 0 {
                 return
             }
             
+            // 2. Load and Decode JSON
             guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
                   let data = try? Data(contentsOf: url) else {
                 return
@@ -53,6 +55,7 @@ actor DataManager {
             do {
                 let registry = try JSONDecoder().decode(MetadataRegistry.self, from: data)
                 
+                // 3. Process Species Rules and Hazards
                 for rule in registry.species_rules {
                     let ruleModel = SpeciesRuleModel(
                         species: rule.species,
@@ -61,6 +64,7 @@ actor DataManager {
                     )
                     context.insert(ruleModel)
                     
+                    // Process hazards in chunks to avoid blocking
                     for hazard in rule.toxic_hazards {
                         let hazardModel = ToxicityModel(
                             keyword: hazard.keyword_id,
@@ -70,8 +74,13 @@ actor DataManager {
                         hazardModel.speciesRule = ruleModel
                         context.insert(hazardModel)
                     }
+                    
+                    // Save and yield after each species to prevent long database locks
+                    try context.save()
+                    await Task.yield()
                 }
                 
+                // 4. Process Behavioral Tidbits
                 for tidbit in registry.behavioral_tidbits {
                     let model = TidbitModel(
                         id: tidbit.id,
@@ -81,10 +90,15 @@ actor DataManager {
                         citation: tidbit.citation
                     )
                     context.insert(model)
+                    
+                    // Periodically save and yield
+                    if context.hasChanges {
+                        try context.save()
+                        await Task.yield()
+                    }
                 }
                 
-                try context.save()
-                print("Successfully seeded data on background actor.")
+                print("Successfully seeded data in background chunks.")
             } catch {
                 print("Failed to seed MetadataRegistry: \(error)")
             }
