@@ -38,8 +38,7 @@ struct AddActivityView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Simpan") {
                         let newLog = ActivityLog(
-                            type: logType.rawValue,
-                            timestamp: Date(),
+                            timestamp: Date(), type: logType.rawValue,
                             durationMinutes: durationMinutes,
                             detail: details
                         )
