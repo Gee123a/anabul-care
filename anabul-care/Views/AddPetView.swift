@@ -4,7 +4,6 @@ import SwiftData
 struct AddPetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = PetViewModel()
     
     @State private var name: String = ""
     @State private var species: PetSpecies = .dog
@@ -47,15 +46,15 @@ struct AddPetView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Simpan") {
-                        viewModel.addPet(
+                        let newPet = PetProfile(
                             name: name,
-                            species: species,
+                            species: species.rawValue,
                             breed: breed,
                             dateOfBirth: dateOfBirth,
                             weightKg: weightKg,
-                            isNeutered: isNeutered,
-                            in: modelContext
+                            isNeutered: isNeutered
                         )
+                        modelContext.insert(newPet)
                         dismiss()
                     }
                     .disabled(name.isEmpty || weightKg <= 0)

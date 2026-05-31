@@ -4,7 +4,6 @@ import SwiftData
 struct AddActivityView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = PetViewModel()
     
     let pet: PetProfile
     
@@ -38,13 +37,16 @@ struct AddActivityView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Simpan") {
-                        viewModel.addActivity(
-                            to: pet,
-                            type: logType,
-                            duration: durationMinutes,
-                            details: details,
-                            in: modelContext
+                        let newLog = ActivityLog(
+                            type: logType.rawValue,
+                            timestamp: Date(),
+                            durationMinutes: durationMinutes,
+                            detail: details
                         )
+                        newLog.pet = pet
+                        modelContext.insert(newLog)
+                        pet.activities.append(newLog)
+                        
                         dismiss()
                     }
                 }
