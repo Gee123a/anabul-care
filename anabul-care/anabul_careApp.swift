@@ -30,7 +30,7 @@ struct anabul_careApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContextualDashboardView()
                 .task {
                     await DataManager.shared.seedData(modelContainer: sharedModelContainer)
                 }
