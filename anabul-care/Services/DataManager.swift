@@ -34,9 +34,9 @@ actor DataManager {
     private init() {}
     
     /// Seeds the database from JSON on a background thread.
-    func seedData(modelContainer: ModelContainer) {
+    func seedData(modelContainer: ModelContainer) async {
         // Use detached task with background priority to move work off the Main Actor
-        Task.detached(priority: .background) {
+        await Task.detached(priority: .background) {
             // Create a dedicated context for this background work
             let context = ModelContext(modelContainer)
             
