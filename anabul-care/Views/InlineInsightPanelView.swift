@@ -11,18 +11,16 @@ import SwiftData
 struct InlineInsightPanelView: View {
     let targetSpecies: String
     
-    // Dynamic query matching the active pet species profile context
-    @Query var tipModels: [TidbitModel]
+    // Use a standard query instead of a custom-initialized one to prevent Main Thread deadlocks
+    @Query var allTips: [TidbitModel]
     
-    init(targetSpecies: String) {
-        self.targetSpecies = targetSpecies
+    // Filter the tips dynamically in memory rather than forcing a synchronous fetch in init
+    private var tip: TidbitModel? {
         let speciesLower = targetSpecies.lowercased()
-        _tipModels = Query(filter: #Predicate<TidbitModel> { $0.speciesTarget == speciesLower })
+        return allTips.first { $0.speciesTarget == speciesLower }
     }
     
     var body: some View {
-        let tip = tipModels.first
-        
         VStack(alignment: .leading, spacing: 0) {
             // Eyebrow row
             HStack {
@@ -107,7 +105,7 @@ struct InlineInsightPanelView: View {
                 LinearGradient(
                     stops: [
                         .init(color: Color(red: 255/255, green: 235/255, blue: 222/255).opacity(0.55), location: 0),
-                        .init(color: Color(red: 255/255, green: 222/255, blue: 205/255).opacity(0.38), location: 0.55),
+                        .init(color: Color(red: 255/255, green: 222/205, blue: 205/255).opacity(0.38), location: 0.55),
                         .init(color: Color(red: 255/255, green: 235/255, blue: 222/255).opacity(0.28), location: 1)
                     ],
                     startPoint: .topLeading,
