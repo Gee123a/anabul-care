@@ -38,9 +38,10 @@ class ClimateManager {
             // Cleanup logic if needed
         }
         
-        Task {
+        Task.detached(priority: .background) {
+            let taskContext = ModelContext(modelContainer)
             let pets = (try? taskContext.fetch(descriptor)) ?? []
-            await checkClimate(for: pets)
+            await self.checkClimate(for: pets)
             task.setTaskCompleted(success: true)
         }
     }

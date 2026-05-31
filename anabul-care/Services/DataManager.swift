@@ -34,57 +34,60 @@ actor DataManager {
     private init() {}
     
     /// Seeds the database from JSON on a background thread.
-    func seedData(modelContainer: ModelContainer) async {
-        let context = ModelContext(modelContainer)
-        
-        // Check if we've already seeded rules
-        let descriptor = FetchDescriptor<SpeciesRuleModel>()
-        if let count = try? context.fetchCount(descriptor), count > 0 {
-            return
-        }
-        
-        guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
-              let data = try? Data(contentsOf: url) else {
-            return
-        }
-        
-        do {
-            let registry = try JSONDecoder().decode(MetadataRegistry.self, from: data)
+    func seedData(modelContainer: ModelContainer) {
+        // Use detached task to ensure this runs completely in background
+        Task.detached(priority: .background) {
+            let context = ModelContext(modelContainer)
             
-            for rule in registry.species_rules {
-                let ruleModel = SpeciesRuleModel(
-                    species: rule.species,
-                    rerConstant: rule.rer_constant,
-                    heatThresholdCelsius: rule.heat_threshold_celsius
-                )
-                context.insert(ruleModel)
+            // Check if we've already seeded rules
+            let descriptor = FetchDescriptor<SpeciesRuleModel>()
+            if let count = try? context.fetchCount(descriptor), count > 0 {
+                return
+            }
+            
+            guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
+                  let data = try? Data(contentsOf: url) else {
+                return
+            }
+            
+            do {
+                let registry = try JSONDecoder().decode(MetadataRegistry.self, from: data)
                 
-                for hazard in rule.toxic_hazards {
-                    let hazardModel = ToxicityModel(
-                        keyword: hazard.keyword_id,
-                        dangerLevel: hazard.danger_level,
-                        alternative: hazard.alternative_id
+                for rule in registry.species_rules {
+                    let ruleModel = SpeciesRuleModel(
+                        species: rule.species,
+                        rerConstant: rule.rer_constant,
+                        heatThresholdCelsius: rule.heat_threshold_celsius
                     )
-                    hazardModel.speciesRule = ruleModel
-                    context.insert(hazardModel)
+                    context.insert(ruleModel)
+                    
+                    for hazard in rule.toxic_hazards {
+                        let hazardModel = ToxicityModel(
+                            keyword: hazard.keyword_id,
+                            dangerLevel: hazard.danger_level,
+                            alternative: hazard.alternative_id
+                        )
+                        hazardModel.speciesRule = ruleModel
+                        context.insert(hazardModel)
+                    }
                 }
+                
+                for tidbit in registry.behavioral_tidbits {
+                    let model = TidbitModel(
+                        id: tidbit.id,
+                        speciesTarget: tidbit.species_target,
+                        title: tidbit.title_id,
+                        bodyText: tidbit.body_id,
+                        citation: tidbit.citation
+                    )
+                    context.insert(model)
+                }
+                
+                try context.save()
+                print("Successfully seeded data on background actor.")
+            } catch {
+                print("Failed to seed MetadataRegistry: \(error)")
             }
-            
-            for tidbit in registry.behavioral_tidbits {
-                let model = TidbitModel(
-                    id: tidbit.id,
-                    speciesTarget: tidbit.species_target,
-                    title: tidbit.title_id,
-                    bodyText: tidbit.body_id,
-                    citation: tidbit.citation
-                )
-                context.insert(model)
-            }
-            
-            try context.save()
-            print("Successfully seeded data on background actor.")
-        } catch {
-            print("Failed to seed MetadataRegistry: \(error)")
         }
     }
 }
