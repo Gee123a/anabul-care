@@ -5,6 +5,7 @@
 //  Created by Nicholas Gerwin Mawardji on 28/05/26.
 //
 
+
 import SwiftUI
 import SwiftData
 
@@ -24,6 +25,19 @@ struct ContextualDashboardView: View {
     @State private var showingSafetyLookup = false
     
     var body: some View {
+        // Embeds the swipeable paging logic directly in the dashboard
+        TabView {
+            dashboardPage
+            
+            PuskeswanRadarView()
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .ignoresSafeArea()
+    }
+    
+    // Extracts your original dashboard layout into its own view property
+    @ViewBuilder
+    private var dashboardPage: some View {
         let currentPet = pets.first
         
         NavigationStack {
@@ -46,7 +60,7 @@ struct ContextualDashboardView: View {
                         if let pet = currentPet {
                             NavigationLink(destination: PetProfileView(pet: pet)) {
                                 ZStack(alignment: .bottomTrailing) {
-                                    Image(systemName: "pawprint.fill") // Placeholder for actual pet image
+                                    Image(systemName: "pawprint.fill")
                                         .resizable()
                                         .scaledToFit()
                                         .padding(12)
@@ -57,7 +71,7 @@ struct ContextualDashboardView: View {
                                         .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
                                     
                                     Circle()
-                                        .fill(Color(red: 155/255, green: 217/255, blue: 180/255)) // #9BD9B4
+                                        .fill(Color(red: 155/255, green: 217/255, blue: 180/255))
                                         .frame(width: 14, height: 14)
                                         .overlay(Circle().stroke(Color.white, lineWidth: 2))
                                 }
@@ -166,8 +180,7 @@ struct ContextualDashboardView: View {
     }
     
     private func todayTaskCount(for pet: PetProfile?) -> Int {
-        // Logic to return task count based on pet's species/schedule
-        return 6 // Default structural target
+        return 6
     }
     
     private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {
