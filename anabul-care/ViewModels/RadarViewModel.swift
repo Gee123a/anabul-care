@@ -13,6 +13,15 @@ class RadarViewModel: ObservableObject {
     @Published var clinics: [ClinicModel] = []
     @Published var selectedClinic: ClinicModel?
     @Published var searchText: String = ""
+    @Published var selectedCategory: POICategory = .all
+    
+    var filteredClinics: [ClinicModel] {
+        clinics.filter { clinic in
+            let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
+            let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
+            return categoryMatch && searchMatch
+        }
+    }
     
     private let radarService: RadarServiceProtocol
     
