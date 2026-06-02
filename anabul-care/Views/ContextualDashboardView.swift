@@ -12,10 +12,8 @@ import SwiftData
 struct ContextualDashboardView: View {
     @Environment(\.modelContext) private var modelContext
     
-    // Dynamic Query to pull live pet profiles and logs
     @Query(sort: \PetProfile.name) private var pets: [PetProfile]
     
-    // UI Aesthetic Configurations - Design Tokens from Figma Make
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     private let textGray = Color(red: 138/255, green: 138/255, blue: 133/255)
     private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
@@ -25,7 +23,6 @@ struct ContextualDashboardView: View {
     @State private var showingSafetyLookup = false
     
     var body: some View {
-        // Embeds the swipeable paging logic directly in the dashboard
         TabView {
             dashboardPage
             
@@ -35,7 +32,6 @@ struct ContextualDashboardView: View {
         .ignoresSafeArea()
     }
     
-    // Extracts your original dashboard layout into its own view property
     @ViewBuilder
     private var dashboardPage: some View {
         let currentPet = pets.first
@@ -44,7 +40,6 @@ struct ContextualDashboardView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // TOP BAR (Date & Avatar)
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(currentDateString)
@@ -56,7 +51,6 @@ struct ContextualDashboardView: View {
                         
                         Spacer()
                         
-                        // Avatar with Status Badge
                         if let pet = currentPet {
                             NavigationLink(destination: PetProfileView(pet: pet)) {
                                 ZStack(alignment: .bottomTrailing) {
@@ -77,7 +71,6 @@ struct ContextualDashboardView: View {
                                 }
                             }
                         } else {
-                            // Placeholder button if no pet
                             Button(action: { showingAddPet = true }) {
                                 Circle()
                                     .fill(Color.gray.opacity(0.1))
@@ -88,7 +81,6 @@ struct ContextualDashboardView: View {
                     }
                     .padding(.top, 20)
                     
-                    // GREETING
                     VStack(alignment: .leading, spacing: 8) {
                         Text(currentPet != nil ? "Good morning," : "Good morning!")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -111,7 +103,6 @@ struct ContextualDashboardView: View {
                             .padding(.top, 4)
                     }
                     
-                    // SAFETY SEARCH CAPSULE
                     Button(action: { showingSafetyLookup.toggle() }) {
                         HStack {
                             Image(systemName: "magnifyingglass")
@@ -134,7 +125,6 @@ struct ContextualDashboardView: View {
                     }
                     .buttonStyle(PressedScaleButtonStyle())
                     
-                    // TODAY SECTION HEADER
                     HStack {
                         Text("TODAY")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -149,7 +139,6 @@ struct ContextualDashboardView: View {
                     }
                     .padding(.top, 4)
                     
-                    // TODAY'S QUEUE BENTO
                     if let pet = currentPet {
                         TodayQueueCardView(pet: pet)
                             .padding(.top, -12)
@@ -157,13 +146,12 @@ struct ContextualDashboardView: View {
                         EmptyPetStateView(showingAddPet: $showingAddPet)
                     }
                     
-                    // CONTEXTUAL INSIGHTS PANEL
-                    InlineInsightPanelView(targetSpecies: currentPet?.species.rawValue ?? "cat")
+                    InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
-            .background(Color(red: 0.98, green: 0.98, blue: 0.97)) // Neutral warm bg
+            .background(Color(red: 0.98, green: 0.98, blue: 0.97))
             .sheet(isPresented: $showingAddPet) {
                 AddPetView()
             }
