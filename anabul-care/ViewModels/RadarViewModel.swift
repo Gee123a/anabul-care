@@ -22,21 +22,52 @@ class RadarViewModel: ObservableObject {
             return categoryMatch && searchMatch
         }
     }
-    
-    private let radarService: RadarServiceProtocol
-    
-    init(radarService: RadarServiceProtocol = RadarService()) {
-        self.radarService = radarService
-        loadClinics()
-    }
-    
-    func loadClinics() {
-        Task {
-            let fetchedClinics = await radarService.getNearbyClinics()
-            await MainActor.run {
-                self.clinics = fetchedClinics
-                self.selectedClinic = fetchedClinics.first
+
+    func performSearch(in region: MKCoordinateRegion) async {
+        var newClinics: [ClinicModel] = []
+        
+        let searchQueries: [(String, POICategory)] = [
+            ("Klinik Hewan", .vet),
+            ("Petcare", .vet),
+            ("Pet Hotel", .hotel),
+            ("Taman", .park)
+        ]
+        
+        for query in searchQueries {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = query.0
+            request.region = region
+            
+            let search = MKLocalSearch(request: request)
+            do {
+                let response = try await search.start()
+                for item in response.mapItems {
+                    let clinic = ClinicModel(
+                        name: item.name ?? "Unknown",
+                        coordinate: item.placemark.coordinate,
+                        address: item.placemark.title ?? "",
+                        phone: item.phoneNumber ?? "No Phone",
+                        category: query.1,
+                        mapItem: item
+                    )
+                    newClinics.append(clinic)
+                }
+            } catch {
+                continue
             }
         }
+        
+        var uniqueClinics: [ClinicModel] = []
+        var seen = Set<String>()
+        
+        for clinic in newClinics {
+            let key = clinic.name + String(clinic.coordinate.latitude)
+            if !seen.contains(key) {
+                seen.insert(key)
+                uniqueClinics.append(clinic)
+            }
+        }
+        
+        self.clinics = uniqueClinics
     }
 }

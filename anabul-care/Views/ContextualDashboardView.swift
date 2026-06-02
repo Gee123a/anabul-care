@@ -16,10 +16,10 @@ struct ContextualDashboardView: View {
     @Query(sort: \PetProfile.name) private var pets: [PetProfile]
     
     // UI Aesthetic Configurations - Design Tokens from Figma Make
-    private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255) // #FF6B33
-    private let textGray = Color(red: 138/255, green: 138/255, blue: 133/255) // #8A8A85
-    private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255) // #1C1C1A
-    private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255) // #5C5C58
+    private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
+    private let textGray = Color(red: 138/255, green: 138/255, blue: 133/255)
+    private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
+    private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
     
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
@@ -158,7 +158,7 @@ struct ContextualDashboardView: View {
                     }
                     
                     // CONTEXTUAL INSIGHTS PANEL
-                    InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
+                    InlineInsightPanelView(targetSpecies: currentPet?.species.rawValue ?? "cat")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)

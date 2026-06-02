@@ -16,7 +16,7 @@ struct PuskeswanRadarView: View {
                             
                             Circle()
                                 .fill(.white)
-                                .frame(width: 22, height: 22)
+                                .frame(width: 26, height: 26)
                                 .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                             
                             Image(systemName: iconForCategory(clinic.category))
@@ -26,8 +26,14 @@ struct PuskeswanRadarView: View {
                     }
                     .tag(clinic)
                 }
+                UserAnnotation()
             }
             .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+            .onMapCameraChange(frequency: .onEnd) { context in
+                Task {
+                    await viewModel.performSearch(in: context.region)
+                }
+            }
             .ignoresSafeArea()
             
             VStack(spacing: 12) {
@@ -61,20 +67,6 @@ struct PuskeswanRadarView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                HStack(spacing: 6) {
-                    Image(systemName: "location.north.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(hex: "FF6B33"))
-                    Text("Surabaya, East Java")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(.black)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(.white)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
                 Spacer()
             }
             .padding(.top, 60)
@@ -94,14 +86,21 @@ struct PuskeswanRadarView: View {
                         Text(clinic.name)
                             .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundColor(.black)
-                        Text("\(clinic.distance) · \(clinic.statusText)")
+                            .lineLimit(1)
+                        Text(clinic.phone)
                             .font(.system(size: 14, design: .rounded))
                             .foregroundColor(.gray)
                     }
                     
                     Spacer()
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        if let mapItem = clinic.mapItem {
+                            mapItem.openInMaps(launchOptions: [
+                                MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+                            ])
+                        }
+                    }) {
                         Text("Route")
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
@@ -123,7 +122,7 @@ struct PuskeswanRadarView: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: viewModel.selectedClinic)
     }
-    
+
     private func iconForCategory(_ category: POICategory) -> String {
         switch category {
         case .vet: return "cross.case.fill"
