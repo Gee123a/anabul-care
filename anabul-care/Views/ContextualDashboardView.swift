@@ -43,22 +43,32 @@ struct ContextualDashboardView: View {
                         Spacer()
                         
                         // Avatar with Status Badge
-                        Button(action: { /* Profile Action */ }) {
-                            ZStack(alignment: .bottomTrailing) {
-                                Image(systemName: "pawprint.fill") // Placeholder for actual pet image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .padding(12)
-                                    .frame(width: 52, height: 52)
-                                    .background(Color.white)
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1.5))
-                                    .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
-                                
+                        if let pet = currentPet {
+                            NavigationLink(destination: PetProfileView(pet: pet)) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    Image(systemName: "pawprint.fill") // Placeholder for actual pet image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(12)
+                                        .frame(width: 52, height: 52)
+                                        .background(Color.white)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1.5))
+                                        .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
+                                    
+                                    Circle()
+                                        .fill(Color(red: 155/255, green: 217/255, blue: 180/255)) // #9BD9B4
+                                        .frame(width: 14, height: 14)
+                                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                }
+                            }
+                        } else {
+                            // Placeholder button if no pet
+                            Button(action: { showingAddPet = true }) {
                                 Circle()
-                                    .fill(Color(red: 155/255, green: 217/255, blue: 180/255)) // #9BD9B4
-                                    .frame(width: 14, height: 14)
-                                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                    .fill(Color.gray.opacity(0.1))
+                                    .frame(width: 52, height: 52)
+                                    .overlay(Image(systemName: "plus").foregroundColor(.gray))
                             }
                         }
                     }
