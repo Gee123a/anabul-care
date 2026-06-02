@@ -21,7 +21,10 @@ struct anabul_careApp: App {
             ToxicityModel.self,
             TidbitModel.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
+        let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
+        
+        let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
