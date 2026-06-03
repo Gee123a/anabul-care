@@ -5,7 +5,6 @@
 //  Created by Nicholas Gerwin Mawardji on 28/05/26.
 //
 
-
 import SwiftUI
 import SwiftData
 
@@ -19,8 +18,10 @@ struct ContextualDashboardView: View {
     private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
     private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
     
+    // State variables for sheet presentation
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
+    @State private var showingPetProfile = false
     
     var body: some View {
         TabView {
@@ -51,8 +52,9 @@ struct ContextualDashboardView: View {
                         
                         Spacer()
                         
-                        if let pet = currentPet {
-                            NavigationLink(destination: PetProfileView(pet: pet)) {
+                        if currentPet != nil {
+                            // Avatar Button to trigger Pet Profile Sheet
+                            Button(action: { showingPetProfile = true }) {
                                 ZStack(alignment: .bottomTrailing) {
                                     Image(systemName: "pawprint.fill")
                                         .resizable()
@@ -157,6 +159,13 @@ struct ContextualDashboardView: View {
             }
             .sheet(isPresented: $showingSafetyLookup) {
                 ToxicityLookupView()
+            }
+            .sheet(isPresented: $showingPetProfile) {
+                if let currentPet = pets.first {
+                    PetProfileView(pet: currentPet)
+                } else {
+                    ContentUnavailableView("No Pet Found", systemImage: "pawprint.circle", description: Text("Please add a pet first."))
+                }
             }
         }
     }
