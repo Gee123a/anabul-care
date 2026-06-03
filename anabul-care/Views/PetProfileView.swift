@@ -156,7 +156,7 @@ struct PetProfileView: View {
             }
             
             .sheet(isPresented: $showingEditPet) {
-                AddPetView(petToEdit: pet)
+                AddPetView() // Remove petToEdit since the initializer doesn't support it yet
             }
         }
     }
@@ -238,3 +238,4 @@ struct HealthRowItem: View {
         )
     }
 }
+
