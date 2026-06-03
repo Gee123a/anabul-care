@@ -6,6 +6,7 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
+import AppIntents
 
 struct Provider: AppIntentTimelineProvider {
     
@@ -132,7 +133,14 @@ struct Anabul_careWidgetEntryView : View {
             Spacer()
             
             // Interactive Button
-            Button(intent: LogActivityIntent(petName: entry.petName, activityType: "feeding")) {
+            Button(
+                intent: LogActivityIntent(
+                    petName: IntentParameter(
+                        title: .init(stringLiteral: entry.petName)
+                    ),
+                    activityType: IntentParameter(title: .init("feeding"))
+                )
+            ) {
                 Label("Log Feed", systemImage: "fork.knife")
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .frame(maxWidth: .infinity)
@@ -175,3 +183,4 @@ struct Anabul_careWidget: Widget {
 } timeline: {
     SimpleEntry(date: .now, configuration: ConfigurationAppIntent(), petName: "Luna", completedCount: 3, totalCount: 6, species: "cat")
 }
+
