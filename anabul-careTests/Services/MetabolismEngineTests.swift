@@ -6,53 +6,49 @@
 //
 
 import XCTest
-@testable import anabul_care
+@testable import anabul_care // Make sure this matches your exact project name
 
 final class MetabolismEngineTests: XCTestCase {
-    var engine: MetabolismEngine!
-    
-    override func setUp() {
-        super.setUp()
-        engine = MetabolismEngine()
-    }
-    
-    override func tearDown() {
-        engine = nil
-        super.tearDown()
-    }
     
     func test_calculateMER_forNeuteredDog() {
-        // Arrange
-        let weight: Double = 10.0 // 10kg
-        let isNeutered = true
-        let species = PetSpecies.dog
+        // Arrange: Create a mock PetProfile with the exact stats you want to test
+        let mockDog = PetProfile(
+            name: "TestDog",
+            species: "dog",
+            breed: "Mixed",
+            dateOfBirth: Date(),
+            weightKg: 10.0,
+            isNeutered: true
+        )
         
-        // Act
-        // Assuming standard RER formula: 70 * (weight ^ 0.75)
-        // Assuming dog neutered multiplier is 1.6
-        let expectedRER = 70.0 * pow(weight, 0.75)
+        // Act: Pass ONLY the pet object into your static function
+        let calculatedMER = MetabolismEngine.calculateMER(pet: mockDog)
+        
+        // Assert: 70 * (10 ^ 0.75) * 1.6
+        let expectedRER = 70.0 * pow(10.0, 0.75)
         let expectedMER = expectedRER * 1.6
         
-        let calculatedMER = MetabolismEngine.calculateMER(pet: <#PetProfile#>, weight: weight, species: species, isNeutered: isNeutered)
-        
-        // Assert
         XCTAssertEqual(calculatedMER, expectedMER, accuracy: 0.1, "MER for neutered dog calculated incorrectly")
     }
     
     func test_calculateMER_forIntactCat() {
         // Arrange
-        let weight: Double = 5.0
-        let isNeutered = false
-        let species = PetSpecies.cat
+        let mockCat = PetProfile(
+            name: "TestCat",
+            species: "cat",
+            breed: "Mixed",
+            dateOfBirth: Date(),
+            weightKg: 5.0,
+            isNeutered: false
+        )
         
         // Act
-        // Assuming cat intact multiplier is 1.4
-        let expectedRER = 70.0 * pow(weight, 0.75)
+        let calculatedMER = MetabolismEngine.calculateMER(pet: mockCat)
+        
+        // Assert: 70 * (5 ^ 0.75) * 1.4
+        let expectedRER = 70.0 * pow(5.0, 0.75)
         let expectedMER = expectedRER * 1.4
         
-        let calculatedMER = MetabolismEngine.calculateMER(pet: <#PetProfile#>, weight: weight, species: species, isNeutered: isNeutered)
-        
-        // Assert
         XCTAssertEqual(calculatedMER, expectedMER, accuracy: 0.1, "MER for intact cat calculated incorrectly")
     }
 }
