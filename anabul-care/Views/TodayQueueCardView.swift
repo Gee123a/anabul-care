@@ -15,14 +15,19 @@ struct TodayQueueCardView: View {
     // Design Tokens
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255) // #FF6B33
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255) // #7BD3B3
+    private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255) // Deep, profound dark color
     
-    @State private var selectedDate = Date()
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     
     // Date Helpers
     private var days: [Date] {
         let calendar = Calendar.current
-        let today = Date()
+        let today = calendar.startOfDay(for: Date())
         return ((-15)...15).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
+    }
+    
+    private var dailyTasks: [DailyTaskItem] {
+        DailyRoutineGenerator.generate(for: pet)
     }
     
     var body: some View {
@@ -33,12 +38,12 @@ struct TodayQueueCardView: View {
                     Text("CALENDAR")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .kerning(0.6)
-                        .foregroundColor(tangerine)
+                        .foregroundColor(profoundAccent)
                         .textCase(.uppercase)
                     
                     Text(monthYearString(for: selectedDate))
-                        .font(.system(size: 10.5))
-                        .foregroundColor(.secondary.opacity(0.8))
+                        .font(.system(size: 10.5, weight: .semibold))
+                        .foregroundColor(tangerine)
                 }
                 .padding(.top, 12)
                 .padding(.horizontal, 12)
@@ -60,7 +65,12 @@ struct TodayQueueCardView: View {
                         .padding(.bottom, 12)
                     }
                     .onAppear {
-                        proxy.scrollTo(Date(), anchor: .center)
+                        // Delay slightly to ensure layout is ready before scrolling
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation {
+                                proxy.scrollTo(Calendar.current.startOfDay(for: Date()), anchor: .center)
+                            }
+                        }
                     }
                 }
                 
@@ -69,7 +79,7 @@ struct TodayQueueCardView: View {
                     Circle()
                         .fill(mint)
                         .frame(width: 6, height: 6)
-                    Text("\(completedCount(for: selectedDate))/6")
+                    Text("\(completedCount(for: selectedDate))/\(dailyTasks.count)")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                 }
@@ -105,7 +115,7 @@ struct TodayQueueCardView: View {
                     
                     Spacer()
                     
-                    Text("6 items")
+                    Text("\(dailyTasks.count) items")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary.opacity(0.8))
                 }
@@ -115,11 +125,9 @@ struct TodayQueueCardView: View {
                 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 6) {
-                        // Dynamic Rows based on LogType and Pet Data
-                        QueueRow(pet: pet, date: selectedDate, type: .feeding, title: "Feeding", time: "1:00 PM", detail: "½ cup kibble", icon: "fork.knife")
-                        QueueRow(pet: pet, date: selectedDate, type: .hydration, title: "Hydration", time: "10:00 AM", detail: "Refresh bowl", icon: "drop.fill")
-                        QueueRow(pet: pet, date: selectedDate, type: .grooming, title: "Grooming", time: "3:00 PM", detail: "Brush coat", icon: "scissors")
-                        QueueRow(pet: pet, date: selectedDate, type: .play, title: "Play Time", time: "5:00 PM", detail: "15 min wand", icon: "sparkles")
+                        ForEach(dailyTasks) { task in
+                            QueueRow(pet: pet, date: selectedDate, type: task.type, title: task.title, time: task.timeRecommendation, detail: task.detail, icon: task.icon)
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)
@@ -140,7 +148,9 @@ struct TodayQueueCardView: View {
     }
     
     private func completedCount(for date: Date) -> Int {
-        pet.activities.filter { Calendar.current.isDate($0.timestamp, inSameDayAs: date) }.count
+        dailyTasks.filter { task in 
+            pet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
+        }.count
     }
     
     private func monthYearString(for date: Date) -> String {
@@ -163,6 +173,7 @@ struct DateButton: View {
     let action: () -> Void
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
+    private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255)
     
     var body: some View {
         Button(action: action) {
@@ -190,7 +201,7 @@ struct DateButton: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? tangerine : isToday ? tangerine.opacity(0.12) : Color.white.opacity(0.55))
+                    .fill(isSelected ? profoundAccent : isToday ? tangerine.opacity(0.12) : Color.white.opacity(0.55))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -262,7 +273,7 @@ struct QueueRow: View {
                         Circle()
                             .fill(mint)
                             .frame(width: 26, height: 26)
-                        Image(systemName: "check")
+                        Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .black))
                             .foregroundColor(.white)
                     }

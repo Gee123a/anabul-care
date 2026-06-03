@@ -5,41 +5,20 @@ struct AddPetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    // 1. Variable to accept an existing pet if editing
-    var petToEdit: PetProfile?
+    @State private var name: String = ""
+    @State private var species: PetSpecies = .dog
+    @State private var breed: String = ""
+    @State private var customBreed: String = ""
+    @State private var dateOfBirth: Date = Date()
+    @State private var weightString: String = ""
+    @State private var isNeutered: Bool = false
     
-    @State private var name: String
-    @State private var species: PetSpecies
-    @State private var breed: String
-    @State private var dateOfBirth: Date
-    @State private var weightString: String
-    @State private var isNeutered: Bool
-    
+    @State private var breedsRegistry: [String: [String]] = [:]
     @State private var isSaved = false
     @FocusState private var focusedField: Field?
     
-    // 2. Custom Initializer to preload existing pet data
-    init(petToEdit: PetProfile? = nil) {
-        self.petToEdit = petToEdit
-        
-        // If petToEdit exists, use its data. Otherwise, start blank.
-        _name = State(initialValue: petToEdit?.name ?? "")
-        _species = State(initialValue: PetSpecies(rawValue: petToEdit?.species ?? PetSpecies.cat.rawValue) ?? .cat)
-        _breed = State(initialValue: petToEdit?.breed ?? "")
-        _dateOfBirth = State(initialValue: petToEdit?.dateOfBirth ?? Date())
-        
-        // Convert the existing double back to a string for the text field
-        if let existingWeight = petToEdit?.weightKg {
-            _weightString = State(initialValue: String(format: "%.1f", existingWeight))
-        } else {
-            _weightString = State(initialValue: "")
-        }
-        
-        _isNeutered = State(initialValue: petToEdit?.isNeutered ?? false)
-    }
-    
     enum Field {
-        case name, breed, weight
+        case name, breed, weight, customBreed
     }
     
     // Design Tokens
@@ -50,8 +29,13 @@ struct AddPetView: View {
         Double(weightString.replacingOccurrences(of: ",", with: ".")) ?? 0.0
     }
     
+    private var currentBreeds: [String] {
+        breedsRegistry[species.rawValue] ?? []
+    }
+    
     private var isFormValid: Bool {
-        !name.isEmpty && parsedWeight > 0
+        let breedValid = breed == "Other (Type manually)" ? !customBreed.isEmpty : !breed.isEmpty
+        return !name.isEmpty && parsedWeight > 0 && breedValid
     }
     
     var body: some View {
@@ -86,7 +70,7 @@ struct AddPetView: View {
                                     .font(.system(size: 24, weight: .black, design: .rounded))
                                     .foregroundColor(.primary)
                                 
-                                Text("Health & wellness profile")
+                                Text("Let's build a health profile")
                                     .font(.system(size: 15, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
@@ -95,8 +79,8 @@ struct AddPetView: View {
                         // 2. PRIMARY INFO CARD
                         VStack(spacing: 20) {
                             PremiumTextField(
-                                title: "Name",
-                                placeholder: "What's their name?",
+                                title: "Nama",
+                                placeholder: "Siapa namanya?",
                                 text: $name,
                                 icon: "tag.fill",
                                 isFocused: focusedField == .name,
@@ -105,29 +89,71 @@ struct AddPetView: View {
                             .focused($focusedField, equals: .name)
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("SPECIES")
+                                Text("SPESIES")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(.secondary)
                                     .padding(.leading, 4)
                                 
-                                Picker("Species", selection: $species) {
+                                Picker("Spesies", selection: $species) {
                                     ForEach(PetSpecies.allCases, id: \.self) { species in
                                         Label(species.rawValue.capitalized, systemImage: iconForSpecies(species)).tag(species)
                                     }
                                 }
                                 .pickerStyle(.segmented)
                                 .scaleEffect(1.02)
+                                .onChange(of: species) {
+                                    // Reset breed selection when species changes
+                                    breed = currentBreeds.first ?? ""
+                                }
                             }
                             
-                            PremiumTextField(
-                                title: "Breed",
-                                placeholder: "e.g. Golden Retriever",
-                                text: $breed,
-                                icon: "pawprint.circle.fill",
-                                isFocused: focusedField == .breed,
-                                accentColor: tangerine
-                            )
-                            .focused($focusedField, equals: .breed)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("RAS / BREED")
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    .foregroundColor(focusedField == .breed ? tangerine : .secondary)
+                                    .padding(.leading, 4)
+                                
+                                Menu {
+                                    Picker("Breed", selection: $breed) {
+                                        ForEach(currentBreeds, id: \.self) { b in
+                                            Text(b).tag(b)
+                                        }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "pawprint.circle.fill")
+                                            .foregroundColor(breed.isEmpty ? .secondary.opacity(0.8) : tangerine)
+                                            .frame(width: 20)
+                                        
+                                        Text(breed.isEmpty ? "Pilih ras..." : breed)
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .foregroundColor(breed.isEmpty ? .secondary : .primary)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 54)
+                                    .background(Color.gray.opacity(0.05))
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                }
+                            }
+                            
+                            if breed == "Other (Type manually)" {
+                                PremiumTextField(
+                                    title: "Custom Breed",
+                                    placeholder: "Type breed manually...",
+                                    text: $customBreed,
+                                    icon: "pencil.line",
+                                    isFocused: focusedField == .customBreed,
+                                    accentColor: tangerine
+                                )
+                                .focused($focusedField, equals: .customBreed)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                            }
                         }
                         .padding(20)
                         .background(Color.white)
@@ -136,14 +162,14 @@ struct AddPetView: View {
                         
                         // 3. PHYSICAL DETAILS CARD
                         VStack(spacing: 20) {
-                            DatePicker("Date of Birth", selection: $dateOfBirth, in: ...Date(), displayedComponents: .date)
+                            DatePicker("Tanggal Lahir", selection: $dateOfBirth, in: ...Date(), displayedComponents: .date)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .tint(tangerine)
                             
                             Divider()
                             
                             HStack {
-                                Label("Weight", systemImage: "scalemass.fill")
+                                Label("Berat", systemImage: "scalemass.fill")
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundColor(focusedField == .weight ? tangerine : .primary)
                                 
@@ -164,9 +190,9 @@ struct AddPetView: View {
                             
                             Toggle(isOn: $isNeutered) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Spayed / Neutered")
+                                    Text("Sudah Steril")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    Text("Important for daily calorie goals")
+                                    Text("Penting untuk perhitungan MER")
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                 }
@@ -181,7 +207,7 @@ struct AddPetView: View {
                         // 4. ACTION BUTTON
                         Button(action: savePet) {
                             HStack {
-                                Text(petToEdit != nil ? "Update Profile" : "Save Profile")
+                                Text("Simpan Profil")
                                 Image(systemName: "checkmark.seal.fill")
                             }
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -201,24 +227,25 @@ struct AddPetView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle(petToEdit != nil ? "Edit Profile" : "Add Pet")
+            .navigationTitle("Tambah Anabul")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Batal") { dismiss() }
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
             }
         }
         .sensoryFeedback(.success, trigger: isSaved)
+        .onAppear(perform: loadBreeds)
     }
     
     private var speciesIcon: String {
         switch species {
         case .dog: return "dog.fill"
         case .cat: return "cat.fill"
-        case .hamster: return "hare.fill" // SF Symbol closest for hamster
+        case .hamster: return "hare.fill"
         }
     }
     
@@ -230,29 +257,31 @@ struct AddPetView: View {
         }
     }
     
-    // 3. Updated save function to route edits correctly
-    private func savePet() {
-        if let existingPet = petToEdit {
-            // Update mode
-            existingPet.name = name
-            existingPet.species = species.rawValue
-            existingPet.breed = breed
-            existingPet.dateOfBirth = dateOfBirth
-            existingPet.weightKg = parsedWeight
-            existingPet.isNeutered = isNeutered
-        } else {
-            // Create mode
-            let newPet = PetProfile(
-                name: name,
-                species: species.rawValue,
-                breed: breed,
-                dateOfBirth: dateOfBirth,
-                weightKg: parsedWeight,
-                isNeutered: isNeutered
-            )
-            modelContext.insert(newPet)
+    private func loadBreeds() {
+        guard let url = Bundle.main.url(forResource: "BreedRegistry", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let registry = try? JSONDecoder().decode([String: [String]].self, from: data) else {
+            return
         }
+        self.breedsRegistry = registry
+        // Default selection
+        if breed.isEmpty {
+            breed = registry[species.rawValue]?.first ?? ""
+        }
+    }
+    
+    private func savePet() {
+        let finalBreed = (breed == "Other (Type manually)") ? customBreed : breed
         
+        let newPet = PetProfile(
+            name: name,
+            species: species.rawValue,
+            breed: finalBreed,
+            dateOfBirth: dateOfBirth,
+            weightKg: parsedWeight,
+            isNeutered: isNeutered
+        )
+        modelContext.insert(newPet)
         isSaved = true
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

@@ -1,5 +1,4 @@
 import Foundation
-import SwiftData
 import SwiftUI
 import MapKit
 import Combine
@@ -7,8 +6,8 @@ import Combine
 @MainActor
 class RadarViewModel: ObservableObject {
     @Published var position: MapCameraPosition = .camera(MapCamera(
-        centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
-        distance: 4000
+        centerCoordinate: CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385),
+        distance: 5000
     ))
     @Published var clinics: [ClinicModel] = []
     @Published var selectedClinic: ClinicModel?
@@ -16,21 +15,49 @@ class RadarViewModel: ObservableObject {
     @Published var selectedCategory: POICategory = .all
     
     var filteredClinics: [ClinicModel] {
-        clinics.filter { clinic in
-            let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
-            let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
-            return categoryMatch && searchMatch
+        if selectedCategory == .all {
+            return clinics
+        }
+        return clinics.filter { $0.category == selectedCategory }
+    }
+    
+    func searchForRegion(query: String) async {
+        guard !query.isEmpty else { return }
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        let search = MKLocalSearch(request: request)
+        
+        do {
+            let response = try await search.start()
+            if let firstItem = response.mapItems.first {
+                await MainActor.run {
+                    self.position = .camera(MapCamera(
+                        centerCoordinate: firstItem.placemark.coordinate,
+                        distance: 8000
+                    ))
+                }
+            }
+        } catch {
+            print("Search failed")
         }
     }
-
+    
     func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
+            ("Veterinarian", .vet),
+            ("Animal Hospital", .vet),
+            ("Vet", .vet),
             ("Petcare", .vet),
             ("Pet Hotel", .hotel),
-            ("Taman", .park)
+            ("Pet Boarding", .hotel),
+            ("Dog Daycare", .hotel),
+            ("Taman Hewan", .park),
+            ("Taman", .park),
+            ("Park", .park),
+            ("Dog Park", .park)
         ]
         
         for query in searchQueries {
