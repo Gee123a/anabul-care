@@ -3,9 +3,10 @@ import MapKit
 
 struct PuskeswanRadarView: View {
     @StateObject private var viewModel = RadarViewModel()
+    @Binding var selectedTab: Int
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .top) {
             Map(position: $viewModel.position, selection: $viewModel.selectedClinic) {
                 ForEach(viewModel.filteredClinics) { clinic in
                     Annotation(clinic.name, coordinate: clinic.coordinate) {
@@ -36,19 +37,39 @@ struct PuskeswanRadarView: View {
             }
             .ignoresSafeArea()
             
-            VStack(spacing: 12) {
+            VStack(spacing: 16) {
                 HStack(spacing: 12) {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            selectedTab = 0
+                        }
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Color(hex: "1C1C1A"))
+                            .frame(width: 48, height: 48)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+                    }
+                    
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
-                        TextField("Cari Puskeswan, taman...", text: $viewModel.searchText)
+                        TextField("Cari kota, klinik...", text: $viewModel.searchText)
                             .font(.system(size: 16, design: .rounded))
+                            .submitLabel(.search)
+                            .onSubmit {
+                                Task {
+                                    await viewModel.searchForRegion(query: viewModel.searchText)
+                                }
+                            }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(.white)
+                    .frame(height: 48)
+                    .background(Color.white)
                     .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
+                    .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
                     
                     Menu {
                         Picker("Kategori", selection: $viewModel.selectedCategory) {
@@ -63,66 +84,87 @@ struct PuskeswanRadarView: View {
                             .frame(width: 48, height: 48)
                             .background(Color(hex: "FF6B33"))
                             .clipShape(Circle())
+                            .shadow(color: Color(hex: "FF6B33").opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                 }
-                .padding(.horizontal, 20)
                 
-                Spacer()
-            }
-            .padding(.top, 60)
-            
-            if let clinic = viewModel.selectedClinic {
-                HStack(spacing: 16) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(hex: "FF6B33"))
-                            .frame(width: 52, height: 52)
-                        Image(systemName: iconForCategory(clinic.category))
-                            .foregroundColor(.white)
-                            .font(.system(size: 22))
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(clinic.name)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundColor(.black)
-                            .lineLimit(1)
-                        Text(clinic.phone)
-                            .font(.system(size: 14, design: .rounded))
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        if let mapItem = clinic.mapItem {
-                            mapItem.openInMaps(launchOptions: [
-                                MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-                            ])
-                        }
-                    }) {
-                        Text("Route")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Color(hex: "1A1A1A"))
-                            .clipShape(Capsule())
-                    }
+                HStack(spacing: 6) {
+                    Image(systemName: "location.north.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(hex: "FF6B33"))
+                    Text("Area Pemantauan Aktif")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.black)
                 }
-                .padding(16)
-                .background(.white.opacity(0.93))
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
-                .shadow(color: .black.opacity(0.08), radius: 15, x: 0, y: 5)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .clipShape(Capsule())
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .padding(.horizontal, 16)
+            .padding(.top, 50)
+            .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 10)
+            
+            VStack {
+                Spacer()
+                if let clinic = viewModel.selectedClinic {
+                    HStack(spacing: 16) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(hex: "FF6B33"))
+                                .frame(width: 52, height: 52)
+                            Image(systemName: iconForCategory(clinic.category))
+                                .foregroundColor(.white)
+                                .font(.system(size: 22))
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(clinic.name)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+                                .lineLimit(1)
+                            Text(clinic.phone)
+                                .font(.system(size: 14, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            if let mapItem = clinic.mapItem {
+                                mapItem.openInMaps(launchOptions: [
+                                    MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+                                ])
+                            }
+                        }) {
+                            Text("Route")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(Color(hex: "1A1A1A"))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.white.opacity(0.93))
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                    .shadow(color: .black.opacity(0.08), radius: 15, x: 0, y: 5)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: viewModel.selectedClinic)
     }
-
+    
     private func iconForCategory(_ category: POICategory) -> String {
         switch category {
         case .vet: return "cross.case.fill"
@@ -149,4 +191,8 @@ extension Color {
         }
         self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: 1)
     }
+}
+
+#Preview {
+    PuskeswanRadarView(selectedTab: .constant(1))
 }

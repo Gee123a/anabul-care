@@ -18,16 +18,18 @@ struct ContextualDashboardView: View {
     private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
     private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
     
-    // State variables for sheet presentation
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
     @State private var showingPetProfile = false
+    @State private var selectedTab = 0
     
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             dashboardPage
+                .tag(0)
             
-            PuskeswanRadarView()
+            PuskeswanRadarView(selectedTab: $selectedTab)
+                .tag(1)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
@@ -53,7 +55,6 @@ struct ContextualDashboardView: View {
                         Spacer()
                         
                         if currentPet != nil {
-                            // Avatar Button to trigger Pet Profile Sheet
                             Button(action: { showingPetProfile = true }) {
                                 ZStack(alignment: .bottomTrailing) {
                                     Image(systemName: "pawprint.fill")
