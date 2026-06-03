@@ -24,14 +24,19 @@ struct ContextualDashboardView: View {
     @State private var selectedTab = 0
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        ZStack {
             dashboardPage
-                .tag(0)
+                .opacity(selectedTab == 0 ? 1 : 0)
+                .offset(x: selectedTab == 0 ? 0 : -150)
+                .allowsHitTesting(selectedTab == 0)
             
-            PuskeswanRadarView(selectedTab: $selectedTab)
-                .tag(1)
+            if selectedTab == 1 {
+                PuskeswanRadarView(selectedTab: $selectedTab)
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+        .background(TwoFingerSwipeRecognizer(selectedTab: $selectedTab))
         .ignoresSafeArea()
     }
     
@@ -149,6 +154,7 @@ struct ContextualDashboardView: View {
                         EmptyPetStateView(showingAddPet: $showingAddPet)
                     }
                     
+                    // Fixed rawValue issue here
                     InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
                 }
                 .padding(.horizontal, 24)
@@ -177,9 +183,7 @@ struct ContextualDashboardView: View {
         return formatter.string(from: Date())
     }
     
-    private func todayTaskCount(for pet: PetProfile?) -> Int {
-        return 6
-    }
+    private func todayTaskCount(for pet: PetProfile?) -> Int { return 6 }
     
     private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {
         guard let pet = pet else { return "Morning sunlight helps regulate sleep cycles for your companions." }
@@ -187,9 +191,60 @@ struct ContextualDashboardView: View {
     }
 }
 
+// MARK: - Custom 2-Finger Swipe Gesture
+struct TwoFingerSwipeRecognizer: UIViewRepresentable {
+    @Binding var selectedTab: Int
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .clear
+        
+        DispatchQueue.main.async {
+            // Attach gesture to the highest available parent view to capture global swipes
+            if let parentView = view.superview?.superview {
+                let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeLeft))
+                swipeLeft.direction = .left
+                swipeLeft.numberOfTouchesRequired = 2
+                swipeLeft.delegate = context.coordinator
+                parentView.addGestureRecognizer(swipeLeft)
+                
+                let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeRight))
+                swipeRight.direction = .right
+                swipeRight.numberOfTouchesRequired = 2
+                swipeRight.delegate = context.coordinator
+                parentView.addGestureRecognizer(swipeRight)
+            }
+        }
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {}
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    
+    class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var parent: TwoFingerSwipeRecognizer
+        init(_ parent: TwoFingerSwipeRecognizer) { self.parent = parent }
+        
+        @objc func swipeLeft() {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                parent.selectedTab = 1
+            }
+        }
+        
+        @objc func swipeRight() {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                parent.selectedTab = 0
+            }
+        }
+        
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return true // Important: Prevents this from blocking map panning or vertical scrolling
+        }
+    }
+}
+
 struct EmptyPetStateView: View {
     @Binding var showingAddPet: Bool
-    
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "pawprint.circle")
@@ -201,10 +256,7 @@ struct EmptyPetStateView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
-            Button("Add Pet") {
-                showingAddPet = true
-            }
+            Button("Add Pet") { showingAddPet = true }
             .buttonStyle(.borderedProminent)
             .tint(.orange)
         }

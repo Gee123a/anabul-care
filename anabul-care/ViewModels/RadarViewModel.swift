@@ -45,14 +45,16 @@ class RadarViewModel: ObservableObject {
     func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
-        // FIX: Added International terms so Apple Maps can categorize places globally
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
             ("Veterinarian", .vet),
             ("Animal Hospital", .vet),
+            ("Vet", .vet),
             ("Petcare", .vet),
             ("Pet Hotel", .hotel),
             ("Pet Boarding", .hotel),
+            ("Dog Daycare", .hotel),
+            ("Taman Hewan", .park),
             ("Taman", .park),
             ("Park", .park),
             ("Dog Park", .park)
