@@ -7,49 +7,48 @@
 
 import SwiftUI
 import SwiftData
+import CoreSpotlight
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @State private var selectedTab = 0
+    @State private var showToxicityLookup = false
+    
+    // To pass the Spotlight text down to your Toxicity Lookup
+    @State private var spotlightSearchQuery: String = ""
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
+        // Horizontal Swipe Layout for Dashboard <-> Map
+        TabView(selection: $selectedTab) {
+            ContextualDashboardView()
+                .tag(0)
+            
+            PuskeswanRadarView()
+                .tag(1)
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+        .tabViewStyle(.page(indexDisplayMode: .never)) // Hides dots, allows seamless swiping
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        
+        // Modal that pops up when a user taps a Spotlight Search Result
+        .sheet(isPresented: $showToxicityLookup) {
+            ToxicityLookupView(initialQuery: spotlightSearchQuery)
         }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        
+        // ---------------------------------------------------------
+        // THE MAGIC: Catches the tap from iOS Home Screen Spotlight
+        // ---------------------------------------------------------
+        .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
+            if let uniqueIdentifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String {
+                
+                // If they tapped one of our food items...
+                if uniqueIdentifier.hasPrefix("toxicity_") {
+                    // Extract the food keyword from the ID
+                    let keyword = uniqueIdentifier.replacingOccurrences(of: "toxicity_", with: "")
+                    
+                    // Route the app automatically
+                    self.selectedTab = 0 // Snap back to dashboard if they were on the Map
+                    self.spotlightSearchQuery = keyword
+                    self.showToxicityLookup = true
+                }
             }
         }
     }

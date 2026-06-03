@@ -5,6 +5,10 @@ struct ToxicityLookupView: View {
     @Query(sort: \ToxicityModel.keyword) private var hazards: [ToxicityModel]
     @StateObject private var viewModel = ToxicityViewModel()
     
+    init(initialQuery: String = "") {
+            _viewModel = StateObject(wrappedValue: ToxicityViewModel(initialText: initialQuery))
+        }
+    
     var body: some View {
         NavigationStack {
             List(viewModel.filterHazards(hazards)) { hazard in
