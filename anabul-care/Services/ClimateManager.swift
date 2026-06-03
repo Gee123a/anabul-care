@@ -31,7 +31,6 @@ class ClimateManager {
     private func handleBackgroundTask(task: BGAppRefreshTask, modelContainer: ModelContainer) {
         scheduleNextCheck()
         
-        let taskContext = ModelContext(modelContainer)
         let descriptor = FetchDescriptor<PetProfile>()
         
         task.expirationHandler = {

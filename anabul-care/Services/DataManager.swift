@@ -1,21 +1,21 @@
 import Foundation
 import SwiftData
 
-// Existing structs for MetadataRegistry
-struct ToxicHazard: Codable {
+// Move structs outside the actor and mark them as Sendable to resolve Swift 6 concurrency warnings
+struct ToxicHazard: Codable, Sendable {
     let keyword_id: String
     let danger_level: String
     let alternative_id: String
 }
 
-struct SpeciesRule: Codable {
+struct SpeciesRule: Codable, Sendable {
     let species: String
     let rer_constant: Int
     let heat_threshold_celsius: Double
     let toxic_hazards: [ToxicHazard]
 }
 
-struct BehavioralTidbit: Codable {
+struct BehavioralTidbit: Codable, Sendable {
     let id: String
     let species_target: String
     let title_id: String
@@ -23,20 +23,19 @@ struct BehavioralTidbit: Codable {
     let citation: String
 }
 
-struct MetadataRegistry: Codable {
+struct MetadataRegistry: Codable, Sendable {
     let species_rules: [SpeciesRule]
     let behavioral_tidbits: [BehavioralTidbit]
 }
 
-// NEW: Structs to parse the full Master database
-struct MasterToxicItem: Codable {
+struct MasterToxicItem: Codable, Sendable {
     let name: String
     let severity: String
     let symptoms: String
     let match_keywords: [String]
 }
 
-struct MasterToxicityData: Codable {
+struct MasterToxicityData: Codable, Sendable {
     let dog: [MasterToxicItem]
     let cat: [MasterToxicItem]
     let hamster: [MasterToxicItem]
@@ -50,13 +49,13 @@ actor DataManager {
     func seedData(modelContainer: ModelContainer) async {
         let context = ModelContext(modelContainer)
         
-        // Check if we've already seeded rules. If count > 0, it skips seeding.
+        // 1. Initial check: If rules already exist, we don't need to seed.
         let descriptor = FetchDescriptor<SpeciesRuleModel>()
         if let count = try? context.fetchCount(descriptor), count > 0 {
             return
         }
         
-        // Step 1: Seed Species Rules & Tidbits from MetadataRegistry
+        // 2. Step 1: Seed Species Rules & Tidbits from MetadataRegistry
         if let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
            let data = try? Data(contentsOf: url),
            let registry = try? JSONDecoder().decode(MetadataRegistry.self, from: data) {
@@ -83,7 +82,7 @@ actor DataManager {
             try? context.save()
         }
         
-        // Step 2: Seed the comprehensive Toxicity list from MasterToxicityDatabase.json
+        // 3. Step 2: Seed the comprehensive Toxicity list from MasterToxicityDatabase.json
         if let masterUrl = Bundle.main.url(forResource: "MasterToxicityDatabase", withExtension: "json"),
            let masterData = try? Data(contentsOf: masterUrl),
            let db = try? JSONDecoder().decode(MasterToxicityData.self, from: masterData) {
@@ -99,7 +98,7 @@ actor DataManager {
                     let hazardModel = ToxicityModel(
                         keyword: item.name,
                         dangerLevel: item.severity.capitalized,
-                        alternative: item.symptoms // We map symptoms to the "alternative" property
+                        alternative: item.symptoms
                     )
                     hazardModel.speciesRule = rule
                     context.insert(hazardModel)
