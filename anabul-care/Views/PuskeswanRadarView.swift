@@ -46,7 +46,9 @@ struct PuskeswanRadarView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            Map(position: $viewModel.position, selection: $viewModel.selectedClinic) {
+            
+            // FIXED: Added interactionModes: .zoom in the correct order before selection
+            Map(position: $viewModel.position, interactionModes: .zoom, selection: $viewModel.selectedClinic) {
                 ForEach(viewModel.filteredClinics) { clinic in
                     Annotation(clinic.name, coordinate: clinic.coordinate) {
                         AnimatedMapPin(category: clinic.category)
@@ -61,8 +63,10 @@ struct PuskeswanRadarView: View {
                 currentDistance = context.camera.distance
             }
             .onMapCameraChange(frequency: .onEnd) { context in
-                viewModel.updateRegion(context.region)
-            }
+                            Task {
+                                await viewModel.performSearch(in: context.region)
+                            }
+                        }
             .ignoresSafeArea()
             
             VStack(spacing: 16) {
