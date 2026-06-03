@@ -8,8 +8,12 @@ struct ToxicityIntent: AppIntent {
     static var title: LocalizedStringResource = "Check Food Toxicity"
     static var description = IntentDescription("Checks the Anabul Care database to see if a food is safe or toxic.")
     
-    // The parameter Siri will ask for (e.g., "What food do you want to check?")
-    @Parameter(title: "Food Name", description: "The food you want to check (e.g., Chocolate, Grape)")
+    // ADDED: requestValueDialog tells Siri what to ask the user!
+    @Parameter(
+        title: "Food Name",
+        description: "The food you want to check (e.g., Chocolate, Grape)",
+        requestValueDialog: "What food would you like to check?"
+    )
     var foodName: String
     
     static var parameterSummary: some ParameterSummary {
@@ -29,6 +33,7 @@ struct ToxicityIntent: AppIntent {
                 ToxicityModel.self,
                 TidbitModel.self
             ])
+            // Ensure this matches your newly created App Group!
             let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
             let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
             
@@ -60,16 +65,17 @@ struct ToxicityIntent: AppIntent {
     }
 }
 
-// 2. The Shortcuts Provider (Registers the phrases with iOS automatically)
+// 2. The Shortcuts Provider
 struct AnabulCareShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: ToxicityIntent(),
+            // REMOVED: \(\.$foodName) interpolation from the phrases to fix the Xcode error
             phrases: [
-                "Ask \(.applicationName) if \(\.$foodName) is safe",
-                "Check \(\.$foodName) in \(.applicationName)",
-                "Is \(\.$foodName) toxic in \(.applicationName)?",
-                "Use \(.applicationName) to check \(\.$foodName)"
+                "Check food toxicity with \(.applicationName)",
+                "Is this safe in \(.applicationName)?",
+                "Food safety check in \(.applicationName)",
+                "Use \(.applicationName) to check toxicity"
             ],
             shortTitle: "Check Toxicity",
             systemImageName: "exclamationmark.shield.fill"
