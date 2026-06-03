@@ -15,13 +15,14 @@ struct TodayQueueCardView: View {
     // Design Tokens
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255) // #FF6B33
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255) // #7BD3B3
+    private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255) // Deep, profound dark color
     
-    @State private var selectedDate = Date()
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     
     // Date Helpers
     private var days: [Date] {
         let calendar = Calendar.current
-        let today = Date()
+        let today = calendar.startOfDay(for: Date())
         return ((-15)...15).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
@@ -33,12 +34,12 @@ struct TodayQueueCardView: View {
                     Text("CALENDAR")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .kerning(0.6)
-                        .foregroundColor(tangerine)
+                        .foregroundColor(profoundAccent)
                         .textCase(.uppercase)
                     
                     Text(monthYearString(for: selectedDate))
-                        .font(.system(size: 10.5))
-                        .foregroundColor(.secondary.opacity(0.8))
+                        .font(.system(size: 10.5, weight: .semibold))
+                        .foregroundColor(tangerine)
                 }
                 .padding(.top, 12)
                 .padding(.horizontal, 12)
@@ -60,7 +61,12 @@ struct TodayQueueCardView: View {
                         .padding(.bottom, 12)
                     }
                     .onAppear {
-                        proxy.scrollTo(Date(), anchor: .center)
+                        // Delay slightly to ensure layout is ready before scrolling
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation {
+                                proxy.scrollTo(Calendar.current.startOfDay(for: Date()), anchor: .center)
+                            }
+                        }
                     }
                 }
                 
@@ -163,6 +169,7 @@ struct DateButton: View {
     let action: () -> Void
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
+    private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255)
     
     var body: some View {
         Button(action: action) {
@@ -190,7 +197,7 @@ struct DateButton: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? tangerine : isToday ? tangerine.opacity(0.12) : Color.white.opacity(0.55))
+                    .fill(isSelected ? profoundAccent : isToday ? tangerine.opacity(0.12) : Color.white.opacity(0.55))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
