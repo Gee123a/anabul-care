@@ -37,7 +37,7 @@ struct PuskeswanRadarView: View {
             }
             .ignoresSafeArea()
             
-            VStack(spacing: 16) {
+            VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Button(action: {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -47,7 +47,7 @@ struct PuskeswanRadarView: View {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(hex: "1C1C1A"))
-                            .frame(width: 48, height: 48)
+                            .frame(width: 44, height: 44)
                             .background(Color.white)
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
@@ -66,7 +66,7 @@ struct PuskeswanRadarView: View {
                             }
                     }
                     .padding(.horizontal, 16)
-                    .frame(height: 48)
+                    .frame(height: 44)
                     .background(Color.white)
                     .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
@@ -78,41 +78,40 @@ struct PuskeswanRadarView: View {
                             }
                         }
                     } label: {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(width: 48, height: 48)
-                            .background(Color(hex: "FF6B33"))
+                        Image(systemName: "line.3.horizontal.decrease")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Color(hex: "1C1C1A"))
+                            .frame(width: 44, height: 44)
+                            .background(Color.white)
                             .clipShape(Circle())
-                            .shadow(color: Color(hex: "FF6B33").opacity(0.3), radius: 8, x: 0, y: 4)
+                            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
                     }
                 }
                 
-                HStack(spacing: 6) {
-                    Image(systemName: "location.north.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(hex: "FF6B33"))
-                    Text("Area Pemantauan Aktif")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(.black)
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        viewModel.position = .userLocation(fallback: .automatic)
+                    }) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color(hex: "FF6B33"))
+                            .frame(width: 44, height: 44)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+                    }
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.white)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .padding(.top, 8)
             }
             .padding(.horizontal, 20)
-            .padding(.vertical, 20)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-            .padding(.horizontal, 16)
-            .padding(.top, 50)
-            .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 10)
+            .padding(.top, 60)
             
-            VStack {
-                Spacer()
-                if let clinic = viewModel.selectedClinic {
+            Spacer()
+            
+            if let clinic = viewModel.selectedClinic {
+                VStack {
+                    Spacer()
                     HStack(spacing: 16) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -191,8 +190,4 @@ extension Color {
         }
         self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: 1)
     }
-}
-
-#Preview {
-    PuskeswanRadarView(selectedTab: .constant(1))
 }

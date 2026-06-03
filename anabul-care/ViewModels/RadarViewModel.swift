@@ -15,11 +15,10 @@ class RadarViewModel: ObservableObject {
     @Published var selectedCategory: POICategory = .all
     
     var filteredClinics: [ClinicModel] {
-        clinics.filter { clinic in
-            let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
-            let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
-            return categoryMatch && searchMatch
+        if selectedCategory == .all {
+            return clinics
         }
+        return clinics.filter { $0.category == selectedCategory }
     }
     
     func searchForRegion(query: String) async {
@@ -34,7 +33,7 @@ class RadarViewModel: ObservableObject {
                 await MainActor.run {
                     self.position = .camera(MapCamera(
                         centerCoordinate: firstItem.placemark.coordinate,
-                        distance: 40000
+                        distance: 8000
                     ))
                 }
             }
@@ -46,11 +45,17 @@ class RadarViewModel: ObservableObject {
     func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
+        // FIX: Added International terms so Apple Maps can categorize places globally
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
+            ("Veterinarian", .vet),
+            ("Animal Hospital", .vet),
             ("Petcare", .vet),
             ("Pet Hotel", .hotel),
-            ("Taman", .park)
+            ("Pet Boarding", .hotel),
+            ("Taman", .park),
+            ("Park", .park),
+            ("Dog Park", .park)
         ]
         
         for query in searchQueries {
