@@ -5,6 +5,8 @@ struct AddPetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
+    var petToEdit: PetProfile? = nil
+    
     @State private var name: String = ""
     @State private var species: PetSpecies = .dog
     @State private var breed: String = ""
@@ -12,6 +14,7 @@ struct AddPetView: View {
     @State private var dateOfBirth: Date = Date()
     @State private var weightString: String = ""
     @State private var isNeutered: Bool = false
+    
     
     @State private var breedsRegistry: [String: [String]] = [:]
     @State private var isSaved = false
@@ -66,11 +69,11 @@ struct AddPetView: View {
                             .padding(.top, 20)
                             
                             VStack(spacing: 4) {
-                                Text(name.isEmpty ? "New Companion" : "Hi, \(name)!")
+                                Text(name.isEmpty ? (petToEdit == nil ? "New Companion" : "Edit Profile") : "Hi, \(name)!")
                                     .font(.system(size: 24, weight: .black, design: .rounded))
                                     .foregroundColor(.primary)
                                 
-                                Text("Let's build a health profile")
+                                Text(petToEdit == nil ? "Let's build a health profile" : "Update health profile")
                                     .font(.system(size: 15, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
@@ -207,7 +210,7 @@ struct AddPetView: View {
                         // 4. ACTION BUTTON
                         Button(action: savePet) {
                             HStack {
-                                Text("Simpan Profil")
+                                Text(petToEdit == nil ? "Simpan Profil" : "Perbarui Profil")
                                 Image(systemName: "checkmark.seal.fill")
                             }
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -227,7 +230,7 @@ struct AddPetView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle("Tambah Anabul")
+            .navigationTitle(petToEdit == nil ? "Tambah Anabul" : "Edit Anabul")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -264,8 +267,27 @@ struct AddPetView: View {
             return
         }
         self.breedsRegistry = registry
-        // Default selection
-        if breed.isEmpty {
+        
+        if let pet = petToEdit {
+            // Edit Mode: Populate all fields
+            name = pet.name
+            if let matchedSpecies = PetSpecies(rawValue: pet.species) {
+                species = matchedSpecies
+            }
+            dateOfBirth = pet.dateOfBirth
+            weightString = String(format: "%.1f", pet.weightKg)
+            isNeutered = pet.isNeutered
+            
+            // Handle Breed Population
+            let availableBreeds = registry[pet.species] ?? []
+            if availableBreeds.contains(pet.breed) {
+                breed = pet.breed
+            } else {
+                breed = "Other (Type manually)"
+                customBreed = pet.breed
+            }
+        } else if breed.isEmpty {
+            // New Pet Mode: Default selection
             breed = registry[species.rawValue]?.first ?? ""
         }
     }
@@ -273,15 +295,27 @@ struct AddPetView: View {
     private func savePet() {
         let finalBreed = (breed == "Other (Type manually)") ? customBreed : breed
         
-        let newPet = PetProfile(
-            name: name,
-            species: species.rawValue,
-            breed: finalBreed,
-            dateOfBirth: dateOfBirth,
-            weightKg: parsedWeight,
-            isNeutered: isNeutered
-        )
-        modelContext.insert(newPet)
+        if let pet = petToEdit {
+            // UPDATE EXISTING PET
+            pet.name = name
+            pet.species = species.rawValue
+            pet.breed = finalBreed
+            pet.dateOfBirth = dateOfBirth
+            pet.weightKg = parsedWeight
+            pet.isNeutered = isNeutered
+        } else {
+            // CREATE NEW PET
+            let newPet = PetProfile(
+                name: name,
+                species: species.rawValue,
+                breed: finalBreed,
+                dateOfBirth: dateOfBirth,
+                weightKg: parsedWeight,
+                isNeutered: isNeutered
+            )
+            modelContext.insert(newPet)
+        }
+        
         isSaved = true
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
