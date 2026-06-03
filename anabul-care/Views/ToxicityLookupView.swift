@@ -6,8 +6,8 @@ struct ToxicityLookupView: View {
     @StateObject private var viewModel = ToxicityViewModel()
     
     init(initialQuery: String = "") {
-            _viewModel = StateObject(wrappedValue: ToxicityViewModel(initialText: initialQuery))
-        }
+        _viewModel = StateObject(wrappedValue: ToxicityViewModel(initialText: initialQuery))
+    }
     
     var body: some View {
         NavigationStack {
@@ -19,7 +19,7 @@ struct ToxicityLookupView: View {
                                 .font(.headline)
                             
                             if let species = hazard.speciesRule?.species {
-                                Text("Berbahaya untuk: \(species.capitalized)")
+                                Text("Toxic to: \(species.capitalized)")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
@@ -39,14 +39,14 @@ struct ToxicityLookupView: View {
                                 Capsule()
                                     .stroke(viewModel.colorForDangerLevel(hazard.dangerLevel).opacity(0.5), lineWidth: 1)
                             )
-                            .accessibilityLabel("Tingkat bahaya: \(hazard.dangerLevel)")
+                            .accessibilityLabel("Danger level: \(hazard.dangerLevel)")
                     }
                     
                     if hazard.alternative != "none" {
                         HStack(spacing: 4) {
                             Image(systemName: "exclamationmark.triangle.fill") // Warning icon
                                 .font(.caption)
-                            Text("Gejala: \(hazard.alternative)")
+                            Text("Symptoms: \(hazard.alternative)")
                                 .font(.caption)
                         }
                         .foregroundColor(.orange)
@@ -56,8 +56,8 @@ struct ToxicityLookupView: View {
                 .padding(.vertical, 4)
                 .accessibilityElement(children: .combine)
             }
-            .navigationTitle("Cek Toksisitas")
-            .searchable(text: $viewModel.searchText, prompt: "Cari bahan makanan...")
+            .navigationTitle("Toxicity Lookup")
+            .searchable(text: $viewModel.searchText, prompt: "Search foods...")
         }
     }
 }
