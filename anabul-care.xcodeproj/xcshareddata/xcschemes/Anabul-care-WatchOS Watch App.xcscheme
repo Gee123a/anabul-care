@@ -15,6 +15,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "56A3ABC62FD0180400475152"
+               BuildableName = "Anabul-care-WatchOS Watch App.app"
+               BlueprintName = "Anabul-care-WatchOS Watch App"
+               ReferencedContainer = "container:anabul-care.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "566ACB772FBEE4D80046B347"
                BuildableName = "anabul-care.app"
                BlueprintName = "anabul-care"
@@ -35,9 +49,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "566ACB862FBEE4E00046B347"
-               BuildableName = "anabul-careTests.xctest"
-               BlueprintName = "anabul-careTests"
+               BlueprintIdentifier = "56A3ABD22FD0180600475152"
+               BuildableName = "Anabul-care-WatchOS Watch AppTests.xctest"
+               BlueprintName = "Anabul-care-WatchOS Watch AppTests"
                ReferencedContainer = "container:anabul-care.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -46,9 +60,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "566ACB902FBEE4E00046B347"
-               BuildableName = "anabul-careUITests.xctest"
-               BlueprintName = "anabul-careUITests"
+               BlueprintIdentifier = "56A3ABDC2FD0180600475152"
+               BuildableName = "Anabul-care-WatchOS Watch AppUITests.xctest"
+               BlueprintName = "Anabul-care-WatchOS Watch AppUITests"
                ReferencedContainer = "container:anabul-care.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -68,9 +82,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "566ACB772FBEE4D80046B347"
-            BuildableName = "anabul-care.app"
-            BlueprintName = "anabul-care"
+            BlueprintIdentifier = "56A3ABC62FD0180400475152"
+            BuildableName = "Anabul-care-WatchOS Watch App.app"
+            BlueprintName = "Anabul-care-WatchOS Watch App"
             ReferencedContainer = "container:anabul-care.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -85,9 +99,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "566ACB772FBEE4D80046B347"
-            BuildableName = "anabul-care.app"
-            BlueprintName = "anabul-care"
+            BlueprintIdentifier = "56A3ABC62FD0180400475152"
+            BuildableName = "Anabul-care-WatchOS Watch App.app"
+            BlueprintName = "Anabul-care-WatchOS Watch App"
             ReferencedContainer = "container:anabul-care.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

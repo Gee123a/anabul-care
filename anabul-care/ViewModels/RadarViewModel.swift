@@ -6,21 +6,43 @@ import Combine
 @MainActor
 class RadarViewModel: ObservableObject {
     @Published var position: MapCameraPosition = .camera(MapCamera(
-        centerCoordinate: CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385),
-        distance: 5000
+        centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
+        distance: 4000
     ))
     @Published var clinics: [ClinicModel] = []
     @Published var selectedClinic: ClinicModel?
     @Published var searchText: String = ""
     @Published var selectedCategory: POICategory = .all
     
-    var filteredClinics: [ClinicModel] {
-        if selectedCategory == .all {
-            return clinics
-        }
-        return clinics.filter { $0.category == selectedCategory }
+    // Internal subject to handle debounced region changes
+    private var regionChangeSubject = PassthroughSubject<MKCoordinateRegion, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        // Setup debounce for map searches to prevent throttling
+        regionChangeSubject
+            .debounce(for: .seconds(0.8), scheduler: RunLoop.main)
+            .sink { [weak self] region in
+                Task {
+                    await self?.performSearch(in: region)
+                }
+            }
+            .store(in: &cancellables)
     }
     
+    var filteredClinics: [ClinicModel] {
+        clinics.filter { clinic in
+            let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
+            let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
+            return categoryMatch && searchMatch
+        }
+    }
+
+    /// Triggered from the View when the camera finishes moving
+    func updateRegion(_ region: MKCoordinateRegion) {
+        regionChangeSubject.send(region)
+    }
+
     func searchForRegion(query: String) async {
         guard !query.isEmpty else { return }
         let request = MKLocalSearch.Request()
@@ -30,7 +52,7 @@ class RadarViewModel: ObservableObject {
         do {
             let response = try await search.start()
             if let firstItem = response.mapItems.first {
-                await MainActor.run {
+                withAnimation {
                     self.position = .camera(MapCamera(
                         centerCoordinate: firstItem.placemark.coordinate,
                         distance: 8000
@@ -41,37 +63,14 @@ class RadarViewModel: ObservableObject {
             print("Search failed")
         }
     }
-    
+
     func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
-            ("Puskeswan", .vet),
-            ("Dokter Hewan", .vet),
-            ("Veterinarian", .vet),
-            ("Vet Clinic", .vet),
-            ("Animal Hospital", .vet),
-            ("Petcare", .vet),
-            
             ("Pet Hotel", .hotel),
-            ("Pet Boarding", .hotel),
-            ("Penitipan Hewan", .hotel),
-            ("Hotel Hewan", .hotel),
-            ("Dog Daycare", .hotel),
-            ("Cat Hotel", .hotel),
-            
-            ("Dog Park", .park),
-            ("Taman Hewan", .park),
-            ("Taman Anjing", .park),
-            ("Pet Park", .park)
-        ]
-        
-        let petKeywords = [
-            "pet", "hewan", "vet", "dog", "cat", "anjing", "kucing",
-            "puskeswan", "animal", "satwa", "paw", "tail", "groom",
-            "fur", "meow", "bark", "clinic", "klinik", "care",
-            "kennel", "boarding", "penitipan", "peliharaan", "hospital"
+            ("Taman", .park)
         ]
         
         for query in searchQueries {
@@ -83,23 +82,15 @@ class RadarViewModel: ObservableObject {
             do {
                 let response = try await search.start()
                 for item in response.mapItems {
-                    let name = item.name ?? ""
-                    let address = item.placemark.title ?? ""
-                    let searchableText = "\(name) \(address)".lowercased()
-                    
-                    let isPetRelated = petKeywords.contains { searchableText.contains($0) }
-                    
-                    if isPetRelated {
-                        let clinic = ClinicModel(
-                            name: name.isEmpty ? "Unknown" : name,
-                            coordinate: item.placemark.coordinate,
-                            address: address,
-                            phone: item.phoneNumber ?? "No Phone",
-                            category: query.1,
-                            mapItem: item
-                        )
-                        newClinics.append(clinic)
-                    }
+                    let clinic = ClinicModel(
+                        name: item.name ?? "Unknown",
+                        coordinate: item.placemark.coordinate,
+                        address: item.placemark.title ?? "",
+                        phone: item.phoneNumber ?? "No Phone",
+                        category: query.1,
+                        mapItem: item
+                    )
+                    newClinics.append(clinic)
                 }
             } catch {
                 continue
@@ -117,6 +108,8 @@ class RadarViewModel: ObservableObject {
             }
         }
         
-        self.clinics = uniqueClinics
+        withAnimation {
+            self.clinics = uniqueClinics
+        }
     }
 }
