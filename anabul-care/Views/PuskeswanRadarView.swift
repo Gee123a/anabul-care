@@ -30,9 +30,7 @@ struct PuskeswanRadarView: View {
             }
             .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
             .onMapCameraChange(frequency: .onEnd) { context in
-                Task {
-                    await viewModel.performSearch(in: context.region)
-                }
+                viewModel.updateRegion(context.region)
             }
             .ignoresSafeArea()
             

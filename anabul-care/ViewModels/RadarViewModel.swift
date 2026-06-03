@@ -15,6 +15,22 @@ class RadarViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedCategory: POICategory = .all
     
+    // Internal subject to handle debounced region changes
+    private var regionChangeSubject = PassthroughSubject<MKCoordinateRegion, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        // Setup debounce for map searches to prevent throttling
+        regionChangeSubject
+            .debounce(for: .seconds(0.8), scheduler: RunLoop.main)
+            .sink { [weak self] region in
+                Task {
+                    await self?.performSearch(in: region)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     var filteredClinics: [ClinicModel] {
         clinics.filter { clinic in
             let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
@@ -23,12 +39,16 @@ class RadarViewModel: ObservableObject {
         }
     }
 
+    /// Triggered from the View when the camera finishes moving
+    func updateRegion(_ region: MKCoordinateRegion) {
+        regionChangeSubject.send(region)
+    }
+
     func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
-            ("Petcare", .vet),
             ("Pet Hotel", .hotel),
             ("Taman", .park)
         ]
@@ -68,6 +88,8 @@ class RadarViewModel: ObservableObject {
             }
         }
         
-        self.clinics = uniqueClinics
+        withAnimation {
+            self.clinics = uniqueClinics
+        }
     }
 }

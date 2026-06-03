@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		56A3A9832FD0014400475152 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56A3A9822FD0014300475152 /* WidgetKit.framework */; };
+		56A3A9852FD0014400475152 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56A3A9842FD0014400475152 /* SwiftUI.framework */; };
+		56A3A9962FD0014600475152 /* Anabul-careWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 56A3A9802FD0014300475152 /* Anabul-careWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		566ACB882FBEE4E00046B347 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,17 +27,71 @@
 			remoteGlobalIDString = 566ACB772FBEE4D80046B347;
 			remoteInfo = "anabul-care";
 		};
+		56A3A9942FD0014600475152 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 566ACB702FBEE4D80046B347 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56A3A97F2FD0014300475152;
+			remoteInfo = "Anabul-careWidgetExtension";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		56A3A99B2FD0014600475152 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				56A3A9962FD0014600475152 /* Anabul-careWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "anabul-care.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A3A9802FD0014300475152 /* Anabul-careWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Anabul-careWidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		56A3A9822FD0014300475152 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		56A3A9842FD0014400475152 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		56A3A99C2FD0018600475152 /* Anabul-careWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Anabul-careWidgetExtension.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		56A3A9972FD0014600475152 /* Exceptions for "Anabul-careWidget" folder in "Anabul-careWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 56A3A97F2FD0014300475152 /* Anabul-careWidgetExtension */;
+		};
+		56A3A99E2FD0025600475152 /* Exceptions for "anabul-care" folder in "Anabul-careWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/ActivityLog.swift,
+				Models/ClinicModel.swift,
+				Models/Enums.swift,
+				Models/PetProfile.swift,
+				Models/Protocols.swift,
+				Models/SpeciesRuleModel.swift,
+				Models/TidbitModel.swift,
+				Models/ToxicityModel.swift,
+				Services/DailyRoutineGenerator.swift,
+				Services/LogActivityIntent.swift,
+			);
+			target = 56A3A97F2FD0014300475152 /* Anabul-careWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		566ACB7A2FBEE4D90046B347 /* anabul-care */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				56A3A99E2FD0025600475152 /* Exceptions for "anabul-care" folder in "Anabul-careWidgetExtension" target */,
+			);
 			path = "anabul-care";
 			sourceTree = "<group>";
 		};
@@ -43,6 +103,14 @@
 		566ACB942FBEE4E00046B347 /* anabul-careUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "anabul-careUITests";
+			sourceTree = "<group>";
+		};
+		56A3A9862FD0014400475152 /* Anabul-careWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				56A3A9972FD0014600475152 /* Exceptions for "Anabul-careWidget" folder in "Anabul-careWidgetExtension" target */,
+			);
+			path = "Anabul-careWidget";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,15 +137,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		56A3A97D2FD0014300475152 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56A3A9852FD0014400475152 /* SwiftUI.framework in Frameworks */,
+				56A3A9832FD0014400475152 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		566ACB6F2FBEE4D80046B347 = {
 			isa = PBXGroup;
 			children = (
+				56A3A99C2FD0018600475152 /* Anabul-careWidgetExtension.entitlements */,
 				566ACB7A2FBEE4D90046B347 /* anabul-care */,
 				566ACB8A2FBEE4E00046B347 /* anabul-careTests */,
 				566ACB942FBEE4E00046B347 /* anabul-careUITests */,
+				56A3A9862FD0014400475152 /* Anabul-careWidget */,
+				56A3A9812FD0014300475152 /* Frameworks */,
 				566ACB792FBEE4D90046B347 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,8 +168,18 @@
 				566ACB782FBEE4D90046B347 /* anabul-care.app */,
 				566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */,
 				566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */,
+				56A3A9802FD0014300475152 /* Anabul-careWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		56A3A9812FD0014300475152 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				56A3A9822FD0014300475152 /* WidgetKit.framework */,
+				56A3A9842FD0014400475152 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,10 +192,12 @@
 				566ACB742FBEE4D80046B347 /* Sources */,
 				566ACB752FBEE4D80046B347 /* Frameworks */,
 				566ACB762FBEE4D80046B347 /* Resources */,
+				56A3A99B2FD0014600475152 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				56A3A9952FD0014600475152 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				566ACB7A2FBEE4D90046B347 /* anabul-care */,
@@ -163,6 +255,28 @@
 			productReference = 566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		56A3A97F2FD0014300475152 /* Anabul-careWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56A3A9982FD0014600475152 /* Build configuration list for PBXNativeTarget "Anabul-careWidgetExtension" */;
+			buildPhases = (
+				56A3A97C2FD0014300475152 /* Sources */,
+				56A3A97D2FD0014300475152 /* Frameworks */,
+				56A3A97E2FD0014300475152 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				56A3A9862FD0014400475152 /* Anabul-careWidget */,
+			);
+			name = "Anabul-careWidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Anabul-careWidgetExtension";
+			productReference = 56A3A9802FD0014300475152 /* Anabul-careWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +298,9 @@
 						CreatedOnToolsVersion = 26.2;
 						TestTargetID = 566ACB772FBEE4D80046B347;
 					};
+					56A3A97F2FD0014300475152 = {
+						CreatedOnToolsVersion = 26.2;
+					};
 				};
 			};
 			buildConfigurationList = 566ACB732FBEE4D80046B347 /* Build configuration list for PBXProject "anabul-care" */;
@@ -203,6 +320,7 @@
 				566ACB772FBEE4D80046B347 /* anabul-care */,
 				566ACB862FBEE4E00046B347 /* anabul-careTests */,
 				566ACB902FBEE4E00046B347 /* anabul-careUITests */,
+				56A3A97F2FD0014300475152 /* Anabul-careWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -223,6 +341,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		566ACB8F2FBEE4E00046B347 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56A3A97E2FD0014300475152 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,6 +378,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		56A3A97C2FD0014300475152 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +397,11 @@
 			isa = PBXTargetDependency;
 			target = 566ACB772FBEE4D80046B347 /* anabul-care */;
 			targetProxy = 566ACB922FBEE4E00046B347 /* PBXContainerItemProxy */;
+		};
+		56A3A9952FD0014600475152 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56A3A97F2FD0014300475152 /* Anabul-careWidgetExtension */;
+			targetProxy = 56A3A9942FD0014600475152 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -542,6 +679,68 @@
 			};
 			name = Release;
 		};
+		56A3A9992FD0014600475152 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Anabul-careWidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Anabul-careWidget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Anabul-careWidget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.anabul-care.Anabul-careWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		56A3A99A2FD0014600475152 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Anabul-careWidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Anabul-careWidget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Anabul-careWidget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Gee.anabul-care.Anabul-careWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -577,6 +776,15 @@
 			buildConfigurations = (
 				566ACBA22FBEE4E00046B347 /* Debug */,
 				566ACBA32FBEE4E00046B347 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56A3A9982FD0014600475152 /* Build configuration list for PBXNativeTarget "Anabul-careWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56A3A9992FD0014600475152 /* Debug */,
+				56A3A99A2FD0014600475152 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

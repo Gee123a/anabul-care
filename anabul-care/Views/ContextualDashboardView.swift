@@ -5,6 +5,7 @@
 //  Created by Nicholas Gerwin Mawardji on 28/05/26.
 //
 
+
 import SwiftUI
 import SwiftData
 
@@ -18,10 +19,17 @@ struct ContextualDashboardView: View {
     private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
     private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
     
-    // State variables for sheet presentation
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
-    @State private var showingPetProfile = false
+    @State private var selectedPetID: UUID?
+    @State private var navigateToProfile = false
+    
+    private var currentPet: PetProfile? {
+        if let id = selectedPetID {
+            return pets.first { $0.id == id }
+        }
+        return pets.first
+    }
     
     var body: some View {
         TabView {
@@ -31,12 +39,20 @@ struct ContextualDashboardView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea()
+        .onAppear {
+            if selectedPetID == nil {
+                selectedPetID = pets.first?.id
+            }
+        }
+        .onChange(of: pets) {
+            if selectedPetID == nil {
+                selectedPetID = pets.first?.id
+            }
+        }
     }
     
     @ViewBuilder
     private var dashboardPage: some View {
-        let currentPet = pets.first
-        
         NavigationStack {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
@@ -52,9 +68,41 @@ struct ContextualDashboardView: View {
                         
                         Spacer()
                         
-                        if currentPet != nil {
-                            // Avatar Button to trigger Pet Profile Sheet
-                            Button(action: { showingPetProfile = true }) {
+                        // PET SWITCHER MENU
+                        Menu {
+                            Section("Switch Pet") {
+                                ForEach(pets) { pet in
+                                    Button {
+                                        withAnimation {
+                                            selectedPetID = pet.id
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(pet.name)
+                                            if selectedPetID == pet.id {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            Section {
+                                Button {
+                                    navigateToProfile = true
+                                } label: {
+                                    Label("View Profile", systemImage: "person.circle")
+                                }
+                                .disabled(currentPet == nil)
+                                
+                                Button {
+                                    showingAddPet = true
+                                } label: {
+                                    Label("Add New Pet", systemImage: "plus.circle")
+                                }
+                            }
+                        } label: {
+                            if let pet = currentPet {
                                 ZStack(alignment: .bottomTrailing) {
                                     Image(systemName: "pawprint.fill")
                                         .resizable()
@@ -71,9 +119,7 @@ struct ContextualDashboardView: View {
                                         .frame(width: 14, height: 14)
                                         .overlay(Circle().stroke(Color.white, lineWidth: 2))
                                 }
-                            }
-                        } else {
-                            Button(action: { showingAddPet = true }) {
+                            } else {
                                 Circle()
                                     .fill(Color.gray.opacity(0.1))
                                     .frame(width: 52, height: 52)
@@ -144,28 +190,28 @@ struct ContextualDashboardView: View {
                     if let pet = currentPet {
                         TodayQueueCardView(pet: pet)
                             .padding(.top, -12)
+                            .id(pet.id) // Ensure view reloads when pet changes
                     } else {
                         EmptyPetStateView(showingAddPet: $showingAddPet)
                     }
                     
                     InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
+                        .id(currentPet?.id ?? UUID())
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
             .background(Color(red: 0.98, green: 0.98, blue: 0.97))
+            .navigationDestination(isPresented: $navigateToProfile) {
+                if let pet = currentPet {
+                    PetProfileView(pet: pet)
+                }
+            }
             .sheet(isPresented: $showingAddPet) {
                 AddPetView()
             }
             .sheet(isPresented: $showingSafetyLookup) {
                 ToxicityLookupView()
-            }
-            .sheet(isPresented: $showingPetProfile) {
-                if let currentPet = pets.first {
-                    PetProfileView(pet: currentPet)
-                } else {
-                    ContentUnavailableView("No Pet Found", systemImage: "pawprint.circle", description: Text("Please add a pet first."))
-                }
             }
         }
     }
@@ -177,7 +223,8 @@ struct ContextualDashboardView: View {
     }
     
     private func todayTaskCount(for pet: PetProfile?) -> Int {
-        return 6
+        guard let pet = pet else { return 0 }
+        return DailyRoutineGenerator.generate(for: pet).count
     }
     
     private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {
