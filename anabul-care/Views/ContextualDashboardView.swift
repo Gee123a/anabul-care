@@ -168,7 +168,8 @@ struct ContextualDashboardView: View {
     }
     
     private func todayTaskCount(for pet: PetProfile?) -> Int {
-        return 6
+        guard let pet = pet else { return 0 }
+        return DailyRoutineGenerator.generate(for: pet).count
     }
     
     private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {

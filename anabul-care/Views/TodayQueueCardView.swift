@@ -26,6 +26,10 @@ struct TodayQueueCardView: View {
         return ((-15)...15).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
+    private var dailyTasks: [DailyTaskItem] {
+        DailyRoutineGenerator.generate(for: pet)
+    }
+    
     var body: some View {
         HStack(spacing: 0) {
             // Left: Vertical Date Strip
@@ -75,7 +79,7 @@ struct TodayQueueCardView: View {
                     Circle()
                         .fill(mint)
                         .frame(width: 6, height: 6)
-                    Text("\(completedCount(for: selectedDate))/6")
+                    Text("\(completedCount(for: selectedDate))/\(dailyTasks.count)")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                 }
@@ -111,7 +115,7 @@ struct TodayQueueCardView: View {
                     
                     Spacer()
                     
-                    Text("6 items")
+                    Text("\(dailyTasks.count) items")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary.opacity(0.8))
                 }
@@ -121,11 +125,9 @@ struct TodayQueueCardView: View {
                 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 6) {
-                        // Dynamic Rows based on LogType and Pet Data
-                        QueueRow(pet: pet, date: selectedDate, type: .feeding, title: "Feeding", time: "1:00 PM", detail: "½ cup kibble", icon: "fork.knife")
-                        QueueRow(pet: pet, date: selectedDate, type: .hydration, title: "Hydration", time: "10:00 AM", detail: "Refresh bowl", icon: "drop.fill")
-                        QueueRow(pet: pet, date: selectedDate, type: .grooming, title: "Grooming", time: "3:00 PM", detail: "Brush coat", icon: "scissors")
-                        QueueRow(pet: pet, date: selectedDate, type: .play, title: "Play Time", time: "5:00 PM", detail: "15 min wand", icon: "sparkles")
+                        ForEach(dailyTasks) { task in
+                            QueueRow(pet: pet, date: selectedDate, type: task.type, title: task.title, time: task.timeRecommendation, detail: task.detail, icon: task.icon)
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)
@@ -146,7 +148,9 @@ struct TodayQueueCardView: View {
     }
     
     private func completedCount(for date: Date) -> Int {
-        pet.activities.filter { Calendar.current.isDate($0.timestamp, inSameDayAs: date) }.count
+        dailyTasks.filter { task in 
+            pet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
+        }.count
     }
     
     private func monthYearString(for date: Date) -> String {
