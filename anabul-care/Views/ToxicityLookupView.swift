@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct ToxicityLookupView: View {
+    @Environment(\.dismiss) private var dismiss // Added to handle closing the modal
     @Query(sort: \ToxicityModel.keyword) private var hazards: [ToxicityModel]
     @StateObject private var viewModel = ToxicityViewModel()
     
@@ -58,6 +59,16 @@ struct ToxicityLookupView: View {
             }
             .navigationTitle("Toxicity Lookup")
             .searchable(text: $viewModel.searchText, prompt: "Search foods...")
+            .toolbar {
+                // Added the top-left button to match the Pet Profile view
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                            .font(.title3.weight(.semibold))
+                    }
+                }
+            }
         }
     }
 }
