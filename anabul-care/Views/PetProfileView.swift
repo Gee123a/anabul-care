@@ -149,10 +149,8 @@ struct PetProfileView: View {
                 Text("This action cannot be undone and will permanently delete all of \(pet.name)'s activity logs and data.")
             }
             
-            // Sheet for editing the pet
             .sheet(isPresented: $showingEditPet) {
-                // Assuming AddPetView is reusable for editing, or you can swap this for an EditPetView later!
-                AddPetView()
+                AddPetView(petToEdit: pet)
             }
         }
     }

@@ -5,15 +5,38 @@ struct AddPetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    @State private var name: String = ""
-    @State private var species: PetSpecies = .dog
-    @State private var breed: String = ""
-    @State private var dateOfBirth: Date = Date()
-    @State private var weightString: String = ""
-    @State private var isNeutered: Bool = false
+    // 1. Variable to accept an existing pet if editing
+    var petToEdit: PetProfile?
+    
+    @State private var name: String
+    @State private var species: PetSpecies
+    @State private var breed: String
+    @State private var dateOfBirth: Date
+    @State private var weightString: String
+    @State private var isNeutered: Bool
     
     @State private var isSaved = false
     @FocusState private var focusedField: Field?
+    
+    // 2. Custom Initializer to preload existing pet data
+    init(petToEdit: PetProfile? = nil) {
+        self.petToEdit = petToEdit
+        
+        // If petToEdit exists, use its data. Otherwise, start blank.
+        _name = State(initialValue: petToEdit?.name ?? "")
+        _species = State(initialValue: PetSpecies(rawValue: petToEdit?.species ?? PetSpecies.cat.rawValue) ?? .cat)
+        _breed = State(initialValue: petToEdit?.breed ?? "")
+        _dateOfBirth = State(initialValue: petToEdit?.dateOfBirth ?? Date())
+        
+        // Convert the existing double back to a string for the text field
+        if let existingWeight = petToEdit?.weightKg {
+            _weightString = State(initialValue: String(format: "%.1f", existingWeight))
+        } else {
+            _weightString = State(initialValue: "")
+        }
+        
+        _isNeutered = State(initialValue: petToEdit?.isNeutered ?? false)
+    }
     
     enum Field {
         case name, breed, weight
@@ -59,11 +82,12 @@ struct AddPetView: View {
                             .padding(.top, 20)
                             
                             VStack(spacing: 4) {
-                                Text(name.isEmpty ? "New Companion" : "Hi, \(name)!")
+                                // Updated header text to reflect Edit vs Create
+                                Text(petToEdit != nil ? "\(name)" : (name.isEmpty ? "New Companion" : "Hi, \(name)!"))
                                     .font(.system(size: 24, weight: .black, design: .rounded))
                                     .foregroundColor(.primary)
                                 
-                                Text("Let's build a health profile")
+                                Text(petToEdit != nil ? "Update health profile" : "Let's build a health profile")
                                     .font(.system(size: 15, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
@@ -158,7 +182,7 @@ struct AddPetView: View {
                         // 4. ACTION BUTTON
                         Button(action: savePet) {
                             HStack {
-                                Text("Simpan Profil")
+                                Text(petToEdit != nil ? "Update Profil" : "Simpan Profil")
                                 Image(systemName: "checkmark.seal.fill")
                             }
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -178,7 +202,7 @@ struct AddPetView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle("Tambah Anabul")
+            .navigationTitle(petToEdit != nil ? "Edit Anabul" : "Tambah Anabul")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -207,16 +231,29 @@ struct AddPetView: View {
         }
     }
     
+    // 3. Updated save function to route edits correctly
     private func savePet() {
-        let newPet = PetProfile(
-            name: name,
-            species: species.rawValue,
-            breed: breed,
-            dateOfBirth: dateOfBirth,
-            weightKg: parsedWeight,
-            isNeutered: isNeutered
-        )
-        modelContext.insert(newPet)
+        if let existingPet = petToEdit {
+            // Update mode
+            existingPet.name = name
+            existingPet.species = species.rawValue
+            existingPet.breed = breed
+            existingPet.dateOfBirth = dateOfBirth
+            existingPet.weightKg = parsedWeight
+            existingPet.isNeutered = isNeutered
+        } else {
+            // Create mode
+            let newPet = PetProfile(
+                name: name,
+                species: species.rawValue,
+                breed: breed,
+                dateOfBirth: dateOfBirth,
+                weightKg: parsedWeight,
+                isNeutered: isNeutered
+            )
+            modelContext.insert(newPet)
+        }
+        
         isSaved = true
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
