@@ -44,12 +44,12 @@ struct ToxicityLookupView: View {
                     
                     if hazard.alternative != "none" {
                         HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "exclamationmark.triangle.fill") // Warning icon
                                 .font(.caption)
-                            Text("Alternatif: \(hazard.alternative)")
+                            Text("Gejala: \(hazard.alternative)")
                                 .font(.caption)
                         }
-                        .foregroundColor(.green)
+                        .foregroundColor(.orange)
                         .padding(.top, 2)
                     }
                 }

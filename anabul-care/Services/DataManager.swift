@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+// Existing structs for MetadataRegistry
 struct ToxicHazard: Codable {
     let keyword_id: String
     let danger_level: String
@@ -27,81 +28,94 @@ struct MetadataRegistry: Codable {
     let behavioral_tidbits: [BehavioralTidbit]
 }
 
-/// Actor-based DataManager to ensure thread-safe, background data operations.
+// NEW: Structs to parse the full Master database
+struct MasterToxicItem: Codable {
+    let name: String
+    let severity: String
+    let symptoms: String
+    let match_keywords: [String]
+}
+
+struct MasterToxicityData: Codable {
+    let dog: [MasterToxicItem]
+    let cat: [MasterToxicItem]
+    let hamster: [MasterToxicItem]
+}
+
 actor DataManager {
     static let shared = DataManager()
     
     private init() {}
     
-    /// Seeds the database from JSON on a background thread.
     func seedData(modelContainer: ModelContainer) async {
-        // Use detached task with background priority to move work off the Main Actor
-        await Task.detached(priority: .background) {
-            // Create a dedicated context for this background work
-            let context = ModelContext(modelContainer)
+        let context = ModelContext(modelContainer)
+        
+        // Check if we've already seeded rules. If count > 0, it skips seeding.
+        let descriptor = FetchDescriptor<SpeciesRuleModel>()
+        if let count = try? context.fetchCount(descriptor), count > 0 {
+            return
+        }
+        
+        // Step 1: Seed Species Rules & Tidbits from MetadataRegistry
+        if let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
+           let data = try? Data(contentsOf: url),
+           let registry = try? JSONDecoder().decode(MetadataRegistry.self, from: data) {
             
-            // 1. Initial check: If rules already exist, we don't need to seed.
-            let descriptor = FetchDescriptor<SpeciesRuleModel>()
-            if let count = try? context.fetchCount(descriptor), count > 0 {
-                return
+            for rule in registry.species_rules {
+                let ruleModel = SpeciesRuleModel(
+                    species: rule.species,
+                    rerConstant: rule.rer_constant,
+                    heatThresholdCelsius: rule.heat_threshold_celsius
+                )
+                context.insert(ruleModel)
             }
             
-            // 2. Load and Decode JSON
-            guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
-                  let data = try? Data(contentsOf: url) else {
-                return
+            for tidbit in registry.behavioral_tidbits {
+                let model = TidbitModel(
+                    id: tidbit.id,
+                    speciesTarget: tidbit.species_target,
+                    title: tidbit.title_id,
+                    bodyText: tidbit.body_id,
+                    citation: tidbit.citation
+                )
+                context.insert(model)
             }
+            try? context.save()
+        }
+        
+        // Step 2: Seed the comprehensive Toxicity list from MasterToxicityDatabase.json
+        if let masterUrl = Bundle.main.url(forResource: "MasterToxicityDatabase", withExtension: "json"),
+           let masterData = try? Data(contentsOf: masterUrl),
+           let db = try? JSONDecoder().decode(MasterToxicityData.self, from: masterData) {
+           
+            // Fetch the rules we just inserted so we can link them to the foods
+            let rules = (try? context.fetch(FetchDescriptor<SpeciesRuleModel>())) ?? []
+            let dogRule = rules.first(where: { $0.species == "dog" })
+            let catRule = rules.first(where: { $0.species == "cat" })
+            let hamsterRule = rules.first(where: { $0.species == "hamster" })
             
-            do {
-                let registry = try JSONDecoder().decode(MetadataRegistry.self, from: data)
-                
-                // 3. Process Species Rules and Hazards
-                for rule in registry.species_rules {
-                    let ruleModel = SpeciesRuleModel(
-                        species: rule.species,
-                        rerConstant: rule.rer_constant,
-                        heatThresholdCelsius: rule.heat_threshold_celsius
+            func insertHazards(_ items: [MasterToxicItem], rule: SpeciesRuleModel?) {
+                for item in items {
+                    let hazardModel = ToxicityModel(
+                        keyword: item.name,
+                        dangerLevel: item.severity.capitalized,
+                        alternative: item.symptoms // We map symptoms to the "alternative" property
                     )
-                    context.insert(ruleModel)
-                    
-                    // Process hazards in chunks to avoid blocking
-                    for hazard in rule.toxic_hazards {
-                        let hazardModel = ToxicityModel(
-                            keyword: hazard.keyword_id,
-                            dangerLevel: hazard.danger_level,
-                            alternative: hazard.alternative_id
-                        )
-                        hazardModel.speciesRule = ruleModel
-                        context.insert(hazardModel)
-                    }
-                    
-                    // Save and yield after each species to prevent long database locks
-                    try context.save()
-                    await Task.yield()
+                    hazardModel.speciesRule = rule
+                    context.insert(hazardModel)
                 }
-                
-                // 4. Process Behavioral Tidbits
-                for tidbit in registry.behavioral_tidbits {
-                    let model = TidbitModel(
-                        id: tidbit.id,
-                        speciesTarget: tidbit.species_target,
-                        title: tidbit.title_id,
-                        bodyText: tidbit.body_id,
-                        citation: tidbit.citation
-                    )
-                    context.insert(model)
-                    
-                    // Periodically save and yield
-                    if context.hasChanges {
-                        try context.save()
-                        await Task.yield()
-                    }
-                }
-                
-                print("Successfully seeded data in background chunks.")
-            } catch {
-                print("Failed to seed MetadataRegistry: \(error)")
             }
+            
+            insertHazards(db.dog, rule: dogRule)
+            insertHazards(db.cat, rule: catRule)
+            insertHazards(db.hamster, rule: hamsterRule)
+        }
+        
+        do {
+            try context.save()
+            print("Successfully seeded all data from JSONs.")
+        } catch {
+            print("Failed to seed Data: \(error)")
         }
     }
 }
