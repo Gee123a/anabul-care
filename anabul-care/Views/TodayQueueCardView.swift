@@ -273,7 +273,7 @@ struct QueueRow: View {
                         Circle()
                             .fill(mint)
                             .frame(width: 26, height: 26)
-                        Image(systemName: "check")
+                        Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .black))
                             .foregroundColor(.white)
                     }
