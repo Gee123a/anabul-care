@@ -47,17 +47,31 @@ class RadarViewModel: ObservableObject {
         
         let searchQueries: [(String, POICategory)] = [
             ("Klinik Hewan", .vet),
+            ("Puskeswan", .vet),
+            ("Dokter Hewan", .vet),
             ("Veterinarian", .vet),
+            ("Vet Clinic", .vet),
             ("Animal Hospital", .vet),
-            ("Vet", .vet),
             ("Petcare", .vet),
+            
             ("Pet Hotel", .hotel),
             ("Pet Boarding", .hotel),
+            ("Penitipan Hewan", .hotel),
+            ("Hotel Hewan", .hotel),
             ("Dog Daycare", .hotel),
+            ("Cat Hotel", .hotel),
+            
+            ("Dog Park", .park),
             ("Taman Hewan", .park),
-            ("Taman", .park),
-            ("Park", .park),
-            ("Dog Park", .park)
+            ("Taman Anjing", .park),
+            ("Pet Park", .park)
+        ]
+        
+        let petKeywords = [
+            "pet", "hewan", "vet", "dog", "cat", "anjing", "kucing",
+            "puskeswan", "animal", "satwa", "paw", "tail", "groom",
+            "fur", "meow", "bark", "clinic", "klinik", "care",
+            "kennel", "boarding", "penitipan", "peliharaan", "hospital"
         ]
         
         for query in searchQueries {
@@ -69,15 +83,23 @@ class RadarViewModel: ObservableObject {
             do {
                 let response = try await search.start()
                 for item in response.mapItems {
-                    let clinic = ClinicModel(
-                        name: item.name ?? "Unknown",
-                        coordinate: item.placemark.coordinate,
-                        address: item.placemark.title ?? "",
-                        phone: item.phoneNumber ?? "No Phone",
-                        category: query.1,
-                        mapItem: item
-                    )
-                    newClinics.append(clinic)
+                    let name = item.name ?? ""
+                    let address = item.placemark.title ?? ""
+                    let searchableText = "\(name) \(address)".lowercased()
+                    
+                    let isPetRelated = petKeywords.contains { searchableText.contains($0) }
+                    
+                    if isPetRelated {
+                        let clinic = ClinicModel(
+                            name: name.isEmpty ? "Unknown" : name,
+                            coordinate: item.placemark.coordinate,
+                            address: address,
+                            phone: item.phoneNumber ?? "No Phone",
+                            category: query.1,
+                            mapItem: item
+                        )
+                        newClinics.append(clinic)
+                    }
                 }
             } catch {
                 continue
