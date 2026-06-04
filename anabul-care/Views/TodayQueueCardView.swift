@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct TodayQueueCardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -311,6 +312,12 @@ struct QueueRow: View {
                 modelContext.insert(newLog)
                 pet.activities.append(newLog)
             }
+            
+            // 1. PERSIST TO DISK: The widget reads from the file, not the app's memory!
+            try? modelContext.save()
+            
+            // 2. SIGNAL WIDGET: Tell iOS to redraw the widget with the new file data
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 }

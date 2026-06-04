@@ -6,22 +6,23 @@
 //
 
 import XCTest
-@testable import anabul_care // Make sure this matches your exact project name
+@testable import anabul_care
 
 final class MetabolismEngineTests: XCTestCase {
     
     func test_calculateMER_forNeuteredDog() {
-        // Arrange: Create a mock PetProfile with the exact stats you want to test
+
+        let twoYearsAgo = Calendar.current.date(byAdding: .year, value: -2, to: Date())!
         let mockDog = PetProfile(
             name: "TestDog",
             species: "dog",
             breed: "Mixed",
-            dateOfBirth: Date(),
+            dateOfBirth: twoYearsAgo,
             weightKg: 10.0,
             isNeutered: true
         )
         
-        // Act: Pass ONLY the pet object into your static function
+        // Act
         let calculatedMER = MetabolismEngine.calculateMER(pet: mockDog)
         
         // Assert: 70 * (10 ^ 0.75) * 1.6
@@ -32,12 +33,13 @@ final class MetabolismEngineTests: XCTestCase {
     }
     
     func test_calculateMER_forIntactCat() {
-        // Arrange
+        // Arrange: Use a date 2 years ago to ensure it's an Adult Cat (Age > 12 months)
+        let twoYearsAgo = Calendar.current.date(byAdding: .year, value: -2, to: Date())!
         let mockCat = PetProfile(
             name: "TestCat",
             species: "cat",
             breed: "Mixed",
-            dateOfBirth: Date(),
+            dateOfBirth: twoYearsAgo,
             weightKg: 5.0,
             isNeutered: false
         )

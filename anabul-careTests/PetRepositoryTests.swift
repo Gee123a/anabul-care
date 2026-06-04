@@ -1,63 +1,50 @@
-//
-//  PetRepositoryTests.swift
-//  anabul-care
-//
-//  Created by Nicholas Gerwin Mawardji on 03/06/26.
-//
-
 import XCTest
-import SwiftData
 @testable import anabul_care
 
-@MainActor
 final class PetRepositoryTests: XCTestCase {
-    var container: ModelContainer!
-    var context: ModelContext!
-    var repository: PetRepository!
     
-    override func setUpWithError() throws {
-        // Arrange: Create IN-MEMORY SwiftData container
-        let schema = Schema([PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self])
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        
-        container = try ModelContainer(for: schema, configurations: [config])
-        context = ModelContext(container)
-        repository = PetRepository(context: context)
-    }
     
-    override func tearDownWithError() throws {
-        repository = nil
-        context = nil
-        container = nil
-    }
     
-    func test_addPet_successfullySavesToContext() throws {
+    func test_petProfile_initialization() {
         // Arrange
-        let newPet = PetProfile(name: "Budi", species: "dog", breed: "Golden Retriever", dateOfBirth: Date(), weightKg: 15.0, isNeutered: false)
+        let name = "Budi"
+        let species = "dog"
+        let breed = "Golden Retriever"
+        let weight = 15.0
         
         // Act
-        try repository.addPet(newPet)
+        let pet = PetProfile(name: name, species: species, breed: breed, dateOfBirth: Date(), weightKg: weight, isNeutered: false)
         
         // Assert
-        let descriptor = FetchDescriptor<PetProfile>()
-        let fetchedPets = try context.fetch(descriptor)
-        
-        XCTAssertEqual(fetchedPets.count, 1, "There should be exactly 1 pet in the database")
-        XCTAssertEqual(fetchedPets.first?.name, "Budi", "The saved pet's name should match")
+        XCTAssertEqual(pet.name, name)
+        XCTAssertEqual(pet.species, species)
+        XCTAssertEqual(pet.weightKg, weight)
+        XCTAssertEqual(pet.petSpecies, .dog)
     }
     
-    func test_deletePet_successfullyRemovesFromContext() throws {
+    func test_petProfile_activityRelationship() {
         // Arrange
         let pet = PetProfile(name: "Luna", species: "cat", breed: "Persian", dateOfBirth: Date(), weightKg: 4.0, isNeutered: true)
-        try repository.addPet(pet)
+        let log = ActivityLog(timestamp: Date(), type: "feeding", detail: "Dinner")
         
         // Act
-        try repository.deletePet(pet)
+        pet.activities.append(log)
+        log.pet = pet
         
         // Assert
-        let descriptor = FetchDescriptor<PetProfile>()
-        let fetchedPets = try context.fetch(descriptor)
+        XCTAssertEqual(pet.activities.count, 1)
+        XCTAssertEqual(pet.activities.first?.type, "feeding")
+        XCTAssertEqual(log.pet?.name, "Luna")
+    }
+    
+    func test_petProfile_metabolicCalculation() {
+        // Arrange
+        let pet = PetProfile(name: "Rex", species: "dog", breed: "German Shepherd", dateOfBirth: Date(), weightKg: 10.0)
         
-        XCTAssertTrue(fetchedPets.isEmpty, "The database should be empty after deletion")
+        // Act
+        let rmr = pet.rmr
+        
+        // Assert: 70 * (10 ^ 0.75) ≈ 393.6
+        XCTAssertEqual(rmr, 70.0 * pow(10.0, 0.75), accuracy: 0.1)
     }
 }

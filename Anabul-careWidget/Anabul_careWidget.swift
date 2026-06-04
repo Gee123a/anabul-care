@@ -3,8 +3,8 @@ import SwiftUI
 import SwiftData
 
 struct Provider: TimelineProvider {
-    // 1. Shared container logic matching the main app EXACTLY
-    // This is the core engine that allows the widget to see what's in the app.
+
+
     private var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             PetProfile.self,
@@ -14,7 +14,7 @@ struct Provider: TimelineProvider {
             TidbitModel.self
         ])
         
-        // Match the App Group ID from the app's entitlements
+
         let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
         let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
@@ -23,7 +23,7 @@ struct Provider: TimelineProvider {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
             print("Widget: Could not create ModelContainer: \(error)")
-            // Return a dummy container to prevent crash, though logic will fail
+
             return try! ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
         }
     }()
@@ -33,7 +33,7 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        // Run on MainActor to safely access the @MainActor fetchRealData
+
         Task { @MainActor in
             let entry = fetchRealData(for: Date()) ?? SimpleEntry(date: Date(), petName: "No Pet", completedCount: 0, totalCount: 0, species: "cat")
             completion(entry)
@@ -45,7 +45,7 @@ struct Provider: TimelineProvider {
             let date = Date()
             let entry = fetchRealData(for: date) ?? SimpleEntry(date: date, petName: "No Pet", completedCount: 0, totalCount: 0, species: "cat")
             
-            // Refresh every 15 minutes to stay reactive
+
             let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: date)!
             let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
             completion(timeline)
@@ -72,8 +72,20 @@ struct Provider: TimelineProvider {
             let totalCount = routine.count
             
             // Count matching activities logged today
+            // FETCH DIRECTLY from ActivityLog to ensure we catch the latest saves
+            let startOfDay = Calendar.current.startOfDay(for: date)
+            let activityDescriptor = FetchDescriptor<ActivityLog>(
+                predicate: #Predicate<ActivityLog> { log in
+                    log.timestamp >= startOfDay
+                }
+            )
+            let allTodayLogs = (try? context.fetch(activityDescriptor)) ?? []
+            
+            // Filter logs for this specific pet and routine types
             let completedCount = routine.filter { task in
-                firstPet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
+                allTodayLogs.contains { log in 
+                    log.pet?.id == firstPet.id && log.type == task.type.rawValue
+                }
             }.count
             
             print("Widget: Fetched data for \(firstPet.name) - \(completedCount)/\(totalCount)")
