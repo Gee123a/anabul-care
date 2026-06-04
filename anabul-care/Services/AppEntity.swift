@@ -2,8 +2,7 @@ import AppIntents
 import SwiftData
 import Foundation
 
-// MARK: - 1. The AppEntity
-// This teaches Siri what a "Food" is in the context of your app
+
 struct FoodEntity: AppEntity {
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Food"
     static var defaultQuery = FoodEntityQuery()
@@ -17,8 +16,7 @@ struct FoodEntity: AppEntity {
     }
 }
 
-// MARK: - 2. The Entity Query
-// This tells Siri how to search your SwiftData database when the user speaks a word
+
 struct FoodEntityQuery: EntityStringQuery {
     
     // Siri uses this to find specific entities by their ID
@@ -50,7 +48,8 @@ struct FoodEntityQuery: EntityStringQuery {
             PetProfile.self, ActivityLog.self,
             SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self
         ])
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare.nicholas")!
+        // FIXED: Using consistent App Group ID
+        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
         
         let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
@@ -83,7 +82,8 @@ struct ToxicityIntent: AppIntent {
                 Item.self, PetProfile.self, ActivityLog.self,
                 SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self
             ])
-            let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare.nicholas")!
+            // FIXED: Using consistent App Group ID
+            let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
             let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
             
             let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Specialized engine for metabolic calculations to decouple logic from data management.
+
 struct MetabolismEngine {
     
     /// Calculates the Resting Energy Requirement (RER)

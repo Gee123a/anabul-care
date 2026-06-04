@@ -72,6 +72,10 @@ struct ContextualDashboardView: View {
                                 .foregroundColor(textGray)
                                 .tracking(0.4)
                                 .textCase(.uppercase)
+                                .onTapGesture(count: 3) {
+
+                                    ClimateManager.shared.triggerTestNotification()
+                                }
                         }
                         
                         Spacer()
@@ -242,7 +246,7 @@ struct ContextualDashboardView: View {
     }
 }
 
-// MARK: - Custom 2-Finger Swipe Gesture
+
 struct TwoFingerSwipeRecognizer: UIViewRepresentable {
     @Binding var selectedTab: Int
     
@@ -255,13 +259,13 @@ struct TwoFingerSwipeRecognizer: UIViewRepresentable {
             if let parentView = view.superview?.superview {
                 let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeLeft))
                 swipeLeft.direction = .left
-                swipeLeft.numberOfTouchesRequired = 2
+                swipeLeft.numberOfTouchesRequired = 1
                 swipeLeft.delegate = context.coordinator
                 parentView.addGestureRecognizer(swipeLeft)
                 
                 let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeRight))
                 swipeRight.direction = .right
-                swipeRight.numberOfTouchesRequired = 2
+                swipeRight.numberOfTouchesRequired = 1
                 swipeRight.delegate = context.coordinator
                 parentView.addGestureRecognizer(swipeRight)
             }

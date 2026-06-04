@@ -12,9 +12,13 @@ import SwiftData
 struct anabul_careApp: App {
     @State private var isDatabaseReady = false
     
+    init() {
+        // Register the background task immediately on launch
+        ClimateManager.shared.registerBackgroundTask(modelContainer: sharedModelContainer)
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
             PetProfile.self,
             ActivityLog.self,
             SpeciesRuleModel.self,
@@ -53,7 +57,13 @@ struct anabul_careApp: App {
                                 SpotlightManager.shared.indexToxicityDatabase(items: hazards)
                             }
                             
-                            // 3. Dismiss Launch Screen smoothly
+                            // 3. Initialize Climate & Location Services
+                            ClimateManager.shared.requestNotificationPermission()
+                            LocationManager.shared.requestPermission()
+                            LocationManager.shared.start()
+                            ClimateManager.shared.scheduleNextCheck()
+                            
+                            // 4. Dismiss Launch Screen smoothly
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                 isDatabaseReady = true
                             }
