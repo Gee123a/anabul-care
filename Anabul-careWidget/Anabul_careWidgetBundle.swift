@@ -12,7 +12,7 @@ import SwiftUI
 struct Anabul_careWidgetBundle: WidgetBundle {
     var body: some Widget {
         Anabul_careWidget()
-        Anabul_careWidgetControl()
-        Anabul_careWidgetLiveActivity()
+        // Anabul_careWidgetControl()
+        // Anabul_careWidgetLiveActivity()
     }
 }
