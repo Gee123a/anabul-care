@@ -11,12 +11,13 @@ import MapKit
 
 // MARK: - Mock Clinic Repository
 class MockClinicRepository: ClinicRepositoryProtocol {
-    func fetchClinics() -> [anabul_care.ClinicModel] {
-        <#code#>
-    }
-    
     var shouldReturnError = false
     var mockClinics: [ClinicModel] = []
+    
+    // FIXED: Replaced <#code#> placeholder with actual return
+    func fetchClinics() -> [anabul_care.ClinicModel] {
+        return mockClinics
+    }
     
     func fetchClinics(in region: MKCoordinateRegion) async throws -> [ClinicModel] {
         if shouldReturnError {
@@ -28,12 +29,14 @@ class MockClinicRepository: ClinicRepositoryProtocol {
 
 // MARK: - Mock Radar Service
 class MockRadarService: RadarServiceProtocol {
-    func getNearbyClinics() async -> [anabul_care.ClinicModel] {
-        <#code#>
-    }
-    
     var mockLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385)
     var isAuthorized: Bool = true
+    var mockNearbyClinics: [ClinicModel] = [] // Added to support the function below
+    
+    // FIXED: Replaced <#code#> placeholder with actual return
+    func getNearbyClinics() async -> [anabul_care.ClinicModel] {
+        return mockNearbyClinics
+    }
     
     func getCurrentLocation() async throws -> CLLocationCoordinate2D {
         if !isAuthorized {
