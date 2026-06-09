@@ -6,6 +6,7 @@
 import AppIntents
 import SwiftData
 import Foundation
+import WidgetKit
 
 struct LogActivityIntent: AppIntent {
     static var title: LocalizedStringResource = "Log Pet Activity"
@@ -56,6 +57,8 @@ struct LogActivityIntent: AppIntent {
         
         do {
             try context.save()
+            // Ensure widget reflects the new activity immediately
+            WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Successfully logged \(activityType) for \(pet.name)!")
         } catch {
             return .result(dialog: "Failed to save the activity.")

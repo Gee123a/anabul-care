@@ -2,39 +2,59 @@
 //  RadarViewModelTests.swift
 //  anabul-care
 //
-//  Created by Filemon Jose Hagen on 28/05/26.
+//  Created by Nicholas Gerwin Mawardji on 03/06/26.
 //
 
 import XCTest
-import CoreLocation
-
+import MapKit
 @testable import anabul_care
-
-class MockRadarService: RadarServiceProtocol {
-    func getNearbyClinics() async -> [ClinicModel] {
-        return [
-            ClinicModel(
-                name: "Mock Clinic",
-                coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0),
-                distance: "1.0 km",
-                statusText: "Open",
-                address: "Mock Address",
-                operatingHours: "24/7"
-            )
-        ]
-    }
-}
 
 @MainActor
 final class RadarViewModelTests: XCTestCase {
-    func testLoadClinicsUpdatesArray() async {
-        let mockService = MockRadarService()
-        let viewModel = RadarViewModel(radarService: mockService)
+    var viewModel: RadarViewModel!
+    
+    override func setUp() {
+        super.setUp()
+        viewModel = RadarViewModel()
+    }
+    
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
+    }
+    
+    func test_initialState() {
+        // Assert
+        XCTAssertTrue(viewModel.clinics.isEmpty, "Clinics should initially be empty")
+        XCTAssertEqual(viewModel.selectedCategory, .all, "Default category should be .all")
+        XCTAssertTrue(viewModel.searchText.isEmpty, "Search text should be empty")
+        XCTAssertNil(viewModel.selectedClinic, "No clinic should be selected initially")
+    }
+    
+    func test_filteredClinics_returnsAll_whenCategoryIsAll() {
+        // Arrange
+        let vet = ClinicModel(name: "Vet A", coordinate: CLLocationCoordinate2D(), address: "", phone: "", category: .vet, mapItem: nil)
+        let park = ClinicModel(name: "Park A", coordinate: CLLocationCoordinate2D(), address: "", phone: "", category: .park, mapItem: nil)
+        viewModel.clinics = [vet, park]
         
-        // Wait for async load in init to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        // Act
+        viewModel.selectedCategory = .all
         
-        XCTAssertEqual(viewModel.clinics.count, 1)
-        XCTAssertEqual(viewModel.clinics.first?.name, "Mock Clinic")
+        // Assert
+        XCTAssertEqual(viewModel.filteredClinics.count, 2, "Should return all clinics")
+    }
+    
+    func test_filteredClinics_filtersCorrectly_whenCategoryIsSelected() {
+        // Arrange
+        let vet = ClinicModel(name: "Vet A", coordinate: CLLocationCoordinate2D(), address: "", phone: "", category: .vet, mapItem: nil)
+        let park = ClinicModel(name: "Park A", coordinate: CLLocationCoordinate2D(), address: "", phone: "", category: .park, mapItem: nil)
+        viewModel.clinics = [vet, park]
+        
+        // Act
+        viewModel.selectedCategory = .vet
+        
+        // Assert
+        XCTAssertEqual(viewModel.filteredClinics.count, 1, "Should only return one item")
+        XCTAssertEqual(viewModel.filteredClinics.first?.category, .vet, "Should only return the vet clinic")
     }
 }

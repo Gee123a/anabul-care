@@ -112,8 +112,11 @@ struct PetProfileView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.down")
-                            .foregroundColor(.secondary)
-                            .font(.title3.weight(.semibold))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(primaryDark)
+                            .frame(width: 36, height: 36)
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -128,8 +131,11 @@ struct PetProfileView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis")
-                            .foregroundColor(.secondary)
-                            .font(.title3.weight(.semibold))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(primaryDark)
+                            .frame(width: 36, height: 36)
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
                 }
             }
