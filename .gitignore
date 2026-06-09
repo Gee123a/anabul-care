@@ -8,3 +8,4 @@ FigmaDesign.md
 *.pbxproj
 anabul-care.xcodeproj/project.pbxproj
 anabul-care.xcodeproj/project.xcworkspace/xcuserdata/niki.xcuserdatad/UserInterfaceState.xcuserstate
+.DS_Store
