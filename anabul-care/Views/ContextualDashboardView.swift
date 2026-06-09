@@ -5,25 +5,40 @@
 //  Created by Nicholas Gerwin Mawardji on 28/05/26.
 //
 
-
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ContextualDashboardView: View {
     @Environment(\.modelContext) private var modelContext
-    
+
     @Query(sort: \PetProfile.name) private var pets: [PetProfile]
-    
-    private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
-    private let textGray = Color(red: 138/255, green: 138/255, blue: 133/255)
-    private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
-    private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
-    
+
+    private let tangerine = Color(
+        red: 255 / 255,
+        green: 107 / 255,
+        blue: 51 / 255
+    )
+    private let textGray = Color(
+        red: 138 / 255,
+        green: 138 / 255,
+        blue: 133 / 255
+    )
+    private let primaryDark = Color(
+        red: 28 / 255,
+        green: 28 / 255,
+        blue: 26 / 255
+    )
+    private let secondaryDark = Color(
+        red: 92 / 255,
+        green: 92 / 255,
+        blue: 88 / 255
+    )
+
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
     @State private var selectedPetID: UUID?
     @State private var navigateToProfile = false
-    
+
     private var currentPet: PetProfile? {
         if let id = selectedPetID {
             return pets.first { $0.id == id }
@@ -31,14 +46,14 @@ struct ContextualDashboardView: View {
         return pets.first
     }
     @State private var selectedTab = 0
-    
+
     var body: some View {
         ZStack {
             dashboardPage
                 .opacity(selectedTab == 0 ? 1 : 0)
                 .offset(x: selectedTab == 0 ? 0 : -150)
                 .allowsHitTesting(selectedTab == 0)
-            
+
             if selectedTab == 1 {
                 PuskeswanRadarView(selectedTab: $selectedTab)
                     .transition(.move(edge: .trailing))
@@ -58,24 +73,30 @@ struct ContextualDashboardView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var dashboardPage: some View {
         NavigationStack {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
-                    
+
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(currentDateString)
-                                .font(.system(size: 13, weight: .regular, design: .default))
+                                .font(
+                                    .system(
+                                        size: 13,
+                                        weight: .regular,
+                                        design: .default
+                                    )
+                                )
                                 .foregroundColor(textGray)
                                 .tracking(0.4)
                                 .textCase(.uppercase)
                         }
-                        
+
                         Spacer()
-                        
+
                         // PET SWITCHER MENU
                         Menu {
                             Section("Switch Pet") {
@@ -94,19 +115,25 @@ struct ContextualDashboardView: View {
                                     }
                                 }
                             }
-                            
+
                             Section {
                                 Button {
                                     navigateToProfile = true
                                 } label: {
-                                    Label("View Profile", systemImage: "person.circle")
+                                    Label(
+                                        "View Profile",
+                                        systemImage: "person.circle"
+                                    )
                                 }
                                 .disabled(currentPet == nil)
-                                
+
                                 Button {
                                     showingAddPet = true
                                 } label: {
-                                    Label("Add New Pet", systemImage: "plus.circle")
+                                    Label(
+                                        "Add New Pet",
+                                        systemImage: "plus.circle"
+                                    )
                                 }
                             }
                         } label: {
@@ -119,53 +146,102 @@ struct ContextualDashboardView: View {
                                         .frame(width: 52, height: 52)
                                         .background(Color.white)
                                         .clipShape(Circle())
-                                        .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1.5))
-                                        .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
-                                    
+                                        .overlay(
+                                            Circle().stroke(
+                                                Color.black.opacity(0.06),
+                                                lineWidth: 1.5
+                                            )
+                                        )
+                                        .shadow(
+                                            color: .black.opacity(0.08),
+                                            radius: 14,
+                                            x: 0,
+                                            y: 4
+                                        )
+
                                     Circle()
-                                        .fill(Color(red: 155/255, green: 217/255, blue: 180/255))
+                                        .fill(
+                                            Color(
+                                                red: 155 / 255,
+                                                green: 217 / 255,
+                                                blue: 180 / 255
+                                            )
+                                        )
                                         .frame(width: 14, height: 14)
-                                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                        .overlay(
+                                            Circle().stroke(
+                                                Color.white,
+                                                lineWidth: 2
+                                            )
+                                        )
                                 }
                             } else {
                                 Circle()
                                     .fill(Color.gray.opacity(0.1))
                                     .frame(width: 52, height: 52)
-                                    .overlay(Image(systemName: "plus").foregroundColor(.gray))
+                                    .overlay(
+                                        Image(systemName: "plus")
+                                            .foregroundColor(.gray)
+                                    )
                             }
                         }
                     }
                     .padding(.top, 20)
-                    
+
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(currentPet != nil ? "Good morning," : "Good morning!")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(primaryDark)
-                            .tracking(-0.5)
-                        
+                        Text(
+                            currentPet != nil
+                                ? "Good morning," : "Good morning!"
+                        )
+                        .font(
+                            .system(size: 28, weight: .bold, design: .rounded)
+                        )
+                        .foregroundColor(primaryDark)
+                        .tracking(-0.5)
+
                         if let pet = currentPet {
                             Text("\(pet.name) is up.")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .font(
+                                    .system(
+                                        size: 28,
+                                        weight: .bold,
+                                        design: .rounded
+                                    )
+                                )
                                 .foregroundColor(tangerine)
                                 .tracking(-0.5)
                                 .padding(.top, -14)
                         }
-                        
+
                         Text(dynamicGreetingSubtext(for: currentPet))
-                            .font(.system(size: 19, weight: .medium, design: .rounded))
+                            .font(
+                                .system(
+                                    size: 19,
+                                    weight: .medium,
+                                    design: .rounded
+                                )
+                            )
                             .foregroundColor(secondaryDark)
                             .lineSpacing(4)
                             .tracking(-0.2)
                             .padding(.top, 4)
                     }
-                    
+
                     Button(action: { showingSafetyLookup.toggle() }) {
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.secondary)
-                            Text("Is it safe to feed \(currentPet?.name ?? "Anabul")...")
-                                .font(.system(size: 15, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondary)
+                            Text(
+                                "Is it safe to feed \(currentPet?.name ?? "Anabul")..."
+                            )
+                            .font(
+                                .system(
+                                    size: 15,
+                                    weight: .medium,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundColor(.secondary)
                             Spacer()
                             Image(systemName: "exclamationmark.shield.fill")
                                 .foregroundColor(.red)
@@ -177,35 +253,53 @@ struct ContextualDashboardView: View {
                         .frame(height: 46)
                         .background(Color.white)
                         .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+                        .shadow(
+                            color: .black.opacity(0.04),
+                            radius: 8,
+                            x: 0,
+                            y: 4
+                        )
                     }
                     .buttonStyle(PressedScaleButtonStyle())
-                    
+
                     HStack {
                         Text("TODAY")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .font(
+                                .system(
+                                    size: 15,
+                                    weight: .semibold,
+                                    design: .rounded
+                                )
+                            )
                             .foregroundColor(primaryDark)
                             .tracking(0.2)
-                        
+
                         Spacer()
-                        
+
                         Text("\(todayTaskCount(for: currentPet)) tasks")
-                            .font(.system(size: 13, weight: .regular, design: .default))
+                            .font(
+                                .system(
+                                    size: 13,
+                                    weight: .regular,
+                                    design: .default
+                                )
+                            )
                             .foregroundColor(textGray)
                     }
                     .padding(.top, 4)
-                    
+
                     if let pet = currentPet {
                         TodayQueueCardView(pet: pet)
                             .padding(.top, -12)
-                            .id(pet.id) // Ensure view reloads when pet changes
+                            .id(pet.id)  // Ensure view reloads when pet changes
                     } else {
                         EmptyPetStateView(showingAddPet: $showingAddPet)
                     }
-                    
-                    // Fixed rawValue issue here
-                    InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
-                        .id(currentPet?.id ?? UUID())
+
+                    // REPLACE InlineInsightPanelView WITH THIS:
+                    if let pet = currentPet {
+                        FlashCardView(pet: pet)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
@@ -224,42 +318,52 @@ struct ContextualDashboardView: View {
             }
         }
     }
-    
+
     private var currentDateString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE · MMM d"
         return formatter.string(from: Date())
     }
-    
+
     private func todayTaskCount(for pet: PetProfile?) -> Int {
         guard let pet = pet else { return 0 }
         return DailyRoutineGenerator.generate(for: pet).count
     }
-    
+
     private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {
-        guard let pet = pet else { return "Morning sunlight helps regulate sleep cycles for your companions." }
-        return "Did you know morning sunlight helps regulate \(pet.name)'s sleep cycle?"
+        guard let pet = pet else {
+            return
+                "Morning sunlight helps regulate sleep cycles for your companions."
+        }
+        return
+            "Did you know morning sunlight helps regulate \(pet.name)'s sleep cycle?"
     }
 }
 
 // MARK: - Custom 2-Finger Swipe Gesture
 struct TwoFingerSwipeRecognizer: UIViewRepresentable {
     @Binding var selectedTab: Int
-    
+
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: .zero)
         view.backgroundColor = .clear
-        
+
         DispatchQueue.main.async {
             // Attach gesture to the highest available parent view to capture global swipes
             if let parentView = view.superview?.superview {
-                let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeLeft))
+                let swipeLeft = UISwipeGestureRecognizer(
+                    target: context.coordinator,
+                    action: #selector(Coordinator.swipeLeft)
+                )
                 swipeLeft.direction = .left
                 swipeLeft.numberOfTouchesRequired = 2
                 swipeLeft.delegate = context.coordinator
                 parentView.addGestureRecognizer(swipeLeft)
-                
-                let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeRight))
+
+                let swipeRight = UISwipeGestureRecognizer(
+                    target: context.coordinator,
+                    action: #selector(Coordinator.swipeRight)
+                )
                 swipeRight.direction = .right
                 swipeRight.numberOfTouchesRequired = 2
                 swipeRight.delegate = context.coordinator
@@ -268,28 +372,32 @@ struct TwoFingerSwipeRecognizer: UIViewRepresentable {
         }
         return view
     }
-    
+
     func updateUIView(_ uiView: UIView, context: Context) {}
     func makeCoordinator() -> Coordinator { Coordinator(self) }
-    
+
     class Coordinator: NSObject, UIGestureRecognizerDelegate {
         var parent: TwoFingerSwipeRecognizer
         init(_ parent: TwoFingerSwipeRecognizer) { self.parent = parent }
-        
+
         @objc func swipeLeft() {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 parent.selectedTab = 1
             }
         }
-        
+
         @objc func swipeRight() {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 parent.selectedTab = 0
             }
         }
-        
-        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-            return true // Important: Prevents this from blocking map panning or vertical scrolling
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith otherGestureRecognizer:
+                UIGestureRecognizer
+        ) -> Bool {
+            return true  // Important: Prevents this from blocking map panning or vertical scrolling
         }
     }
 }
@@ -308,8 +416,8 @@ struct EmptyPetStateView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             Button("Add Pet") { showingAddPet = true }
-            .buttonStyle(.borderedProminent)
-            .tint(.orange)
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 340)
@@ -322,6 +430,9 @@ struct PressedScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+            .animation(
+                .spring(response: 0.2, dampingFraction: 0.6),
+                value: configuration.isPressed
+            )
     }
 }

@@ -117,4 +117,22 @@ actor DataManager {
             print("Failed to seed Data: \(error)")
         }
     }
+    
+    // MARK: - Fun Facts Loader
+    func loadFunFacts() -> [String: [FunFactModel]] {
+        guard let url = Bundle.main.url(forResource: "BreedFunFacts", withExtension: "json") else {
+            print("Could not find BreedFunFacts.json")
+            return [:]
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            let factsDictionary = try decoder.decode([String: [FunFactModel]].self, from: data)
+            return factsDictionary
+        } catch {
+            print("Failed to decode fun facts: \(error)")
+            return [:]
+        }
+    }
 }
