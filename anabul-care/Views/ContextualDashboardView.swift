@@ -44,6 +44,33 @@ struct ContextualDashboardView: View {
                     .transition(.move(edge: .trailing))
                     .zIndex(1)
             }
+            
+            // NEW: Page Indicator for better discovery
+            VStack {
+                Spacer()
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(selectedTab == 0 ? tangerine : Color.gray.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                selectedTab = 0
+                            }
+                        }
+                    
+                    Circle()
+                        .fill(selectedTab == 1 ? tangerine : Color.gray.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                selectedTab = 1
+                            }
+                        }
+                }
+                .padding(.bottom, 34) // Adjust for safe area
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(true)
         }
         .background(TwoFingerSwipeRecognizer(selectedTab: $selectedTab))
         .ignoresSafeArea()

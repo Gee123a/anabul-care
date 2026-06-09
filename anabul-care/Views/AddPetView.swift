@@ -15,6 +15,18 @@ struct AddPetView: View {
     @State private var weightString: String = ""
     @State private var isNeutered: Bool = false
     
+    init(petToEdit: PetProfile? = nil) {
+        self.petToEdit = petToEdit
+        
+        if let pet = petToEdit {
+            _name = State(initialValue: pet.name)
+            _species = State(initialValue: PetSpecies(rawValue: pet.species) ?? .dog)
+            _dateOfBirth = State(initialValue: pet.dateOfBirth)
+            _weightString = State(initialValue: String(format: "%.1f", pet.weightKg))
+            _isNeutered = State(initialValue: pet.isNeutered)
+            // Note: breed is handled in loadBreeds to match registry
+        }
+    }
     
     @State private var breedsRegistry: [String: [String]] = [:]
     @State private var isSaved = false

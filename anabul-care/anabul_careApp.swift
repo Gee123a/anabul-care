@@ -24,6 +24,8 @@ struct anabul_careApp: App {
             SpeciesRuleModel.self,
             ToxicityModel.self,
             TidbitModel.self,
+            TaskPreference.self,
+            TaskDeactivation.self,
         ])
         let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")

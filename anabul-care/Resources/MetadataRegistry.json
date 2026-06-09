@@ -5,16 +5,8 @@
       "rer_constant": 70,
       "heat_threshold_celsius": 34.0,
       "toxic_hazards": [
-        {
-          "keyword_id": "bawang",
-          "danger_level": "High",
-          "alternative_id": "none"
-        },
-        {
-          "keyword_id": "cokelat",
-          "danger_level": "Critical",
-          "alternative_id": "none"
-        }
+        { "keyword_id": "bawang", "danger_level": "High", "alternative_id": "none" },
+        { "keyword_id": "cokelat", "danger_level": "Critical", "alternative_id": "none" }
       ]
     },
     {
@@ -22,16 +14,8 @@
       "rer_constant": 70,
       "heat_threshold_celsius": 34.0,
       "toxic_hazards": [
-        {
-          "keyword_id": "bawang",
-          "danger_level": "High",
-          "alternative_id": "none"
-        },
-        {
-          "keyword_id": "cokelat",
-          "danger_level": "Critical",
-          "alternative_id": "none"
-        }
+        { "keyword_id": "bawang", "danger_level": "High", "alternative_id": "none" },
+        { "keyword_id": "cokelat", "danger_level": "Critical", "alternative_id": "none" }
       ]
     },
     {
@@ -39,11 +23,7 @@
       "rer_constant": 145,
       "heat_threshold_celsius": 26.0,
       "toxic_hazards": [
-        {
-          "keyword_id": "bawang",
-          "danger_level": "Critical",
-          "alternative_id": "none"
-        }
+        { "keyword_id": "bawang", "danger_level": "Critical", "alternative_id": "none" }
       ]
     }
   ],
@@ -51,9 +31,188 @@
     {
       "id": "tip_1",
       "species_target": "dog",
-      "title_id": "Sosialisasi Dini",
-      "body_id": "Mulailah sosialisasi anjing Anda sejak usia dini untuk mencegah kecemasan.",
-      "citation": "Chen dkk., 2026"
+      "title_id": "Early Socialization",
+      "body_id": "Start socializing your dog early to prevent future anxiety and aggression.",
+      "citation": "PetMD, 2026"
+    }
+  ],
+  "breed_metadata": {
+    "dog": {
+      "Pug": ["brachycephalic", "low_energy", "obesity_prone", "floppy_ears"],
+      "French Bulldog": ["brachycephalic", "low_energy", "obesity_prone", "floppy_ears"],
+      "English Bulldog": ["brachycephalic", "low_energy", "obesity_prone", "floppy_ears"],
+      "Boxer": ["brachycephalic", "high_energy", "floppy_ears"],
+      "Siberian Husky": ["high_energy", "thick_coat", "working", "vocal"],
+      "Husky": ["high_energy", "thick_coat", "working", "vocal"],
+      "Border Collie": ["high_energy", "working", "intelligent", "floppy_ears"],
+      "Golden Retriever": ["thick_coat", "intelligent", "obesity_prone", "floppy_ears"],
+      "Labrador Retriever": ["thick_coat", "intelligent", "obesity_prone", "floppy_ears"],
+      "German Shepherd": ["working", "thick_coat", "intelligent"],
+      "Poodle (Standard)": ["intelligent", "high_grooming"],
+      "Poodle (Miniature)": ["intelligent", "high_grooming"],
+      "Poodle (Toy)": ["intelligent", "high_grooming"],
+      "Yorkshire Terrier": ["high_grooming", "small_breed"],
+      "Maltese": ["high_grooming", "small_breed"],
+      "Shih Tzu": ["brachycephalic", "high_grooming", "floppy_ears"],
+      "Chihuahua": ["small_breed", "low_energy"],
+      "Great Dane": ["giant_breed", "low_energy", "floppy_ears"],
+      "Saint Bernard": ["giant_breed", "thick_coat", "floppy_ears"],
+      "Dachshund": ["back_risk", "small_breed", "floppy_ears"],
+      "Beagle": ["floppy_ears", "high_energy", "vocal"],
+      "Corgi (Pembroke)": ["back_risk", "intelligent", "thick_coat"],
+      "Corgi (Cardigan)": ["back_risk", "intelligent", "thick_coat"],
+      "Rottweiler": ["working", "intelligent", "obesity_prone"],
+      "Doberman Pinscher": ["working", "intelligent", "high_energy"],
+      "Samoyed": ["thick_coat", "vocal", "high_energy"],
+      "Shiba Inu": ["thick_coat", "intelligent", "vocal"],
+      "Bichon Frise": ["high_grooming", "small_breed"],
+      "Cocker Spaniel": ["floppy_ears", "high_grooming"],
+      "Dalmatian": ["high_energy", "floppy_ears"],
+      "Alaskan Malamute": ["thick_coat", "working", "vocal"],
+      "Greyhound": ["low_energy", "floppy_ears", "thin_skin"]
+    },
+    "cat": {
+      "Persian": ["brachycephalic", "high_grooming", "low_energy"],
+      "Exotic Shorthair": ["brachycephalic", "low_energy"],
+      "Maine Coon": ["giant_breed", "thick_coat", "high_energy"],
+      "Siamese": ["high_energy", "vocal", "intelligent"],
+      "Bengal": ["high_energy", "active", "intelligent"],
+      "Sphynx": ["skin_care", "high_energy", "vocal"],
+      "Ragdoll": ["thick_coat", "low_energy"],
+      "British Shorthair": ["obesity_prone", "low_energy"],
+      "Abyssinian": ["high_energy", "active"],
+      "Scottish Fold": ["low_energy", "floppy_ears"],
+      "Russian Blue": ["intelligent", "low_energy"]
+    }
+  },
+  "base_routines": {
+    "dog": [
+      { "type": "feeding", "title": "Morning Feeding", "time": "8:00 AM", "detail": "Measured portions based on RMR.", "icon": "fork.knife" },
+      { "type": "grooming", "title": "Dental Care", "time": "8:30 AM", "detail": "Brush teeth or dental chew.", "icon": "sparkles" },
+      { "type": "walk", "title": "Morning Walk", "time": "9:00 AM", "detail": "20-30 min exercise session.", "icon": "figure.walk" },
+      { "type": "hydration", "title": "Hydration Check", "time": "12:00 PM", "detail": "Refresh water bowl.", "icon": "drop.fill" },
+      { "type": "play", "title": "Play Time", "time": "4:00 PM", "detail": "Active engagement & toys.", "icon": "tennisball" },
+      { "type": "feeding", "title": "Evening Feeding", "time": "7:00 PM", "detail": "Measured dinner portion.", "icon": "fork.knife" }
+    ],
+    "cat": [
+      { "type": "feeding", "title": "Morning Feeding", "time": "7:00 AM", "detail": "Wet or dry food measured.", "icon": "fork.knife" },
+      { "type": "grooming", "title": "Litter Scoop", "time": "8:00 AM", "detail": "Clean waste from box.", "icon": "trash" },
+      { "type": "hydration", "title": "Water Check", "time": "10:00 AM", "detail": "Refresh or refill fountain.", "icon": "drop.fill" },
+      { "type": "play", "title": "Interactive Play", "time": "6:00 PM", "detail": "15 min wand toy session.", "icon": "sparkles" },
+      { "type": "grooming", "title": "Coat Brushing", "time": "8:00 PM", "detail": "Remove loose fur.", "icon": "scissors" },
+      { "type": "feeding", "title": "Night Snack", "time": "10:00 PM", "detail": "Small measured portion.", "icon": "fork.knife" }
+    ],
+    "hamster": [
+      { "type": "feeding", "title": "Evening Feeding", "time": "7:00 PM", "detail": "Seeds & fresh veg.", "icon": "leaf.fill" },
+      { "type": "hydration", "title": "Bottle Check", "time": "8:00 PM", "detail": "Check ball for flow.", "icon": "drop.fill" },
+      { "type": "play", "title": "Wheel Check", "time": "10:00 PM", "detail": "Verify wheel is clear.", "icon": "circle.dashed" },
+      { "type": "grooming", "title": "Sand Bath", "time": "11:00 PM", "detail": "Sift sand for debris.", "icon": "sparkles" }
+    ]
+  },
+  "routine_modifiers": [
+    {
+      "id": "puppy_feeding_lunch",
+      "trigger": { "age_max_months": 3 },
+      "action": "add",
+      "task": { "type": "feeding", "title": "Lunch Feeding", "time": "1:00 PM", "detail": "3rd meal for growth support.", "icon": "fork.knife" }
+    },
+    {
+      "id": "puppy_feeding_afternoon",
+      "trigger": { "age_max_months": 2 },
+      "action": "add",
+      "task": { "type": "feeding", "title": "Afternoon Feeding", "time": "4:00 PM", "detail": "4th meal for young growth.", "icon": "fork.knife" }
+    },
+    {
+      "id": "senior_joint_care",
+      "trigger": { "age_min_months": 84 },
+      "action": "add",
+      "task": { "type": "grooming", "title": "Joint Supplement", "time": "8:15 AM", "detail": "Glucosamine / Chondroitin dose.", "icon": "pills.fill" }
+    },
+    {
+      "id": "brachycephalic_walk",
+      "trigger": { "trait": "brachycephalic" },
+      "action": "modify",
+      "target_type": "walk",
+      "new_title": "Light Stroll",
+      "new_detail": "Max 15-20 min. Monitor breathing closely.",
+      "new_icon": "figure.walk"
+    },
+    {
+      "id": "brachycephalic_cleaning",
+      "trigger": { "trait": "brachycephalic" },
+      "action": "add",
+      "task": { "type": "grooming", "title": "Fold Cleaning", "time": "8:45 AM", "detail": "Clean facial folds with damp cloth.", "icon": "face.smiling" }
+    },
+    {
+      "id": "high_energy_exercise",
+      "trigger": { "trait": "high_energy" },
+      "action": "modify",
+      "target_type": "play",
+      "new_title": "Vigorous Training",
+      "new_detail": "45+ min high intensity play or work.",
+      "new_icon": "figure.run"
+    },
+    {
+      "id": "high_grooming_daily",
+      "trigger": { "trait": "high_grooming" },
+      "action": "modify",
+      "target_type": "grooming",
+      "new_title": "Intensive Brushing",
+      "new_detail": "Detangle coat and eye cleaning.",
+      "new_icon": "comb.fill"
+    },
+    {
+      "id": "obesity_prone_feeding",
+      "trigger": { "trait": "obesity_prone" },
+      "action": "modify",
+      "target_type": "feeding",
+      "new_detail": "Strict portion control. No table scraps."
+    },
+    {
+      "id": "giant_breed_low_impact",
+      "trigger": { "trait": "giant_breed" },
+      "action": "add",
+      "task": { "type": "play", "title": "Low Impact Movement", "time": "2:00 PM", "detail": "Slow walk to preserve large joints.", "icon": "figure.walk" }
+    },
+    {
+      "id": "floppy_ears_weekly",
+      "trigger": { "trait": "floppy_ears", "weekday": 7 },
+      "action": "add",
+      "task": { "type": "grooming", "title": "Ear Cleaning", "time": "10:30 AM", "detail": "Weekly check & clean floppy ears.", "icon": "ear" }
+    },
+    {
+      "id": "intelligent_puzzle",
+      "trigger": { "trait": "intelligent" },
+      "action": "add",
+      "task": { "type": "play", "title": "Mental Puzzle", "time": "3:00 PM", "detail": "Interactive treat toy or puzzle.", "icon": "brain.head.profile" }
+    },
+    {
+      "id": "back_risk_check",
+      "trigger": { "trait": "back_risk" },
+      "action": "modify",
+      "target_type": "play",
+      "new_detail": "Avoid jumping. Focus on ground play."
+    },
+    {
+      "id": "vocal_engagement",
+      "trigger": { "trait": "vocal" },
+      "action": "add",
+      "task": { "type": "play", "title": "Vocal/Social Play", "time": "5:30 PM", "detail": "Talking & social interaction.", "icon": "mouth.fill" }
+    },
+    {
+      "id": "skin_care_daily",
+      "trigger": { "trait": "skin_care" },
+      "action": "add",
+      "task": { "type": "grooming", "title": "Skin Protection", "time": "10:00 AM", "detail": "Lotion or sun protection check.", "icon": "bandage.fill" }
+    },
+    {
+      "id": "litter_deep_clean",
+      "trigger": { "weekday": 1 },
+      "action": "modify",
+      "target_type": "grooming",
+      "new_title": "Deep Litter Clean",
+      "new_detail": "Full scrub and fresh litter refill.",
+      "new_icon": "trash.fill"
     }
   ]
 }

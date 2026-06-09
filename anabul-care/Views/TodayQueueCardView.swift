@@ -13,12 +13,16 @@ struct TodayQueueCardView: View {
     @Environment(\.modelContext) private var modelContext
     let pet: PetProfile
     
+    @Query private var allPreferences: [TaskPreference]
+    @Query private var allDeactivations: [TaskDeactivation]
+    
     // Design Tokens
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255) // #FF6B33
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255) // #7BD3B3
     private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255) // Deep, profound dark color
     
     @State private var selectedDate = Calendar.current.startOfDay(for: Date())
+    @State private var taskToEdit: DailyTaskItem?
     
     // Date Helpers
     private var days: [Date] {
@@ -27,8 +31,21 @@ struct TodayQueueCardView: View {
         return ((-15)...15).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
+    private var petPreferences: [TaskPreference] {
+        allPreferences.filter { $0.petID == pet.id }
+    }
+    
+    private var petDeactivations: [TaskDeactivation] {
+        allDeactivations.filter { $0.petID == pet.id }
+    }
+    
     private var dailyTasks: [DailyTaskItem] {
-        DailyRoutineGenerator.generate(for: pet)
+        DailyRoutineGenerator.generate(
+            for: pet, 
+            on: selectedDate, 
+            preferences: petPreferences, 
+            deactivations: petDeactivations
+        )
     }
     
     var body: some View {
@@ -128,6 +145,10 @@ struct TodayQueueCardView: View {
                     VStack(spacing: 6) {
                         ForEach(dailyTasks) { task in
                             QueueRow(pet: pet, date: selectedDate, type: task.type, title: task.title, time: task.timeRecommendation, detail: task.detail, icon: task.icon)
+                                .contentShape(Rectangle())
+                                .onLongPressGesture(minimumDuration: 0.5) {
+                                    taskToEdit = task
+                                }
                         }
                     }
                     .padding(.horizontal, 12)
@@ -146,7 +167,11 @@ struct TodayQueueCardView: View {
                 .stroke(Color.white.opacity(0.85), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.1), radius: 36, x: 0, y: 16)
+        .sheet(item: $taskToEdit) { task in
+            EditTaskTimeView(pet: pet, task: task, date: selectedDate)
+        }
     }
+
     
     private func completedCount(for date: Date) -> Int {
         dailyTasks.filter { task in 
@@ -264,23 +289,20 @@ struct QueueRow: View {
             Spacer()
             
             // Checkmark Toggle
-            Button(action: toggleActivity) {
-                ZStack {
+            ZStack {
+                Circle()
+                    .stroke(isLogged ? Color.clear : Color.black.opacity(0.28), lineWidth: 1.5)
+                    .frame(width: 26, height: 26)
+                
+                if isLogged {
                     Circle()
-                        .stroke(isLogged ? Color.clear : Color.black.opacity(0.28), lineWidth: 1.5)
+                        .fill(mint)
                         .frame(width: 26, height: 26)
-                    
-                    if isLogged {
-                        Circle()
-                            .fill(mint)
-                            .frame(width: 26, height: 26)
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .black))
-                            .foregroundColor(.white)
-                    }
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .black))
+                        .foregroundColor(.white)
                 }
             }
-            .buttonStyle(.plain)
         }
         .padding(8)
         .background(
@@ -291,6 +313,9 @@ struct QueueRow: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.black.opacity(0.06), lineWidth: 1)
         )
+        .onTapGesture {
+            toggleActivity()
+        }
     }
     
     private func toggleActivity() {

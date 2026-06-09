@@ -34,6 +34,22 @@ final class PetProfile {
         PetSpecies(rawValue: species.lowercased()) ?? .cat
     }
     
+    var ageInMonths: Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.month], from: dateOfBirth, to: Date())
+        return components.month ?? 0
+    }
+    
+    var lifeStage: LifeStage {
+        if ageInMonths < 12 {
+            return .puppyKitten
+        } else if ageInMonths < 84 { // 7 years
+            return .adult
+        } else {
+            return .senior
+        }
+    }
+    
     var rmr: Double {
         let constant = species.lowercased() == "hamster" ? 145.0 : 70.0
         return constant * pow(weightKg, 0.75)

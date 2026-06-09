@@ -68,24 +68,49 @@ struct PetProfileView: View {
                     
                     // 2. STATS ROW (Bento Cards)
                     HStack(spacing: 12) {
-                        StatCard(icon: "birthday.cake.fill", label: "AGE", value: "3 Yrs")
-                        StatCard(icon: "scalemass.fill", label: "WEIGHT", value: "4.2 kg")
+                        StatCard(icon: "birthday.cake.fill", label: "AGE", value: ageString)
+                        StatCard(icon: "scalemass.fill", label: "WEIGHT", value: String(format: "%.1f kg", pet.weightKg))
                         StatCard(icon: "syringe.fill", label: "VACCINES", value: "Up to Date")
                     }
                     .padding(.horizontal, 20)
                     
-                    // 3. HEALTH OVERVIEW SECTION
+                    // 3. ACTIVITY HISTORY SECTION
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("HEALTH OVERVIEW")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(secondaryDark)
-                            .tracking(1.0)
-                            .padding(.leading, 4)
+                        HStack {
+                            Text("RECENT ACTIVITY")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(secondaryDark)
+                                .tracking(1.0)
+                            
+                            Spacer()
+                            
+                            if !pet.activities.isEmpty {
+                                Text("\(pet.activities.count) total")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.leading, 4)
                         
-                        VStack(spacing: 10) {
-                            HealthRowItem(icon: "heart.fill", title: "Wellness Check", subtitle: "Due in 2 months", iconColor: tangerine)
-                            HealthRowItem(icon: "syringe.fill", title: "Rabies Booster", subtitle: "Completed May 2025", iconColor: .blue)
-                            HealthRowItem(icon: "birthday.cake.fill", title: "Birthday", subtitle: "March 3rd", iconColor: .purple)
+                        if pet.activities.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "clock.badge.questionmark")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.secondary.opacity(0.3))
+                                Text("No activity logged yet")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 32)
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        } else {
+                            VStack(spacing: 10) {
+                                ForEach(pet.activities.sorted(by: { $0.timestamp > $1.timestamp }).prefix(5)) { log in
+                                    ActivityRowItem(log: log)
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -156,8 +181,18 @@ struct PetProfileView: View {
             }
             
             .sheet(isPresented: $showingEditPet) {
-                AddPetView() // Remove petToEdit since the initializer doesn't support it yet
+                AddPetView(petToEdit: pet)
             }
+        }
+    }
+    
+    private var ageString: String {
+        let months = pet.ageInMonths
+        if months < 12 {
+            return "\(months) Mos"
+        } else {
+            let years = months / 12
+            return "\(years) Yrs"
         }
     }
 }
@@ -199,41 +234,66 @@ struct StatCard: View {
     }
 }
 
-struct HealthRowItem: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    let iconColor: Color
+struct ActivityRowItem: View {
+    let log: ActivityLog
+    
+    private var icon: String {
+        switch LogType(rawValue: log.type) {
+        case .feeding: return "fork.knife"
+        case .grooming: return "scissors"
+        case .walk: return "figure.walk"
+        case .play: return "tennisball"
+        case .hydration: return "drop.fill"
+        default: return "star.fill"
+        }
+    }
+    
+    private var color: Color {
+        switch LogType(rawValue: log.type) {
+        case .feeding: return .orange
+        case .grooming: return .purple
+        case .walk: return .green
+        case .play: return .blue
+        case .hydration: return .cyan
+        default: return .gray
+        }
+    }
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(width: 36, height: 36)
-                .background(iconColor)
-                .clipShape(Circle())
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(color)
+            }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(log.type.capitalized)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 28/255, green: 28/255, blue: 26/255))
-                Text(subtitle)
+                
+                Text(log.timestamp.formatted(.relative(presentation: .named)))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
             
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color.secondary.opacity(0.5))
+            if !log.detail.isEmpty {
+                Text(log.detail)
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
         }
-        .padding(16)
+        .padding(12)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(Color.white.opacity(0.6), lineWidth: 0.5)
         )
     }
