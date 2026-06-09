@@ -1,0 +1,116 @@
+//
+//  BreedFunFacts.json
+//  anabul-care
+//
+//  Created by Nicholas Gerwin Mawardji on 09/06/26.
+//
+
+
+{
+  "dog": [
+    {
+      "breed": "Golden Retriever",
+      "fact": "Golden Retrievers are known to have 'soft mouths', meaning they can carry delicate items like raw eggs without breaking them."
+    },
+    {
+      "breed": "Siberian Husky",
+      "fact": "Siberian Huskies have a double coat that keeps them warm in temperatures as low as -50 to -60 degrees Fahrenheit."
+    },
+    {
+      "breed": "Dalmatian",
+      "fact": "Dalmatian puppies are born completely white. Their iconic black or liver spots don't start appearing until they are about two weeks old."
+    },
+    {
+      "breed": "Chihuahua",
+      "fact": "Relative to their body size, Chihuahuas have the largest brain of any dog breed."
+    },
+    {
+      "breed": "Dachshund",
+      "fact": "Dachshunds were originally bred in Germany to hunt badgers, which is why their long, low bodies are perfectly shaped for digging into burrows."
+    },
+    {
+      "breed": "Poodle",
+      "fact": "Poodles actually have hair, not fur. This means they rarely shed and are often considered hypoallergenic."
+    },
+    {
+      "breed": "Greyhound",
+      "fact": "Greyhounds are the fastest dog breed and can reach speeds of up to 45 miles per hour."
+    },
+    {
+      "breed": "Corgi",
+      "fact": "The word 'Corgi' translates to 'dwarf dog' in Welsh. According to Welsh legend, they were used by fairies to pull their coaches."
+    },
+    {
+      "breed": "Beagle",
+      "fact": "A Beagle’s ears are designed to catch scent particles and keep them close to the dog's nose to help them track scents."
+    },
+    {
+      "breed": "Pug",
+      "fact": "A group of Pugs is officially referred to as a 'grumble'."
+    }
+  ],
+  "cat": [
+    {
+      "breed": "Maine Coon",
+      "fact": "The Maine Coon is the largest domesticated cat breed. Some can grow up to 40 inches in length."
+    },
+    {
+      "breed": "Siamese",
+      "fact": "Siamese cats are born completely white. Their distinctive color points develop later due to a heat-sensitive enzyme in their bodies."
+    },
+    {
+      "breed": "Sphynx",
+      "fact": "Despite looking bald, Sphynx cats actually have a fine layer of downy fuzz that makes them feel like a warm peach."
+    },
+    {
+      "breed": "Ragdoll",
+      "fact": "Ragdolls get their name because they tend to go completely limp and relax all their muscles when you pick them up."
+    },
+    {
+      "breed": "Scottish Fold",
+      "fact": "All Scottish Fold kittens are born with straight ears. The fold doesn't develop until they are about three to four weeks old."
+    },
+    {
+      "breed": "Abyssinian",
+      "fact": "The Abyssinian is considered one of the oldest known cat breeds, with their likeness appearing in ancient Egyptian art."
+    },
+    {
+      "breed": "Bengal",
+      "fact": "Bengal cats have a special trait called 'glittering' that makes their fur look like it has been dusted with iridescent gold or pearl."
+    },
+    {
+      "breed": "Persian",
+      "fact": "Persian cats were Queen Victoria’s favorite breed, which highly popularized them among royalty and the upper class in the 19th century."
+    },
+    {
+      "breed": "Russian Blue",
+      "fact": "Russian Blues are known for their dense double coat, which stands out at a 45-degree angle, allowing you to trace patterns in their fur."
+    },
+    {
+      "breed": "Savannah",
+      "fact": "Savannah cats are one of the only domestic cat breeds that genuinely enjoy playing in the water and swimming."
+    }
+  ],
+  "hamster": [
+    {
+      "breed": "Syrian Hamster",
+      "fact": "Syrian hamsters are strictly solitary. If housed together after 8-10 weeks of age, they will become highly territorial."
+    },
+    {
+      "breed": "Roborovski Dwarf",
+      "fact": "Roborovski hamsters are the smallest and fastest hamster breed. In the wild, they can run the equivalent of 4 human marathons in a single night."
+    },
+    {
+      "breed": "Winter White Dwarf",
+      "fact": "Winter White hamsters can actually change their fur color from dark grey to pure white during the winter months to camouflage in the snow."
+    },
+    {
+      "breed": "Chinese Hamster",
+      "fact": "Unlike other hamster breeds that have stubby tails, the Chinese Hamster has a slightly longer, prehensile tail that helps them climb."
+    },
+    {
+      "breed": "Campbell's Dwarf",
+      "fact": "Campbell's hamsters have very poor eyesight and rely almost entirely on their excellent sense of smell and hearing to navigate."
+    }
+  ]
+}
