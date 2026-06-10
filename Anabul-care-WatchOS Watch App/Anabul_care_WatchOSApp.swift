@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct Anabul_care_WatchOSApp: App {
     // Starts listening for the iPhone immediately
-    @StateObject private var connectivity = WatchConnectivityManager.shared
+    private let connectivity = WatchConnectivityManager.shared
 
     var body: some Scene {
         WindowGroup {

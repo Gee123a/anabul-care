@@ -158,5 +158,5 @@ struct WatchTaskRow: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self], inMemory: true)
+        .modelContainer(for: [PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self, TaskPreference.self, TaskDeactivation.self], inMemory: true)
 }
