@@ -9,10 +9,11 @@ import Combine
 public final class RadarViewModel {
     /// The current camera position on the map.
     // MapCameraPosition tracks both the center coordinate and the viewing altitude (distance)
-    public var position: MapCameraPosition = .camera(MapCamera(
+    // DEFAULT TO USER LOCATION: This ensures the map automatically finds vets, hotels, and parks near you on load
+    public var position: MapCameraPosition = .userLocation(fallback: .camera(MapCamera(
         centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
         distance: 4000
-    ))
+    )))
     
     /// List of clinics found in the current region.
     public var clinics: [ClinicModel] = []
@@ -51,6 +52,10 @@ public final class RadarViewModel {
         // Create a request for Apple's local search API using the text query
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
+        
+        // BIAS SEARCH TO CURRENT LOCATION: This tells Apple Maps to prioritize results closest to you
+        request.region = MKCoordinateRegion(center: currentCenter, latitudinalMeters: 15000, longitudinalMeters: 15000)
+        
         let search = MKLocalSearch(request: request)
         
         do {
