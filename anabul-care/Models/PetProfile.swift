@@ -7,19 +7,19 @@ import Foundation
 import SwiftData
 
 @Model
-final class PetProfile {
-    var id: UUID
-    var name: String
-    var species: String // "dog", "cat", "hamster"
-    var breed: String
-    var dateOfBirth: Date
-    var weightKg: Double
-    var isNeutered: Bool
+public final class PetProfile {
+    public var id: UUID
+    public var name: String
+    public var species: String // "dog", "cat", "hamster"
+    public var breed: String
+    public var dateOfBirth: Date
+    public var weightKg: Double
+    public var isNeutered: Bool
     
     @Relationship(deleteRule: .cascade, inverse: \ActivityLog.pet)
-    var activities: [ActivityLog] = []
+    public var activities: [ActivityLog] = []
     
-    init(id: UUID = UUID(), name: String, species: String, breed: String, dateOfBirth: Date, weightKg: Double, isNeutered: Bool = false) {
+    public init(id: UUID = UUID(), name: String, species: String, breed: String, dateOfBirth: Date, weightKg: Double, isNeutered: Bool = false) {
         self.id = id
         self.name = name
         self.species = species
@@ -30,17 +30,17 @@ final class PetProfile {
     }
     
     // Metabolic Calculations
-    var petSpecies: PetSpecies {
+    public var petSpecies: PetSpecies {
         PetSpecies(rawValue: species.lowercased()) ?? .cat
     }
     
-    var ageInMonths: Int {
+    public var ageInMonths: Int {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.month], from: dateOfBirth, to: Date())
         return components.month ?? 0
     }
     
-    var lifeStage: LifeStage {
+    public var lifeStage: LifeStage {
         if ageInMonths < 12 {
             return .puppyKitten
         } else if ageInMonths < 84 { // 7 years
@@ -50,7 +50,7 @@ final class PetProfile {
         }
     }
     
-    var rmr: Double {
+    public var rmr: Double {
         let constant = species.lowercased() == "hamster" ? 145.0 : 70.0
         return constant * pow(weightKg, 0.75)
     }

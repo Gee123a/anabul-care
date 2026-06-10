@@ -1,106 +1,82 @@
+//
+//  Anabul_careWidget.swift
+//  Anabul-careWidget
+//
+
 import WidgetKit
 import SwiftUI
 import SwiftData
 
+@MainActor
 struct Provider: TimelineProvider {
-
-
-    private var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            PetProfile.self,
-            ActivityLog.self,
-            SpeciesRuleModel.self,
-            ToxicityModel.self,
-            TidbitModel.self
-        ])
-        
-
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
-        let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
-        let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
-        
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            print("Widget: Could not create ModelContainer: \(error)")
-
-            return try! ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-        }
-    }()
-
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), petName: "Luna", completedCount: 3, totalCount: 5, species: "cat")
+        SimpleEntry(date: Date(), petName: "Luna", completedCount: 3, totalCount: 6, species: "cat")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-
-        Task { @MainActor in
-            let entry = fetchRealData(for: Date()) ?? SimpleEntry(date: Date(), petName: "No Pet", completedCount: 0, totalCount: 0, species: "cat")
-            completion(entry)
-        }
+        let entry = fetchLatestEntry()
+        completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        Task { @MainActor in
-            let date = Date()
-            let entry = fetchRealData(for: date) ?? SimpleEntry(date: date, petName: "No Pet", completedCount: 0, totalCount: 0, species: "cat")
-            
-
-            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: date)!
-            let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-            completion(timeline)
-        }
+        let entry = fetchLatestEntry()
+        // Refresh every 15 minutes to stay updated
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
+        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        completion(timeline)
     }
     
-    // This function bridges the SwiftData database into Widget data
-    @MainActor
-    private func fetchRealData(for date: Date) -> SimpleEntry? {
-        let context = ModelContext(sharedModelContainer)
-        let descriptor = FetchDescriptor<PetProfile>(sortBy: [SortDescriptor(\.name)])
+    private func fetchLatestEntry() -> SimpleEntry {
+        let context = ModelContext(Anabul_careWidget.sharedModelContainer)
+        let petDescriptor = FetchDescriptor<PetProfile>(sortBy: [SortDescriptor(\.name)])
         
         do {
-            let pets = try context.fetch(descriptor)
-            
-            // If no pets found, return nil to trigger the "No Pet" state
-            guard let firstPet = pets.first else {
-                print("Widget: No pets found in database.")
-                return nil
+            let pets = try context.fetch(petDescriptor)
+            if let pet = pets.first {
+                let today = Date()
+                let petID = pet.id
+                
+                // Fetch preferences
+                let prefDescriptor = FetchDescriptor<TaskPreference>(
+                    predicate: #Predicate<TaskPreference> { $0.petID == petID }
+                )
+                let preferences = (try? context.fetch(prefDescriptor)) ?? []
+                
+                // Fetch deactivations
+                let deactDescriptor = FetchDescriptor<TaskDeactivation>(
+                    predicate: #Predicate<TaskDeactivation> { $0.petID == petID }
+                )
+                let deactivations = (try? context.fetch(deactDescriptor)) ?? []
+                
+                // Generate today's tasks
+                let tasks = DailyRoutineGenerator.generate(
+                    for: pet,
+                    on: today,
+                    preferences: preferences,
+                    deactivations: deactivations
+                )
+                
+                let totalCount = tasks.count
+                let completedCount = tasks.filter { task in
+                    pet.activities.contains { activity in
+                        activity.type == task.type.rawValue && Calendar.current.isDate(activity.timestamp, inSameDayAs: today)
+                    }
+                }.count
+                
+                return SimpleEntry(
+                    date: today,
+                    petName: pet.name,
+                    completedCount: completedCount,
+                    totalCount: totalCount,
+                    species: pet.species
+                )
             }
-            
-            // Use the same generator as the Dashboard View
-            let routine = DailyRoutineGenerator.generate(for: firstPet)
-            let totalCount = routine.count
-            
-            // Count matching activities logged today
-            // FETCH DIRECTLY from ActivityLog to ensure we catch the latest saves
-            let startOfDay = Calendar.current.startOfDay(for: date)
-            let activityDescriptor = FetchDescriptor<ActivityLog>(
-                predicate: #Predicate<ActivityLog> { log in
-                    log.timestamp >= startOfDay
-                }
-            )
-            let allTodayLogs = (try? context.fetch(activityDescriptor)) ?? []
-            
-            // Filter logs for this specific pet and routine types
-            let completedCount = routine.filter { task in
-                allTodayLogs.contains { log in 
-                    log.pet?.id == firstPet.id && log.type == task.type.rawValue
-                }
-            }.count
-            
-            print("Widget: Fetched data for \(firstPet.name) - \(completedCount)/\(totalCount)")
-            
-            return SimpleEntry(
-                date: date,
-                petName: firstPet.name,
-                completedCount: completedCount,
-                totalCount: totalCount,
-                species: firstPet.species
-            )
         } catch {
-            print("Widget: Fetch error: \(error)")
-            return nil
+            print("Widget failed to fetch pets: \(error)")
         }
+        
+        // Default fallback placeholder if no pets exist in the database yet
+        return SimpleEntry(date: Date(), petName: "Luna", completedCount: 3, totalCount: 6, species: "cat")
     }
 }
 
@@ -118,78 +94,61 @@ struct Anabul_careWidgetEntryView : View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header: Pet Info
-            HStack(spacing: 10) {
+            HStack {
                 ZStack {
                     Circle()
-                        .fill(tangerine.opacity(0.12))
-                        .frame(width: 34, height: 34)
+                        .fill(tangerine.opacity(0.15))
+                        .frame(width: 32, height: 32)
                     Image(systemName: speciesIcon)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14))
                         .foregroundColor(tangerine)
                 }
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(entry.petName)
-                        .font(.system(size: 15, weight: .black, design: .rounded))
-                    Text("DAILY PROGRESS")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .kerning(0.5)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                    Text("Today's Progress")
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
             }
             
             Spacer()
             
-            // Progress Section
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .bottom) {
-                    Text("\(entry.completedCount)")
-                        .font(.system(size: 26, weight: .black, design: .rounded))
-                        + Text("/\(entry.totalCount)")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text(entry.totalCount > 0 ? "\(Int(Double(entry.completedCount)/Double(entry.totalCount)*100))%" : "0%")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundColor(tangerine)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(entry.completedCount)/\(entry.totalCount) tasks")
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundColor(.primary)
                 
-                // Real Dynamic Progress Bar
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
                         Capsule()
                             .fill(Color.gray.opacity(0.1))
-                            .frame(height: 10)
+                            .frame(height: 8)
                         
                         Capsule()
                             .fill(tangerine)
-                            .frame(width: progressWidth(in: geometry.size.width), height: 10)
+                            .frame(width: geometry.size.width * CGFloat(progressFraction), height: 8)
                     }
                 }
-                .frame(height: 10)
+                .frame(height: 8)
             }
             
             Spacer()
             
-            // Visual Prompt
-            Text("Log Activity")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
+            Text("Log activity in app")
+                .font(.system(size: 10, weight: .bold, design: .rounded))
                 .frame(maxWidth: .infinity)
-                .frame(height: 30)
+                .frame(height: 28)
                 .background(tangerine)
+                .foregroundColor(.white)
                 .clipShape(Capsule())
-                .shadow(color: tangerine.opacity(0.3), radius: 4, x: 0, y: 2)
         }
     }
     
-    private func progressWidth(in totalWidth: CGFloat) -> CGFloat {
-        guard entry.totalCount > 0 else { return 0 }
-        let percentage = CGFloat(entry.completedCount) / CGFloat(entry.totalCount)
-        return totalWidth * min(percentage, 1.0)
+    private var progressFraction: Double {
+        guard entry.totalCount > 0 else { return 0.0 }
+        return Double(entry.completedCount) / Double(entry.totalCount)
     }
     
     private var speciesIcon: String {
@@ -204,14 +163,48 @@ struct Anabul_careWidgetEntryView : View {
 
 struct Anabul_careWidget: Widget {
     let kind: String = "Anabul_careWidget"
+    
+    // Shared container configuration to read data from the main app
+    static var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            PetProfile.self,
+            ActivityLog.self,
+            SpeciesRuleModel.self,
+            ToxicityModel.self,
+            TidbitModel.self,
+            TaskPreference.self,
+            TaskDeactivation.self,
+        ])
+        
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare") {
+            let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
+            let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
+            do {
+                return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            } catch {
+                print("Failed to initialize shared ModelContainer: \(error)")
+            }
+        } else {
+            print("App Group container URL not available")
+        }
+
+        // Fallback to in-memory store so that the widget does not crash during gallery discovery
+        do {
+            let fallbackConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            return try ModelContainer(for: schema, configurations: [fallbackConfig])
+        } catch {
+            fatalError("Could not create fallback ModelContainer: \(error)")
+        }
+    }()
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             Anabul_careWidgetEntryView(entry: entry)
                 .containerBackground(Color(red: 0.98, green: 0.98, blue: 0.97), for: .widget)
+                .modelContainer(Self.sharedModelContainer) // Inject the container
         }
-        .configurationDisplayName("Pet Status")
-        .description("Monitor your companion's daily routine.")
+        .configurationDisplayName("Anabul Status")
+        .description("Track your pet's daily progress at a glance.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

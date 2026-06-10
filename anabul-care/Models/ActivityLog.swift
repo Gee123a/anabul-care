@@ -7,16 +7,16 @@ import Foundation
 import SwiftData
 
 @Model
-final class ActivityLog {
-    var id: UUID
-    var timestamp: Date
-    var type: String // "feeding", "grooming", "walk", "play", "hydration"
-    var durationMinutes: Int
-    var detail: String
+public final class ActivityLog {
+    public var id: UUID
+    public var timestamp: Date
+    public var type: String // "feeding", "grooming", "walk", "play", "hydration"
+    public var durationMinutes: Int
+    public var detail: String
     
-    var pet: PetProfile?
+    public var pet: PetProfile?
     
-    init(id: UUID = UUID(), timestamp: Date = Date(), type: String, durationMinutes: Int = 0, detail: String = "") {
+    public init(id: UUID = UUID(), timestamp: Date = Date(), type: String, durationMinutes: Int = 0, detail: String = "") {
         self.id = id
         self.timestamp = timestamp
         self.type = type

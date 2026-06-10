@@ -31,4 +31,33 @@ final class PetRepository: PetRepositoryProtocol {
     func save() throws {
         try context.save()
     }
+    
+    func fetchPreferences(for petID: UUID) throws -> [TaskPreference] {
+        let descriptor = FetchDescriptor<TaskPreference>(
+            predicate: #Predicate<TaskPreference> { $0.petID == petID }
+        )
+        return try context.fetch(descriptor)
+    }
+    
+    func fetchDeactivations(for petID: UUID) throws -> [TaskDeactivation] {
+        let descriptor = FetchDescriptor<TaskDeactivation>(
+            predicate: #Predicate<TaskDeactivation> { $0.petID == petID }
+        )
+        return try context.fetch(descriptor)
+    }
+    
+    func addPreference(_ preference: TaskPreference) throws {
+        context.insert(preference)
+        try save()
+    }
+    
+    func addDeactivation(_ deactivation: TaskDeactivation) throws {
+        context.insert(deactivation)
+        try save()
+    }
+    
+    func deletePreference(_ preference: TaskPreference) throws {
+        context.delete(preference)
+        try save()
+    }
 }

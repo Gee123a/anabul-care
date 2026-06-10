@@ -44,7 +44,7 @@ struct anabul_careApp: App {
             ZStack {
                 if isDatabaseReady {
                     // Replaced with ContentView to enable the Page-Swipe system
-                    ContentView()
+                    ContextualDashboardView(modelContext: ModelContext(sharedModelContainer))
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 } else {
                     LaunchScreenView()

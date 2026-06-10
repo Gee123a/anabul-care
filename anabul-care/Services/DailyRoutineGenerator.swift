@@ -1,17 +1,17 @@
 import Foundation
 import SwiftData
 
-struct DailyTaskItem: Identifiable {
-    let id = UUID()
-    let type: LogType
-    let title: String
-    let timeRecommendation: String
-    let detail: String
-    let icon: String
+public struct DailyTaskItem: Identifiable {
+    public let id = UUID()
+    public let type: LogType
+    public let title: String
+    public let timeRecommendation: String
+    public let detail: String
+    public let icon: String
 }
 
-struct DailyRoutineGenerator {
-    static func generate(for pet: PetProfile, on date: Date = Date(), preferences: [TaskPreference] = [], deactivations: [TaskDeactivation] = []) -> [DailyTaskItem] {
+public struct DailyRoutineGenerator {
+    public static func generate(for pet: PetProfile, on date: Date = Date(), preferences: [TaskPreference] = [], deactivations: [TaskDeactivation] = []) -> [DailyTaskItem] {
         let engine = RoutineRuleEngine.shared
         let species = pet.species.lowercased()
         let breed = pet.breed
@@ -64,6 +64,7 @@ struct DailyRoutineGenerator {
         // 5. Sort tasks by time
         return tasks.sorted { compareTimes($0.timeRecommendation, $1.timeRecommendation) }
     }
+
     private static func updatedTime(for task: DailyTaskItem, newTime: String) -> DailyTaskItem {
         DailyTaskItem(
             type: task.type,

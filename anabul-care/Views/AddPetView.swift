@@ -5,31 +5,13 @@ struct AddPetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    var petToEdit: PetProfile? = nil
+    @State private var viewModel: AddPetViewModel
     
-    @State private var name: String = ""
-    @State private var species: PetSpecies = .dog
-    @State private var breed: String = ""
-    @State private var customBreed: String = ""
-    @State private var dateOfBirth: Date = Date()
-    @State private var weightString: String = ""
-    @State private var isNeutered: Bool = false
-    
-    init(petToEdit: PetProfile? = nil) {
-        self.petToEdit = petToEdit
-        
-        if let pet = petToEdit {
-            _name = State(initialValue: pet.name)
-            _species = State(initialValue: PetSpecies(rawValue: pet.species) ?? .dog)
-            _dateOfBirth = State(initialValue: pet.dateOfBirth)
-            _weightString = State(initialValue: String(format: "%.1f", pet.weightKg))
-            _isNeutered = State(initialValue: pet.isNeutered)
-            // Note: breed is handled in loadBreeds to match registry
-        }
+    init(petToEdit: PetProfile? = nil, modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: AddPetViewModel(petToEdit: petToEdit, repository: repository))
     }
     
-    @State private var breedsRegistry: [String: [String]] = [:]
-    @State private var isSaved = false
     @FocusState private var focusedField: Field?
     
     enum Field {
@@ -39,19 +21,6 @@ struct AddPetView: View {
     // Design Tokens
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     private let bgApp = Color(red: 0.98, green: 0.98, blue: 0.97)
-    
-    private var parsedWeight: Double {
-        Double(weightString.replacingOccurrences(of: ",", with: ".")) ?? 0.0
-    }
-    
-    private var currentBreeds: [String] {
-        breedsRegistry[species.rawValue] ?? []
-    }
-    
-    private var isFormValid: Bool {
-        let breedValid = breed == "Other (Type manually)" ? !customBreed.isEmpty : !breed.isEmpty
-        return !name.isEmpty && parsedWeight > 0 && breedValid
-    }
     
     var body: some View {
         NavigationStack {
@@ -81,11 +50,11 @@ struct AddPetView: View {
                             .padding(.top, 20)
                             
                             VStack(spacing: 4) {
-                                Text(name.isEmpty ? (petToEdit == nil ? "New Companion" : "Edit Profile") : "Hi, \(name)!")
+                                Text(viewModel.name.isEmpty ? (viewModel.petToEdit == nil ? "New Companion" : "Edit Profile") : "Hi, \(viewModel.name)!")
                                     .font(.system(size: 24, weight: .black, design: .rounded))
                                     .foregroundColor(.primary)
                                 
-                                Text(petToEdit == nil ? "Let's build a health profile" : "Update health profile")
+                                Text(viewModel.petToEdit == nil ? "Let's build a health profile" : "Update health profile")
                                     .font(.system(size: 15, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
@@ -96,7 +65,7 @@ struct AddPetView: View {
                             PremiumTextField(
                                 title: "Nama",
                                 placeholder: "Siapa namanya?",
-                                text: $name,
+                                text: $viewModel.name,
                                 icon: "tag.fill",
                                 isFocused: focusedField == .name,
                                 accentColor: tangerine
@@ -109,16 +78,15 @@ struct AddPetView: View {
                                     .foregroundColor(.secondary)
                                     .padding(.leading, 4)
                                 
-                                Picker("Spesies", selection: $species) {
+                                Picker("Spesies", selection: $viewModel.species) {
                                     ForEach(PetSpecies.allCases, id: \.self) { species in
                                         Label(species.rawValue.capitalized, systemImage: iconForSpecies(species)).tag(species)
                                     }
                                 }
                                 .pickerStyle(.segmented)
                                 .scaleEffect(1.02)
-                                .onChange(of: species) {
-                                    // Reset breed selection when species changes
-                                    breed = currentBreeds.first ?? ""
+                                .onChange(of: viewModel.species) { oldValue, newValue in
+                                    viewModel.updateSpecies(newValue)
                                 }
                             }
                             
@@ -129,20 +97,20 @@ struct AddPetView: View {
                                     .padding(.leading, 4)
                                 
                                 Menu {
-                                    Picker("Breed", selection: $breed) {
-                                        ForEach(currentBreeds, id: \.self) { b in
+                                    Picker("Breed", selection: $viewModel.breed) {
+                                        ForEach(viewModel.currentBreeds, id: \.self) { b in
                                             Text(b).tag(b)
                                         }
                                     }
                                 } label: {
                                     HStack {
                                         Image(systemName: "pawprint.circle.fill")
-                                            .foregroundColor(breed.isEmpty ? .secondary.opacity(0.8) : tangerine)
+                                            .foregroundColor(viewModel.breed.isEmpty ? .secondary.opacity(0.8) : tangerine)
                                             .frame(width: 20)
                                         
-                                        Text(breed.isEmpty ? "Pilih ras..." : breed)
+                                        Text(viewModel.breed.isEmpty ? "Pilih ras..." : viewModel.breed)
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(breed.isEmpty ? .secondary : .primary)
+                                            .foregroundColor(viewModel.breed.isEmpty ? .secondary : .primary)
                                         
                                         Spacer()
                                         
@@ -157,11 +125,11 @@ struct AddPetView: View {
                                 }
                             }
                             
-                            if breed == "Other (Type manually)" {
+                            if viewModel.breed == "Other (Type manually)" {
                                 PremiumTextField(
                                     title: "Custom Breed",
                                     placeholder: "Type breed manually...",
-                                    text: $customBreed,
+                                    text: $viewModel.customBreed,
                                     icon: "pencil.line",
                                     isFocused: focusedField == .customBreed,
                                     accentColor: tangerine
@@ -177,7 +145,7 @@ struct AddPetView: View {
                         
                         // 3. PHYSICAL DETAILS CARD
                         VStack(spacing: 20) {
-                            DatePicker("Tanggal Lahir", selection: $dateOfBirth, in: ...Date(), displayedComponents: .date)
+                            DatePicker("Tanggal Lahir", selection: $viewModel.dateOfBirth, in: ...Date(), displayedComponents: .date)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .tint(tangerine)
                             
@@ -190,7 +158,7 @@ struct AddPetView: View {
                                 
                                 Spacer()
                                 
-                                TextField("0.0", text: $weightString)
+                                TextField("0.0", text: $viewModel.weightString)
                                     .keyboardType(.decimalPad)
                                     .multilineTextAlignment(.trailing)
                                     .font(.system(size: 18, weight: .black, design: .rounded))
@@ -203,7 +171,7 @@ struct AddPetView: View {
                             
                             Divider()
                             
-                            Toggle(isOn: $isNeutered) {
+                            Toggle(isOn: $viewModel.isNeutered) {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Sudah Steril")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -220,20 +188,20 @@ struct AddPetView: View {
                         .shadow(color: .black.opacity(0.03), radius: 10, x: 0, y: 5)
                         
                         // 4. ACTION BUTTON
-                        Button(action: savePet) {
+                        Button(action: viewModel.savePet) {
                             HStack {
-                                Text(petToEdit == nil ? "Simpan Profil" : "Perbarui Profil")
+                                Text(viewModel.petToEdit == nil ? "Simpan Profil" : "Perbarui Profil")
                                 Image(systemName: "checkmark.seal.fill")
                             }
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 60)
-                            .background(isFormValid ? tangerine : Color.gray.opacity(0.3))
+                            .background(viewModel.isFormValid ? tangerine : Color.gray.opacity(0.3))
                             .clipShape(Capsule())
-                            .shadow(color: isFormValid ? tangerine.opacity(0.3) : .clear, radius: 12, x: 0, y: 6)
+                            .shadow(color: viewModel.isFormValid ? tangerine.opacity(0.3) : .clear, radius: 12, x: 0, y: 6)
                         }
-                        .disabled(!isFormValid)
+                        .disabled(!viewModel.isFormValid)
                         .buttonStyle(BouncyButtonStyle())
                         .padding(.top, 8)
                         
@@ -242,7 +210,7 @@ struct AddPetView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle(petToEdit == nil ? "Tambah Anabul" : "Edit Anabul")
+            .navigationTitle(viewModel.petToEdit == nil ? "Tambah Anabul" : "Edit Anabul")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -252,12 +220,18 @@ struct AddPetView: View {
                 }
             }
         }
-        .sensoryFeedback(.success, trigger: isSaved)
-        .onAppear(perform: loadBreeds)
+        .sensoryFeedback(.success, trigger: viewModel.isSaved)
+        .onChange(of: viewModel.isSaved) { oldValue, newValue in
+            if newValue {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                }
+            }
+        }
     }
     
     private var speciesIcon: String {
-        switch species {
+        switch viewModel.species {
         case .dog: return "dog.fill"
         case .cat: return "cat.fill"
         case .hamster: return "hare.fill"
@@ -269,69 +243,6 @@ struct AddPetView: View {
         case .dog: return "dog"
         case .cat: return "cat"
         case .hamster: return "hare"
-        }
-    }
-    
-    private func loadBreeds() {
-        guard let url = Bundle.main.url(forResource: "BreedRegistry", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let registry = try? JSONDecoder().decode([String: [String]].self, from: data) else {
-            return
-        }
-        self.breedsRegistry = registry
-        
-        if let pet = petToEdit {
-            // Edit Mode: Populate all fields
-            name = pet.name
-            if let matchedSpecies = PetSpecies(rawValue: pet.species) {
-                species = matchedSpecies
-            }
-            dateOfBirth = pet.dateOfBirth
-            weightString = String(format: "%.1f", pet.weightKg)
-            isNeutered = pet.isNeutered
-            
-            // Handle Breed Population
-            let availableBreeds = registry[pet.species] ?? []
-            if availableBreeds.contains(pet.breed) {
-                breed = pet.breed
-            } else {
-                breed = "Other (Type manually)"
-                customBreed = pet.breed
-            }
-        } else if breed.isEmpty {
-            // New Pet Mode: Default selection
-            breed = registry[species.rawValue]?.first ?? ""
-        }
-    }
-    
-    private func savePet() {
-        let finalBreed = (breed == "Other (Type manually)") ? customBreed : breed
-        
-        if let pet = petToEdit {
-            // UPDATE EXISTING PET
-            pet.name = name
-            pet.species = species.rawValue
-            pet.breed = finalBreed
-            pet.dateOfBirth = dateOfBirth
-            pet.weightKg = parsedWeight
-            pet.isNeutered = isNeutered
-        } else {
-            // CREATE NEW PET
-            let newPet = PetProfile(
-                name: name,
-                species: species.rawValue,
-                breed: finalBreed,
-                dateOfBirth: dateOfBirth,
-                weightKg: parsedWeight,
-                isNeutered: isNeutered
-            )
-            modelContext.insert(newPet)
-        }
-        
-        isSaved = true
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            dismiss()
         }
     }
 }
@@ -383,6 +294,7 @@ struct BouncyButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    AddPetView()
-        .modelContainer(for: PetProfile.self, inMemory: true)
+    let container = try! ModelContainer(for: PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    AddPetView(modelContext: container.mainContext)
+        .modelContainer(container)
 }

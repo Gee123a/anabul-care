@@ -1,14 +1,14 @@
 import Foundation
 import SwiftData
 
-class HabitLearningService {
-    static let shared = HabitLearningService()
+public class HabitLearningService {
+    public static let shared = HabitLearningService()
     
     private init() {}
     
     /// Analyzes logs for a specific pet and task type to find a "habitual" time.
     /// Returns a time string if a habit is detected, otherwise nil.
-    func detectHabit(for pet: PetProfile, taskType: String) -> String? {
+    public func detectHabit(for pet: PetProfile, taskType: String) -> String? {
         let logs = pet.activities.filter { $0.type == taskType }
         
         // We need at least 3 logs to establish a habit

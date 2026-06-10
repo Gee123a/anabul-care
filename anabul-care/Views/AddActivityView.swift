@@ -5,27 +5,28 @@ struct AddActivityView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    let pet: PetProfile
+    @State private var viewModel: AddActivityViewModel
     
-    @State private var logType: LogType = .feeding
-    @State private var durationMinutes: Int = 0
-    @State private var details: String = ""
+    init(pet: PetProfile, modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: AddActivityViewModel(pet: pet, repository: repository))
+    }
     
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Jenis Aktivitas", selection: $logType) {
+                Picker("Jenis Aktivitas", selection: $viewModel.logType) {
                     ForEach(LogType.allCases, id: \.self) { type in
                         Text(type.rawValue.capitalized).tag(type)
                     }
                 }
                 
-                if logType == .walk || logType == .play {
-                    Stepper("Durasi: \(durationMinutes) menit", value: $durationMinutes, in: 0...120, step: 5)
+                if viewModel.logType == .walk || viewModel.logType == .play {
+                    Stepper("Durasi: \(viewModel.durationMinutes) menit", value: $viewModel.durationMinutes, in: 0...120, step: 5)
                 }
                 
                 Section(header: Text("Catatan")) {
-                    TextField("Detail (opsional)", text: $details)
+                    TextField("Detail (opsional)", text: $viewModel.details)
                 }
             }
             .navigationTitle("Catat Aktivitas")
@@ -37,15 +38,7 @@ struct AddActivityView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Simpan") {
-                        let newLog = ActivityLog(
-                            timestamp: Date(), type: logType.rawValue,
-                            durationMinutes: durationMinutes,
-                            detail: details
-                        )
-                        newLog.pet = pet
-                        modelContext.insert(newLog)
-                        pet.activities.append(newLog)
-                        
+                        viewModel.saveActivity()
                         dismiss()
                     }
                 }

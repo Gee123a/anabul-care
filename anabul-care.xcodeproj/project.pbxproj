@@ -118,6 +118,7 @@
 				Models/TaskPreference.swift,
 				Models/TidbitModel.swift,
 				Models/ToxicityModel.swift,
+				Resources/MetadataRegistry.json,
 				Services/DailyRoutineGenerator.swift,
 				Services/DataManager.swift,
 				Services/HabitLearningService.swift,
@@ -140,6 +141,7 @@
 				Models/TaskPreference.swift,
 				Models/TidbitModel.swift,
 				Models/ToxicityModel.swift,
+				Resources/MetadataRegistry.json,
 				Services/DailyRoutineGenerator.swift,
 				Services/DataManager.swift,
 				Services/HabitLearningService.swift,
@@ -947,6 +949,7 @@
 				INFOPLIST_FILE = "Anabul-careWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Anabul-careWidget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -978,6 +981,7 @@
 				INFOPLIST_FILE = "Anabul-careWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Anabul-careWidget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -5,27 +5,14 @@ struct EditTaskTimeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    let pet: PetProfile
-    let task: DailyTaskItem
-    let date: Date
-    
-    @Query private var allPreferences: [TaskPreference]
-    @Query private var allDeactivations: [TaskDeactivation]
-    @State private var selectedTime: Date = Date()
+    @State private var viewModel: EditTaskViewModel
     @State private var showingRemoveConfirmation = false
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     
-    init(pet: PetProfile, task: DailyTaskItem, date: Date) {
-        self.pet = pet
-        self.task = task
-        self.date = date
-        
-        // Initializing the state from existing preference if it exists
-        let f = DateFormatter()
-        f.dateFormat = "h:mm a"
-        let initialDate = f.date(from: task.timeRecommendation) ?? Date()
-        _selectedTime = State(initialValue: initialDate)
+    init(pet: PetProfile, task: DailyTaskItem, date: Date, modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: EditTaskViewModel(pet: pet, task: task, date: date, repository: repository))
     }
     
     var body: some View {
@@ -37,13 +24,13 @@ struct EditTaskTimeView: View {
                         Circle()
                             .fill(tangerine.opacity(0.12))
                             .frame(width: 80, height: 80)
-                        Image(systemName: task.icon)
+                        Image(systemName: viewModel.task.icon)
                             .font(.system(size: 32))
                             .foregroundColor(tangerine)
                     }
                     
                     VStack(spacing: 4) {
-                        Text("Manage \(task.title)")
+                        Text("Manage \(viewModel.task.title)")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                         Text("Customize or remove this task.")
                             .font(.system(size: 14))
@@ -59,7 +46,7 @@ struct EditTaskTimeView: View {
                         .foregroundColor(.secondary)
                         .padding(.leading, 8)
                     
-                    DatePicker("Preferred Time", selection: $selectedTime, displayedComponents: .hourAndMinute)
+                    DatePicker("Preferred Time", selection: $viewModel.selectedTime, displayedComponents: .hourAndMinute)
                         .datePickerStyle(.wheel)
                         .labelsHidden()
                         .frame(maxWidth: .infinity)
@@ -74,7 +61,10 @@ struct EditTaskTimeView: View {
                 
                 // Action Buttons
                 VStack(spacing: 12) {
-                    Button(action: savePreference) {
+                    Button(action: {
+                        viewModel.savePreference()
+                        dismiss()
+                    }) {
                         Text("Save Preference")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
@@ -85,7 +75,10 @@ struct EditTaskTimeView: View {
                     }
                     
                     HStack(spacing: 16) {
-                        Button(action: resetToDefault) {
+                        Button(action: {
+                            viewModel.resetToDefault()
+                            dismiss()
+                        }) {
                             Text("Reset Time")
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.secondary)
@@ -116,58 +109,18 @@ struct EditTaskTimeView: View {
                 }
             }
             .confirmationDialog("Remove Task", isPresented: $showingRemoveConfirmation, titleVisibility: .visible) {
-                Button("Remove for Today Only") { removeTask(permanent: false) }
-                Button("Remove Permanently", role: .destructive) { removeTask(permanent: true) }
+                Button("Remove for Today Only") { 
+                    viewModel.removeTask(permanent: false)
+                    dismiss()
+                }
+                Button("Remove Permanently", role: .destructive) { 
+                    viewModel.removeTask(permanent: true)
+                    dismiss()
+                }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text(impactWarning)
+                Text(viewModel.impactWarning)
             }
         }
-    }
-    
-    private var impactWarning: String {
-        let base = "Removing this task might impact \(pet.name)'s health. "
-        switch task.type {
-        case .feeding: return base + "Consistent feeding is crucial for metabolism and energy levels."
-        case .walk, .play: return base + "Lack of exercise can lead to obesity and behavioral issues."
-        case .grooming: return base + "Regular grooming prevents skin issues and monitors for parasites."
-        case .hydration: return base + "Hydration is essential for kidney function and overall health."
-        }
-    }
-    
-    private func savePreference() {
-        let f = DateFormatter()
-        f.dateFormat = "h:mm a"
-        let timeString = f.string(from: selectedTime)
-        
-        if let existing = allPreferences.first(where: { $0.petID == pet.id && $0.taskType == task.type.rawValue }) {
-            existing.preferredTime = timeString
-            existing.isManualOverride = true
-        } else {
-            let newPref = TaskPreference(petID: pet.id, taskType: task.type.rawValue, preferredTime: timeString, isManualOverride: true)
-            modelContext.insert(newPref)
-        }
-        
-        try? modelContext.save()
-        dismiss()
-    }
-    
-    private func resetToDefault() {
-        if let existing = allPreferences.first(where: { $0.petID == pet.id && $0.taskType == task.type.rawValue }) {
-            modelContext.delete(existing)
-            try? modelContext.save()
-        }
-        dismiss()
-    }
-    
-    private func removeTask(permanent: Bool) {
-        let deactivation = TaskDeactivation(
-            petID: pet.id,
-            taskType: task.type.rawValue,
-            date: permanent ? nil : date
-        )
-        modelContext.insert(deactivation)
-        try? modelContext.save()
-        dismiss()
     }
 }

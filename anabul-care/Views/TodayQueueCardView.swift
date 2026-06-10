@@ -10,151 +10,42 @@ import SwiftData
 import WidgetKit
 
 struct TodayQueueCardView: View {
-    @Environment(\.modelContext) private var modelContext
-    let pet: PetProfile
+    @State private var viewModel: RoutineViewModel
+    private let modelContext: ModelContext
     
-    @Query private var allPreferences: [TaskPreference]
-    @Query private var allDeactivations: [TaskDeactivation]
+    init(pet: PetProfile, modelContext: ModelContext) {
+        self.modelContext = modelContext
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: RoutineViewModel(pet: pet, repository: repository, modelContext: modelContext))
+    }
     
     // Design Tokens
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255) // #FF6B33
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255) // #7BD3B3
     private let profoundAccent = Color(red: 32/255, green: 32/255, blue: 34/255) // Deep, profound dark color
     
-    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     @State private var taskToEdit: DailyTaskItem?
     
     // Date Helpers
     private var days: [Date] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        return ((-15)...15).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
-    }
-    
-    private var petPreferences: [TaskPreference] {
-        allPreferences.filter { $0.petID == pet.id }
-    }
-    
-    private var petDeactivations: [TaskDeactivation] {
-        allDeactivations.filter { $0.petID == pet.id }
-    }
-    
-    private var dailyTasks: [DailyTaskItem] {
-        DailyRoutineGenerator.generate(
-            for: pet, 
-            on: selectedDate, 
-            preferences: petPreferences, 
-            deactivations: petDeactivations
-        )
+        var list: [Date] = []
+        for offset in -15...15 {
+            if let date = calendar.date(byAdding: .day, value: offset, to: today) {
+                list.append(date)
+            }
+        }
+        return list
     }
     
     var body: some View {
         HStack(spacing: 0) {
             // Left: Vertical Date Strip
-            VStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("CALENDAR")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .kerning(0.6)
-                        .foregroundColor(profoundAccent)
-                        .textCase(.uppercase)
-                    
-                    Text(monthYearString(for: selectedDate))
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .foregroundColor(tangerine)
-                }
-                .padding(.top, 12)
-                .padding(.horizontal, 12)
-                .padding(.bottom, 8)
-                
-                ScrollViewReader { proxy in
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 6) {
-                            ForEach(days, id: \.self) { date in
-                                DateButton(date: date, isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate), isToday: Calendar.current.isDateInToday(date)) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        selectedDate = date
-                                    }
-                                }
-                                .id(date)
-                            }
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 12)
-                    }
-                    .onAppear {
-                        // Delay slightly to ensure layout is ready before scrolling
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation {
-                                proxy.scrollTo(Calendar.current.startOfDay(for: Date()), anchor: .center)
-                            }
-                        }
-                    }
-                }
-                
-                // Completion Stats
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(mint)
-                        .frame(width: 6, height: 6)
-                    Text("\(completedCount(for: selectedDate))/\(dailyTasks.count)")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundColor(.primary)
-                }
-                .padding(6)
-                .background(Color.white.opacity(0.7))
-                .clipShape(Capsule())
-                .padding(.bottom, 12)
-            }
-            .frame(width: 112)
-            .background(
-                LinearGradient(
-                    stops: [
-                        .init(color: tangerine.opacity(0.10), location: 0),
-                        .init(color: tangerine.opacity(0.02), location: 1)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .overlay(
-                Rectangle()
-                    .fill(Color.black.opacity(0.08))
-                    .frame(width: 0.5)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            )
+            dateStrip
             
             // Right: Event List
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Text(Calendar.current.isDateInToday(selectedDate) ? "Today's Queue" : longDateString(for: selectedDate))
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .kerning(-0.2)
-                    
-                    Spacer()
-                    
-                    Text("\(dailyTasks.count) items")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary.opacity(0.8))
-                }
-                .padding(.top, 14)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-                
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 6) {
-                        ForEach(dailyTasks) { task in
-                            QueueRow(pet: pet, date: selectedDate, type: task.type, title: task.title, time: task.timeRecommendation, detail: task.detail, icon: task.icon)
-                                .contentShape(Rectangle())
-                                .onLongPressGesture(minimumDuration: 0.5) {
-                                    taskToEdit = task
-                                }
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
-                }
-            }
+            eventList
         }
         .frame(height: 340)
         .background(
@@ -168,27 +59,116 @@ struct TodayQueueCardView: View {
         )
         .shadow(color: Color.black.opacity(0.1), radius: 36, x: 0, y: 16)
         .sheet(item: $taskToEdit) { task in
-            EditTaskTimeView(pet: pet, task: task, date: selectedDate)
+            EditTaskTimeView(pet: viewModel.pet, task: task, date: viewModel.selectedDate, modelContext: modelContext)
         }
     }
-
     
-    private func completedCount(for date: Date) -> Int {
-        dailyTasks.filter { task in 
-            pet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
-        }.count
+    @ViewBuilder
+    private var dateStrip: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("CALENDAR")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .kerning(0.6)
+                    .foregroundColor(profoundAccent)
+                    .textCase(.uppercase)
+                
+                Text(viewModel.monthYearString)
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .foregroundColor(tangerine)
+            }
+            .padding(.top, 12)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+            
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 6) {
+                        ForEach(days, id: \.self) { date in
+                            DateButton(date: date, isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate), isToday: Calendar.current.isDateInToday(date)) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    viewModel.selectDate(date)
+                                }
+                            }
+                            .id(date)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 12)
+                }
+                .onAppear {
+                    // Delay slightly to ensure layout is ready before scrolling
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation {
+                            proxy.scrollTo(Calendar.current.startOfDay(for: Date()), anchor: .center)
+                        }
+                    }
+                }
+            }
+            
+            // Completion Stats
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(mint)
+                    .frame(width: 6, height: 6)
+                Text("\(viewModel.completedCount(for: viewModel.selectedDate))/\(viewModel.dailyTasks.count)")
+                    .font(.system(size: 8, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
+            }
+            .padding(6)
+            .background(Color.white.opacity(0.7))
+            .clipShape(Capsule())
+            .padding(.bottom, 12)
+        }
+        .frame(width: 112)
+        .background(
+            LinearGradient(
+                stops: [
+                    .init(color: tangerine.opacity(0.10), location: 0),
+                    .init(color: tangerine.opacity(0.02), location: 1)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .overlay(
+            Rectangle()
+                .fill(Color.black.opacity(0.08))
+                .frame(width: 0.5)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        )
     }
     
-    private func monthYearString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: date)
-    }
-    
-    private func longDateString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d"
-        return formatter.string(from: date)
+    @ViewBuilder
+    private var eventList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(Calendar.current.isDateInToday(viewModel.selectedDate) ? "Today's Queue" : viewModel.longDateString)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .kerning(-0.2)
+                
+                Spacer()
+                
+                Text("\(viewModel.dailyTasks.count) items")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary.opacity(0.8))
+            }
+            .padding(.top, 14)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
+            
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 6) {
+                    ForEach(viewModel.dailyTasks) { task in
+                        QueueRow(viewModel: viewModel, task: task) {
+                            taskToEdit = task
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+            }
+        }
     }
 }
 
@@ -244,20 +224,15 @@ struct DateButton: View {
 }
 
 struct QueueRow: View {
-    @Environment(\.modelContext) private var modelContext
-    let pet: PetProfile
-    let date: Date
-    let type: LogType
-    let title: String
-    let time: String
-    let detail: String
-    let icon: String
+    var viewModel: RoutineViewModel
+    let task: DailyTaskItem
+    var onEdit: () -> Void
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255)
     
     var isLogged: Bool {
-        pet.activities.contains { $0.type == type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
+        viewModel.isTaskCompleted(task, on: viewModel.selectedDate)
     }
     
     var body: some View {
@@ -267,20 +242,20 @@ struct QueueRow: View {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(isLogged ? mint.opacity(0.18) : tangerine.opacity(0.12))
                     .frame(width: 32, height: 32)
-                Image(systemName: icon)
+                Image(systemName: task.icon)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(isLogged ? mint : tangerine)
             }
             
             // Text
             VStack(alignment: .leading, spacing: 1) {
-                Text(title)
+                Text(task.title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                     .strikethrough(isLogged)
                     .opacity(isLogged ? 0.55 : 1)
                 
-                Text("\(time) · \(detail)")
+                Text("\(task.timeRecommendation) · \(task.detail)")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary.opacity(0.6))
                     .opacity(isLogged ? 0.55 : 1)
@@ -288,7 +263,7 @@ struct QueueRow: View {
             
             Spacer()
             
-            // Checkmark Toggle
+            // Checkmark Visual (Not a button anymore)
             ZStack {
                 Circle()
                     .stroke(isLogged ? Color.clear : Color.black.opacity(0.28), lineWidth: 1.5)
@@ -305,6 +280,7 @@ struct QueueRow: View {
             }
         }
         .padding(8)
+        .contentShape(Rectangle()) // Make the whole row tappable
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(isLogged ? mint.opacity(0.12) : Color.white.opacity(0.6))
@@ -314,35 +290,12 @@ struct QueueRow: View {
                 .stroke(Color.black.opacity(0.06), lineWidth: 1)
         )
         .onTapGesture {
-            toggleActivity()
-        }
-    }
-    
-    private func toggleActivity() {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-            if isLogged {
-                if let index = pet.activities.firstIndex(where: { $0.type == type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) }) {
-                    let logToDelete = pet.activities[index]
-                    modelContext.delete(logToDelete)
-                    pet.activities.remove(at: index)
-                }
-            } else {
-                let newLog = ActivityLog(
-                    timestamp: date,
-                    type: type.rawValue,
-                    durationMinutes: 15,
-                    detail: detail
-                )
-                newLog.pet = pet
-                modelContext.insert(newLog)
-                pet.activities.append(newLog)
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                viewModel.toggleTask(task, on: viewModel.selectedDate)
             }
-            
-            // 1. PERSIST TO DISK: The widget reads from the file, not the app's memory!
-            try? modelContext.save()
-            
-            // 2. SIGNAL WIDGET: Tell iOS to redraw the widget with the new file data
-            WidgetCenter.shared.reloadAllTimelines()
+        }
+        .onLongPressGesture(minimumDuration: 0.5) {
+            onEdit()
         }
     }
 }
