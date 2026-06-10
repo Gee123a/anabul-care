@@ -48,6 +48,7 @@ struct anabul_careApp: App {
         WindowGroup {
             ZStack {
                 if isDatabaseReady {
+                    // Replaced with ContentView to enable the Page-Swipe system
                     ContextualDashboardView(modelContext: sharedModelContainer.mainContext)
                 } else {
                     LaunchScreenView()
@@ -75,8 +76,6 @@ struct anabul_careApp: App {
     }
 }
 
-<<<<<<< HEAD
-=======
 // Simple but elegant Launch Screen to mask the SwiftData initialization
 struct LaunchScreenView: View {
     var body: some View {
@@ -107,4 +106,3 @@ struct LaunchScreenView: View {
         .background(Color(red: 0.98, green: 0.98, blue: 0.97))
     }
 }
->>>>>>> niki
