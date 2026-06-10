@@ -2,30 +2,30 @@ import Foundation
 import SwiftData
 
 // Move structs outside the actor and mark them as Sendable to resolve Swift 6 concurrency warnings
-struct ToxicHazard: Codable, Sendable {
-    let keyword_id: String
-    let danger_level: String
-    let alternative_id: String
+public struct ToxicHazard: Codable, Sendable {
+    public let keyword_id: String
+    public let danger_level: String
+    public let alternative_id: String
 }
 
-struct SpeciesRule: Codable, Sendable {
-    let species: String
-    let rer_constant: Int
-    let heat_threshold_celsius: Double
-    let toxic_hazards: [ToxicHazard]
+public struct SpeciesRule: Codable, Sendable {
+    public let species: String
+    public let rer_constant: Int
+    public let heat_threshold_celsius: Double
+    public let toxic_hazards: [ToxicHazard]
 }
 
-struct BehavioralTidbit: Codable, Sendable {
-    let id: String
-    let species_target: String
-    let title_id: String
-    let body_id: String
-    let citation: String
+public struct BehavioralTidbit: Codable, Sendable {
+    public let id: String
+    public let species_target: String
+    public let title_id: String
+    public let body_id: String
+    public let citation: String
 }
 
-struct MetadataRegistry: Codable, Sendable {
-    let species_rules: [SpeciesRule]
-    let behavioral_tidbits: [BehavioralTidbit]
+public struct MetadataRegistry: Codable, Sendable {
+    public let species_rules: [SpeciesRule]
+    public let behavioral_tidbits: [BehavioralTidbit]
 }
 
 struct MasterToxicItem: Codable, Sendable {
@@ -115,6 +115,24 @@ actor DataManager {
             print("Successfully seeded all data from JSONs.")
         } catch {
             print("Failed to seed Data: \(error)")
+        }
+    }
+    
+    // MARK: - Fun Facts Loader
+    func loadFunFacts() -> [String: [FunFactModel]] {
+        guard let url = Bundle.main.url(forResource: "BreedFunFacts", withExtension: "json") else {
+            print("Could not find BreedFunFacts.json")
+            return [:]
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            let factsDictionary = try decoder.decode([String: [FunFactModel]].self, from: data)
+            return factsDictionary
+        } catch {
+            print("Failed to decode fun facts: \(error)")
+            return [:]
         }
     }
 }

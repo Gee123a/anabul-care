@@ -2,17 +2,17 @@ import SwiftUI
 import SwiftData
 
 struct ToxicityLookupView: View {
-    @Environment(\.dismiss) private var dismiss // Added to handle closing the modal
-    @Query(sort: \ToxicityModel.keyword) private var hazards: [ToxicityModel]
-    @StateObject private var viewModel = ToxicityViewModel()
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel: ToxicityViewModel
     
-    init(initialQuery: String = "") {
-        _viewModel = StateObject(wrappedValue: ToxicityViewModel(initialText: initialQuery))
+    init(initialQuery: String = "", modelContext: ModelContext) {
+        _viewModel = State(initialValue: ToxicityViewModel(initialText: initialQuery, modelContext: modelContext))
     }
     
     var body: some View {
         NavigationStack {
-            List(viewModel.filterHazards(hazards)) { hazard in
+            List(viewModel.filteredHazards) { hazard in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -74,6 +74,7 @@ struct ToxicityLookupView: View {
 }
 
 #Preview {
-    ToxicityLookupView()
-        .modelContainer(for: ToxicityModel.self, inMemory: true)
+    let container = try! ModelContainer(for: ToxicityModel.self, SpeciesRuleModel.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    ToxicityLookupView(modelContext: container.mainContext)
+        .modelContainer(container)
 }

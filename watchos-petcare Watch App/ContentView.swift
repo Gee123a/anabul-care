@@ -3,13 +3,18 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \PetProfile.name) private var pets: [PetProfile]
+    @State private var viewModel: WatchViewModel
+    
+    init(modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: WatchViewModel(repository: repository, modelContext: modelContext))
+    }
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     
     var body: some View {
         NavigationStack {
-            if pets.isEmpty {
+            if viewModel.pets.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "pawprint.circle.fill")
                         .font(.system(size: 40))
@@ -24,12 +29,12 @@ struct ContentView: View {
                 .navigationTitle("Anabul")
             } else {
                 List {
-                    ForEach(pets) { pet in
+                    ForEach(viewModel.pets) { pet in
                         NavigationLink {
-                            WatchPetDashboardView(pet: pet)
+                            WatchPetDashboardView(viewModel: viewModel, pet: pet)
                         } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: iconForSpecies(pet.species))
+                                Image(systemName: viewModel.iconForSpecies(pet.species))
                                     .foregroundColor(tangerine)
                                     .font(.system(size: 16, weight: .bold))
                                 
@@ -45,29 +50,17 @@ struct ContentView: View {
                 .listStyle(.carousel)
             }
         }
-    }
-    
-    private func iconForSpecies(_ species: String) -> String {
-        switch species.lowercased() {
-        case "dog": return "dog.fill"
-        case "cat": return "cat.fill"
-        case "hamster": return "hare.fill"
-        default: return "pawprint.fill"
+        .onAppear {
+            viewModel.fetchPets()
         }
     }
 }
 
 struct WatchPetDashboardView: View {
-    @Environment(\.modelContext) private var modelContext
+    var viewModel: WatchViewModel
     let pet: PetProfile
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
-    private let mint = Color(red: 123/255, green: 211/255, blue: 179/255)
-    
-    // We get the dynamic tasks for this pet
-    private var dailyTasks: [DailyTaskItem] {
-        DailyRoutineGenerator.generate(for: pet)
-    }
     
     var body: some View {
         ScrollView {
@@ -76,7 +69,7 @@ struct WatchPetDashboardView: View {
                 // Progress Header
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("\(completedCount)/\(dailyTasks.count)")
+                        Text("\(viewModel.completedCount(for: pet))/\(viewModel.dailyTasks.count)")
                             .font(.system(size: 24, weight: .black, design: .rounded))
                             .foregroundColor(tangerine)
                         Text("Completed")
@@ -86,7 +79,7 @@ struct WatchPetDashboardView: View {
                     }
                     Spacer()
                     
-                    ProgressView(value: Double(completedCount), total: Double(dailyTasks.count))
+                    ProgressView(value: Double(viewModel.completedCount(for: pet)), total: Double(viewModel.dailyTasks.count))
                         .progressViewStyle(.circular)
                         .tint(tangerine)
                         .scaleEffect(0.8)
@@ -97,26 +90,22 @@ struct WatchPetDashboardView: View {
                 
                 // Task List
                 VStack(spacing: 8) {
-                    ForEach(dailyTasks) { task in
-                        WatchTaskRow(pet: pet, task: task)
+                    ForEach(viewModel.dailyTasks) { task in
+                        WatchTaskRow(viewModel: viewModel, pet: pet, task: task)
                     }
                 }
                 .padding(.bottom, 10)
             }
         }
         .navigationTitle(pet.name)
-    }
-    
-    private var completedCount: Int {
-        let today = Calendar.current.startOfDay(for: Date())
-        return dailyTasks.filter { task in
-            pet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: today) }
-        }.count
+        .onAppear {
+            viewModel.updateTasks(for: pet)
+        }
     }
 }
 
 struct WatchTaskRow: View {
-    @Environment(\.modelContext) private var modelContext
+    var viewModel: WatchViewModel
     let pet: PetProfile
     let task: DailyTaskItem
     
@@ -124,12 +113,15 @@ struct WatchTaskRow: View {
     private let mint = Color(red: 123/255, green: 211/255, blue: 179/255)
     
     var isLogged: Bool {
-        let today = Calendar.current.startOfDay(for: Date())
-        return pet.activities.contains { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: today) }
+        viewModel.isTaskCompleted(task, for: pet)
     }
     
     var body: some View {
-        Button(action: toggleActivity) {
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                viewModel.toggleTask(task, for: pet)
+            }
+        }) {
             HStack(spacing: 10) {
                 Image(systemName: task.icon)
                     .font(.system(size: 14, weight: .bold))
@@ -161,33 +153,6 @@ struct WatchTaskRow: View {
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
-    }
-    
-    private func toggleActivity() {
-        let today = Calendar.current.startOfDay(for: Date())
-        
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            if isLogged {
-                if let index = pet.activities.firstIndex(where: { $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: today) }) {
-                    let logToDelete = pet.activities[index]
-                    modelContext.delete(logToDelete)
-                    pet.activities.remove(at: index)
-                }
-            } else {
-                let newLog = ActivityLog(
-                    timestamp: today,
-                    type: task.type.rawValue,
-                    durationMinutes: 0,
-                    detail: "Logged via Watch"
-                )
-                newLog.pet = pet
-                modelContext.insert(newLog)
-                pet.activities.append(newLog)
-            }
-            
-            // Explicit save to ensure Watch sends update to shared container
-            try? modelContext.save()
-        }
     }
 }
 

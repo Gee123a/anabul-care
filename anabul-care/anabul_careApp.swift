@@ -24,6 +24,8 @@ struct anabul_careApp: App {
             SpeciesRuleModel.self,
             ToxicityModel.self,
             TidbitModel.self,
+            TaskPreference.self,
+            TaskDeactivation.self,
         ])
         let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
@@ -42,7 +44,7 @@ struct anabul_careApp: App {
             ZStack {
                 if isDatabaseReady {
                     // Replaced with ContentView to enable the Page-Swipe system
-                    ContentView()
+                    ContextualDashboardView(modelContext: ModelContext(sharedModelContainer))
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 } else {
                     LaunchScreenView()

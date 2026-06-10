@@ -9,15 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct InlineInsightPanelView: View {
-    let targetSpecies: String
+    @State private var viewModel: InsightViewModel
     
-    // Use a standard query instead of a custom-initialized one to prevent Main Thread deadlocks
-    @Query var allTips: [TidbitModel]
-    
-    // Filter the tips dynamically in memory rather than forcing a synchronous fetch in init
-    private var tip: TidbitModel? {
-        let speciesLower = targetSpecies.lowercased()
-        return allTips.first { $0.speciesTarget == speciesLower }
+    init(targetSpecies: String, modelContext: ModelContext) {
+        _viewModel = State(initialValue: InsightViewModel(targetSpecies: targetSpecies, modelContext: modelContext))
     }
     
     var body: some View {
@@ -56,7 +51,7 @@ struct InlineInsightPanelView: View {
             .padding(.bottom, 10)
             
             // Title
-            Text(tip?.title ?? "Structured Routines")
+            Text(viewModel.tip?.title ?? "Structured Routines")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundColor(Color(red: 92/255, green: 58/255, blue: 40/255))
                 .kerning(-0.3)
@@ -64,7 +59,7 @@ struct InlineInsightPanelView: View {
                 .padding(.bottom, 6)
             
             // Body
-            Text(tip?.bodyText ?? "Providing physical stimulus tasks contextually builds emotional security inside indoor spaces.")
+            Text(viewModel.tip?.bodyText ?? "Providing physical stimulus tasks contextually builds emotional security inside indoor spaces.")
                 .font(.system(size: 13, weight: .regular, design: .default))
                 .foregroundColor(Color(red: 92/255, green: 58/255, blue: 40/255).opacity(0.78))
                 .kerning(-0.05)
