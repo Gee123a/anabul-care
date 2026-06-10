@@ -5,7 +5,6 @@
 //  Created by Nicholas Gerwin Mawardji on 11/06/26.
 //
 
-
 import Foundation
 import WatchConnectivity
 import SwiftUI
@@ -45,27 +44,104 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
         }
     }
     
-    // MARK: - Receiving Data
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        DispatchQueue.main.async {
-            self.handleIncomingPayload(message)
+    // MARK: - Sending Data (Phone -> Watch)
+        func sendPetToWatch(petName: String, species: String, breed: String) {
+            guard WCSession.default.activationState == .activated else {
+                print("🚨 WCSession not activated yet!")
+                return
+            }
+            
+            let payload: [String: Any] = [
+                "action": "sync_pet",
+                "name": petName,
+                "species": species,
+                "breed": breed,
+                "timestamp": Date().timeIntervalSince1970 // ⭐️ THIS FORCES EVERY SEND TO BE UNIQUE
+            ]
+            
+            if WCSession.default.isReachable {
+                WCSession.default.sendMessage(payload, replyHandler: nil) { error in
+                    print("🚨 Instant message failed: \(error.localizedDescription)")
+                }
+                print("🚨 INSTANT MESSAGE SENT FROM IPHONE!")
+            }
+            
+            do {
+                try WCSession.default.updateApplicationContext(payload)
+                print("🚨 BACKGROUND CONTEXT QUEUED FROM IPHONE!")
+            } catch {
+                print("🚨 Context failed: \(error.localizedDescription)")
+            }
         }
-    }
-    
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
-        DispatchQueue.main.async {
-            self.handleIncomingPayload(userInfo)
+    // MARK: - Sending Tasks (Phone -> Watch)
+        func sendActivityToWatch(petName: String, activityType: String) {
+            guard WCSession.default.activationState == .activated else { return }
+            
+            let payload: [String: Any] = [
+                "action": "sync_activity",
+                "petName": petName,
+                "activityType": activityType,
+                "timestamp": Date().timeIntervalSince1970
+            ]
+            
+            if WCSession.default.isReachable {
+                WCSession.default.sendMessage(payload, replyHandler: nil) { error in
+                    print("🚨 Failed to send activity: \(error.localizedDescription)")
+                }
+                print("🚨 INSTANT ACTIVITY SENT TO WATCH: \(activityType)")
+            } else {
+                // If watch is asleep, queue it in the background
+                WCSession.default.transferUserInfo(payload)
+                print("🚨 QUEUED ACTIVITY FOR WATCH: \(activityType)")
+            }
         }
-    }
+        
+        // MARK: - Receiving Data (Watch catching the data)
+        func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+            print("🚨 WATCH CAUGHT INSTANT MESSAGE: \(message)")
+            DispatchQueue.main.async { self.handleIncomingPayload(message) }
+        }
+        
+        func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+            print("🚨 WATCH CAUGHT USER INFO: \(userInfo)")
+            DispatchQueue.main.async { self.handleIncomingPayload(userInfo) }
+        }
+        
+        func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+            print("🚨 WATCH CAUGHT BACKGROUND CONTEXT: \(applicationContext)")
+            DispatchQueue.main.async { self.handleIncomingPayload(applicationContext) }
+        }
+        
+        private func handleIncomingPayload(_ payload: [String: Any]) {
+            print("🚨 MANAGER BROADCASTING TO VIEWS...")
+            NotificationCenter.default.post(
+                name: NSNotification.Name("ReceivedWatchData"),
+                object: nil,
+                userInfo: payload
+            )
+        }
     
-    private func handleIncomingPayload(_ payload: [String: Any]) {
-        // Broadcast the data using NotificationCenter so your views/SwiftData can catch it
-        NotificationCenter.default.post(
-            name: NSNotification.Name("ReceivedWatchData"),
-            object: nil,
-            userInfo: payload
-        )
-    }
+    // MARK: - Deleting Tasks (Bidirectional)
+        func sendActivityDeletion(petName: String, activityType: String) {
+            guard WCSession.default.activationState == .activated else { return }
+            
+            let payload: [String: Any] = [
+                "action": "delete_activity", // The critical new action string
+                "petName": petName,
+                "activityType": activityType,
+                "timestamp": Date().timeIntervalSince1970
+            ]
+            
+            if WCSession.default.isReachable {
+                WCSession.default.sendMessage(payload, replyHandler: nil) { error in
+                    print("🚨 Failed to send deletion: \(error.localizedDescription)")
+                }
+                print("🚨 INSTANT DELETION SENT: \(activityType)")
+            } else {
+                WCSession.default.transferUserInfo(payload)
+                print("🚨 QUEUED DELETION: \(activityType)")
+            }
+        }
     
     // MARK: - WCSessionDelegate Required Methods
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
@@ -81,5 +157,5 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
         // Re-activate if the session drops
         WCSession.default.activate()
     }
-    #endif
+    #endif // ⭐️ FIXED: Removed the extra os(iOS) text here so it compiles perfectly
 }

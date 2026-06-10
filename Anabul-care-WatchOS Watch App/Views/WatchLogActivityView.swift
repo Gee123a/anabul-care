@@ -15,11 +15,11 @@ struct WatchLogActivityView: View {
 
     // Activity types matching your widget
     let activities = [
-        ("Fed", "bowl.fill", Color.orange),
-        ("Hydrated", "drop.fill", Color.blue),
-        ("Walked", "figure.walk", Color.green),
-        ("Medication", "cross.pills.fill", Color.red),
-    ]
+            ("feeding", "dog.bowl.fill", Color.orange), // "bowl.fill" -> "dog.bowl.fill" or "fork.knife"
+            ("hydration", "drop.fill", Color.blue),     // Ensure this matches iPhone
+            ("walk", "figure.walk", Color.green),       // "Walked" -> "walk"
+            ("medication", "pills.fill", Color.red),    // "cross.pills.fill" -> "pills.fill"
+        ]
 
     var body: some View {
         NavigationStack {

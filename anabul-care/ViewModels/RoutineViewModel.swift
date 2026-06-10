@@ -81,6 +81,11 @@ public final class RoutineViewModel {
             // Delete existing log to unmark task as completed
             context.delete(existingLog)
             pet.activities.removeAll(where: { $0.id == existingLog.id })
+            
+            WatchConnectivityManager.shared.sendActivityDeletion(
+                            petName: pet.name,
+                            activityType: taskType
+                        )
         } else {
             // Create new log to mark task as completed
             let newLog = ActivityLog(
@@ -92,6 +97,11 @@ public final class RoutineViewModel {
             newLog.pet = pet
             context.insert(newLog)
             pet.activities.append(newLog)
+            
+            WatchConnectivityManager.shared.sendActivityToWatch(
+                            petName: pet.name,
+                            activityType: taskType
+                        )
         }
         
         // Force the @Observable macro to detect a change in the relationship
