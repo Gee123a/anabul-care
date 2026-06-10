@@ -15,6 +15,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private var continuations: [CheckedContinuation<CLLocation?, Never>] = []
     private var isRequestingLocation = false
     
+    // Testing flag to prevent the simulator hardware from returning coordinates before our tests can inject them
+    var isMockedForTesting = false
+    
     override init() {
         super.init()
         manager.delegate = self
@@ -48,7 +51,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             if shouldRequest {
                 // Must call CLLocationManager methods on main actor/thread since it's an NSObject delegate
                 Task { @MainActor in
-                    manager.requestLocation()
+                    if !self.isMockedForTesting {
+                        self.manager.requestLocation()
+                    }
                 }
             }
         }
@@ -81,5 +86,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         for continuation in queuedContinuations {
             continuation.resume(returning: nil)
         }
+    }
+    
+    // Testing helper to ensure a clean state
+    func resetTestState() {
+        lock.lock()
+        lastLocation = nil
+        continuations.removeAll()
+        isRequestingLocation = false
+        lock.unlock()
     }
 }
