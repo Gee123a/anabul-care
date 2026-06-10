@@ -9,6 +9,17 @@ import Foundation
 import MapKit
 @testable import anabul_care
 
+protocol ClinicRepositoryProtocol {
+    func fetchClinics() -> [ClinicModel]
+    func fetchClinics(in region: MKCoordinateRegion) async throws -> [ClinicModel]
+}
+
+protocol RadarServiceProtocol {
+    func getNearbyClinics() async -> [ClinicModel]
+    func getCurrentLocation() async throws -> CLLocationCoordinate2D
+    func requestAuthorization()
+}
+
 // MARK: - Mock Clinic Repository
 class MockClinicRepository: ClinicRepositoryProtocol {
     var shouldReturnError = false
