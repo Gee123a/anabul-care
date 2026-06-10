@@ -97,14 +97,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		20F9992F2FD9DA3700069947 /* Exceptions for "Anabul-care-WatchOS Watch App" folder in "anabul-care" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Anabul_care_WatchOSApp.swift,
-				Views/WatchLogActivityView.swift,
-			);
-			target = 566ACB772FBEE4D80046B347 /* anabul-care */;
-		};
 		56A3A9972FD0014600475152 /* Exceptions for "Anabul-careWidget" folder in "Anabul-careWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -190,9 +182,6 @@
 		};
 		56A3ABC82FD0180400475152 /* Anabul-care-WatchOS Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				20F9992F2FD9DA3700069947 /* Exceptions for "Anabul-care-WatchOS Watch App" folder in "anabul-care" target */,
-			);
 			path = "Anabul-care-WatchOS Watch App";
 			sourceTree = "<group>";
 		};

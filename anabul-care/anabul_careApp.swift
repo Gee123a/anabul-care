@@ -48,8 +48,7 @@ struct anabul_careApp: App {
         WindowGroup {
             ZStack {
                 if isDatabaseReady {
-                    // Replaced with ContentView to enable the Page-Swipe system
-                    ContextualDashboardView(modelContext: <#ModelContext#>)
+                    ContextualDashboardView(modelContext: sharedModelContainer.mainContext)
                 } else {
                     LaunchScreenView()
                         .onAppear {
