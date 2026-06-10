@@ -76,19 +76,6 @@ struct FlashCardView: View {
                     .foregroundColor(textLightBrown.opacity(0.7))
                 
                 Spacer()
-                
-                // Pagination Dots
-                HStack(spacing: 4) {
-                    Capsule()
-                        .fill(tangerine)
-                        .frame(width: 12, height: 4)
-                    Circle()
-                        .fill(tangerine.opacity(0.3))
-                        .frame(width: 4, height: 4)
-                    Circle()
-                        .fill(tangerine.opacity(0.3))
-                        .frame(width: 4, height: 4)
-                }
             }
         }
         .padding(20)
