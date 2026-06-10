@@ -7,6 +7,7 @@ struct AnimatedMapPin: View {
     
     var body: some View {
         ZStack {
+            // Animate the pulsing effect for the map pin background
             Circle()
                 .fill(Color(hex: "FF6B33").opacity(0.3))
                 .frame(width: isPulsing ? 60 : 25, height: isPulsing ? 60 : 25)
@@ -37,26 +38,42 @@ struct PuskeswanRadarView: View {
     var body: some View {
         ZStack(alignment: .top) {
             
+            // The core MapKit UI component.
+            // position binds the viewport to the ViewModel
+            // interactionModes specifies what gestures the map allows naturally
+            // selection binds to a tapped map pin marker
             Map(position: $viewModel.position, interactionModes: [.pan, .zoom], selection: $viewModel.selectedClinic) {
+                
                 ForEach(viewModel.filteredClinics) { clinic in
+                    // Annotation renders a custom SwiftUI view at a precise CLLocationCoordinate2D
                     Annotation(clinic.name, coordinate: clinic.coordinate) {
                         AnimatedMapPin(category: clinic.category)
                     }
-                    .tag(clinic)
+                    .tag(clinic) // The tag is necessary to match the Annotation to the 'selection' binding
                 }
+                
+                // Displays the user's current physical GPS location (the blue dot)
                 UserAnnotation()
             }
+            // Applies realistic 3D elevation and removes default Apple Map POI clutter (like restaurants/shops)
             .mapStyle(.standard(elevation: .realistic, emphasis: .muted, pointsOfInterest: .excludingAll))
+            
+            // Tracks the camera position constantly while the user is actively dragging the map
             .onMapCameraChange(frequency: .continuous) { context in
                 viewModel.currentCenter = context.region.center
                 viewModel.currentDistance = context.camera.distance
             }
+            
+            // Triggers a network search ONLY when the map camera completely stops moving
             .onMapCameraChange(frequency: .onEnd) { context in
                             Task {
                                 await viewModel.performSearch(in: context.region)
                             }
                         }
+            // Allows the map to stretch behind the top notch and dynamic island
             .ignoresSafeArea()
+            
+            // Injects custom UIKit gesture recognizers to override default map panning behaviors
             .background(MapGestureConfigurator())
             
             VStack(spacing: 16) {
@@ -102,6 +119,7 @@ struct PuskeswanRadarView: View {
                 HStack {
                     Spacer()
                     Button(action: {
+                        // .userLocation forces the camera to snap back to the user's GPS position
                         viewModel.position = .userLocation(fallback: .automatic)
                     }) {
                         Image(systemName: "location.fill")
@@ -303,6 +321,7 @@ class GestureInterceptorView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        // Recursively digs through the UI hierarchy to find the underlying MKMapView native layer
         if parentMapView == nil {
             parentMapView = findMapView(from: self)
         }
@@ -334,6 +353,7 @@ class GestureInterceptorView: UIView {
     }
     
     private func configureGestures(in view: UIView) {
+        // Forces the underlying MapKit pan gesture to require exactly 2 fingers, leaving 1-finger gestures for the TabView
         if let gestures = view.gestureRecognizers {
             for gesture in gestures {
                 if let pan = gesture as? UIPanGestureRecognizer {

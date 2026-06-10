@@ -3,47 +3,63 @@ import SwiftUI
 import MapKit
 import Combine
 
+/// ViewModel for the Radar feature, managing map state, clinic searches, and navigation.
+@Observable
 @MainActor
-class RadarViewModel: ObservableObject {
-    
-    // Set the initial camera position and zoom distance for the map
-    @Published var position: MapCameraPosition = .camera(MapCamera(
-        centerCoordinate: CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385),
-        distance: 5000
+public final class RadarViewModel {
+    /// The current camera position on the map.
+    // MapCameraPosition tracks both the center coordinate and the viewing altitude (distance)
+    public var position: MapCameraPosition = .camera(MapCamera(
+        centerCoordinate: CLLocationCoordinate2D(latitude: -7.3055, longitude: 112.7385),
+        distance: 4000
     ))
     
-    // Store the active map pins
-    @Published var clinics: [ClinicModel] = []
+    /// List of clinics found in the current region.
+    public var clinics: [ClinicModel] = []
     
-    // Track the currently tapped map pin
-    @Published var selectedClinic: ClinicModel?
+    /// The currently selected clinic on the map.
+    public var selectedClinic: ClinicModel?
     
-    @Published var searchText: String = ""
-    @Published var selectedCategory: POICategory = .all
+    /// User's search text for filtering or regional search.
+    public var searchText: String = ""
     
-    var filteredClinics: [ClinicModel] {
-        if selectedCategory == .all {
-            return clinics
+    /// The active category filter.
+    public var selectedCategory: POICategory = .all
+    
+    /// The current center coordinate of the map view.
+    public var currentCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385)
+    
+    /// The current distance (altitude) of the map camera.
+    public var currentDistance: Double = 5000
+    
+    public init() {}
+    
+    /// Returns clinics filtered by category and search text.
+    public var filteredClinics: [ClinicModel] {
+        clinics.filter { clinic in
+            let categoryMatch = (selectedCategory == .all) || (clinic.category == selectedCategory)
+            let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
+            return categoryMatch && searchMatch
         }
-        return clinics.filter { $0.category == selectedCategory }
     }
-    
-    // Move the map camera to a specific city or area
-    func searchForRegion(query: String) async {
+
+    /// Searches for a specific region by name and updates the map position.
+    /// - Parameter query: The name of the city or region to search for.
+    public func searchForRegion(query: String) async {
         guard !query.isEmpty else { return }
         
-        // Build a search request for the typed city name
+        // Create a request for Apple's local search API using the text query
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
         let search = MKLocalSearch(request: request)
         
         do {
-            // Ask Apple Maps servers for the coordinate data
+            // Send the asynchronous request to Apple servers
             let response = try await search.start()
             
-            // Extract the first map item and fly the camera to that coordinate
+            // If Apple finds a matching region, update the camera to fly to that coordinate
             if let firstItem = response.mapItems.first {
-                await MainActor.run {
+                withAnimation {
                     self.position = .camera(MapCamera(
                         centerCoordinate: firstItem.placemark.coordinate,
                         distance: 8000
@@ -51,114 +67,159 @@ class RadarViewModel: ObservableObject {
                 }
             }
         } catch {
-            print("Search failed")
+            print("RadarViewModel: Regional search failed: \(error)")
         }
     }
-    
-    // Scan the visible map area for specific clinic types
-    func performSearch(in region: MKCoordinateRegion) async {
+
+    /// Performs a search for pet-related points of interest in a given region.
+    /// - Parameter region: The coordinate region to search within.
+    public func performSearch(in region: MKCoordinateRegion) async {
         var newClinics: [ClinicModel] = []
         
-        // Define Apple Maps search terms and their categories
+        // Combine specific terms with POICategory to help Apple Maps find raw data
         let searchQueries: [(String, POICategory)] = [
-            // Vet
             ("Klinik Hewan", .vet),
-            ("Puskeswan", .vet),
-            ("Dokter Hewan", .vet),
-            ("Veterinarian", .vet),
-            ("Vet Clinic", .vet),
-            ("Animal Hospital", .vet),
-            ("Petcare", .vet),
-            
-            // Hotel
             ("Pet Hotel", .hotel),
-            ("Pet Boarding", .hotel),
-            ("Penitipan Hewan", .hotel),
-            ("Hotel Hewan", .hotel),
-            ("Dog Daycare", .hotel),
-            ("Cat Hotel", .hotel),
-            
-            // Park
-            ("Dog Park", .park),
-            ("Taman Hewan", .park),
-            ("Taman Anjing", .park),
-            ("Pet Park", .park),
-            ("Taman", .park),
-            ("Park", .park)
-        ]
-        
-        // Define strict terms to filter out human hotels and human clinics
-        let petKeywords = [
-            "pet", "hewan", "vet", "dog", "cat", "anjing", "kucing",
-            "puskeswan", "animal", "satwa", "paw", "tail", "groom",
-            "fur", "meow", "bark", "clinic", "klinik", "care",
-            "kennel", "boarding", "penitipan", "peliharaan", "hospital",
-            "dokter"
+            ("Taman", .park)
         ]
         
         for query in searchQueries {
-            // Configure the MapKit search request for the current screen boundaries
+            // Create a localized search request scoped ONLY to the currently visible map boundaries
             let request = MKLocalSearch.Request()
             request.naturalLanguageQuery = query.0
             request.region = region
             
-            // Execute the local search
             let search = MKLocalSearch(request: request)
             do {
+                // Execute the search against Apple's POI database
                 let response = try await search.start()
                 
-                // Process each location returned by Apple Maps
+                // Iterate through the raw MKMapItem objects returned by Apple
                 for item in response.mapItems {
-                    let name = item.name ?? ""
-                    let address = item.placemark.title ?? ""
-                    let searchableText = "\(name) \(address)".lowercased()
+                    let name = item.name ?? "Unknown"
                     
-                    var isValid = false
+                    // Pass the data through the Keyword Shield to ensure it's actually pet-related
+                    guard isRelevant(name: name, category: query.1) else { continue }
                     
-                    // Conditionally apply the Keyword Shield
-                    if query.1 == .vet || query.1 == .hotel {
-                        // Require a pet word for veterinarians and hotels
-                        isValid = petKeywords.contains { searchableText.contains($0) }
-                    } else {
-                        // Allow all general parks to display
-                        isValid = true
-                    }
-                    
-                    if isValid {
-                        // Convert the raw MKMapItem into your custom ClinicModel
-                        let clinic = ClinicModel(
-                            name: name.isEmpty ? "Unknown" : name,
-                            coordinate: item.placemark.coordinate,
-                            address: address,
-                            phone: item.phoneNumber ?? "No Phone",
-                            category: query.1,
-                            mapItem: item
-                        )
-                        newClinics.append(clinic)
-                    }
+                    // Package the MapKit data into our custom ClinicModel format
+                    let clinic = ClinicModel(
+                        name: name,
+                        coordinate: item.placemark.coordinate,
+                        address: item.placemark.title ?? "",
+                        phone: item.phoneNumber ?? "No Phone",
+                        category: query.1,
+                        mapItem: item // Store the raw MKMapItem to use later for routing
+                    )
+                    newClinics.append(clinic)
                 }
             } catch {
                 continue
             }
         }
         
-        // Filter out duplicates (same coordinate + name)
+        // Ensure uniqueness
         // Apple Maps often returns the exact same location for different search terms
         var uniqueClinics: [ClinicModel] = []
         var seen = Set<String>()
         
         for clinic in newClinics {
-            // Generate a unique ID string using the name and the latitude
+            // Generate a unique ID string combining the name and latitude to filter out duplicate map pins
             let key = clinic.name + String(clinic.coordinate.latitude)
-            
-            // Add the clinic only if the ID string does not exist in the Set
             if !seen.contains(key) {
                 seen.insert(key)
                 uniqueClinics.append(clinic)
             }
         }
         
-        // Update the user interface with the clean data array
-        self.clinics = uniqueClinics
+        withAnimation {
+            self.clinics = uniqueClinics
+        }
+    }
+    
+    /// Filters search results to ensure they are actually relevant to pets.
+    private func isRelevant(name: String, category: POICategory) -> Bool {
+        let lowercaseName = name.lowercased()
+        
+        // A strict list of keywords to identify if a location is specifically for pets
+        let petKeywords = [
+            "pet", "hewan", "kucing", "anjing", "cat", "dog", "paw", "animal",
+            "boarding", "grooming", "penitipan", "vet", "klinik", "clinic",
+            "care", "drh", "dokter", "aquatic", "reptile", "bird", "burung",
+            "meow", "bark", "tail", "fur", "fauna"
+        ]
+        
+        switch category {
+        case .hotel:
+            return petKeywords.contains { lowercaseName.contains($0) } || lowercaseName.contains("hotel")
+        case .vet:
+            let isPetRelated = petKeywords.contains { lowercaseName.contains($0) } || lowercaseName.contains("drh")
+            let isMedical = lowercaseName.contains("klinik") || lowercaseName.contains("clinic") ||
+                            lowercaseName.contains("hospital") || lowercaseName.contains("rumah sakit") ||
+                            lowercaseName.contains("rs ") || lowercaseName.contains("puskesmas")
+            return isPetRelated && isMedical
+        case .park:
+            // Parks are allowed universally because Apple Maps cannot distinguish pet-friendly parks natively
+            return true
+        case .all:
+            return true
+        }
+    }
+    
+    // MARK: - Navigation & Zoom
+    
+    /// Increases the map zoom level.
+    public func zoomIn() {
+        // Calculate a closer altitude distance, capping at 500 meters
+        let newDistance = max(currentDistance * 0.4, 500)
+        withAnimation(.easeInOut(duration: 0.5)) {
+            position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
+        }
+    }
+    
+    /// Decreases the map zoom level.
+    public func zoomOut() {
+        // Calculate a further altitude distance, capping at 500,000 meters
+        let newDistance = min(currentDistance * 2.5, 500000)
+        withAnimation(.easeInOut(duration: 0.5)) {
+            position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
+        }
+    }
+    
+    /// Opens the selected clinic in Apple Maps for directions.
+    /// - Parameter clinic: The clinic to navigate to.
+    public func openInAppleMaps(clinic: ClinicModel) {
+        let mapItem: MKMapItem
+        
+        // Utilize the stored MKMapItem if available, otherwise build a new one from coordinates
+        if let existing = clinic.mapItem {
+            mapItem = existing
+        } else {
+            let location = CLLocation(latitude: clinic.coordinate.latitude, longitude: clinic.coordinate.longitude)
+            mapItem = MKMapItem(placemark: MKPlacemark(coordinate: location.coordinate))
+            mapItem.name = clinic.name
+        }
+        
+        // This bridges out of your app and asks iOS to open the native Apple Maps app with driving mode pre-selected
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+        ])
+    }
+    
+    /// Attempts to open the selected clinic in Google Maps, falling back to web if needed.
+    /// - Parameter clinic: The clinic to navigate to.
+    public func openInGoogleMaps(clinic: ClinicModel) {
+        let lat = clinic.coordinate.latitude
+        let lon = clinic.coordinate.longitude
+        
+        // Use iOS URL schemes to attempt opening the Google Maps app directly
+        let appUrl = URL(string: "comgooglemaps://?daddr=\(lat),\(lon)&directionsmode=driving")!
+        let webUrl = URL(string: "https://www.google.com/maps/dir/?api=1&destination=\(lat),\(lon)&travelmode=driving")!
+        
+        if UIApplication.shared.canOpenURL(appUrl) {
+            UIApplication.shared.open(appUrl)
+        } else {
+            // Fallback to Safari if the Google Maps app is not installed
+            UIApplication.shared.open(webUrl)
+        }
     }
 }
