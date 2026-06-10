@@ -54,7 +54,8 @@ public final class RadarViewModel {
         request.naturalLanguageQuery = query
         
         // BIAS SEARCH TO CURRENT LOCATION: This tells Apple Maps to prioritize results closest to you
-        request.region = MKCoordinateRegion(center: currentCenter, latitudinalMeters: 15000, longitudinalMeters: 15000)
+        // Radius tightened to 5000 meters to force closest nearby locations
+        request.region = MKCoordinateRegion(center: currentCenter, latitudinalMeters: 5000, longitudinalMeters: 5000)
         
         let search = MKLocalSearch(request: request)
         
@@ -72,7 +73,7 @@ public final class RadarViewModel {
                 }
             }
         } catch {
-            print("RadarViewModel: Regional search failed: \(error)")
+            print("RadarViewModel: Regional search failed")
         }
     }
 
@@ -148,20 +149,15 @@ public final class RadarViewModel {
         // A strict list of keywords to identify if a location is specifically for pets
         let petKeywords = [
             "pet", "hewan", "kucing", "anjing", "cat", "dog", "paw", "animal",
-            "boarding", "grooming", "penitipan", "vet", "klinik", "clinic",
-            "care", "drh", "dokter", "aquatic", "reptile", "bird", "burung",
-            "meow", "bark", "tail", "fur", "fauna"
+            "boarding", "grooming", "penitipan", "vet", "drh", "veterinarian",
+            "aquatic", "reptile", "bird", "burung", "meow", "bark", "tail", "fur", "fauna", "satwa"
         ]
         
         switch category {
         case .hotel:
-            return petKeywords.contains { lowercaseName.contains($0) } || lowercaseName.contains("hotel")
+            return petKeywords.contains { lowercaseName.contains($0) }
         case .vet:
-            let isPetRelated = petKeywords.contains { lowercaseName.contains($0) } || lowercaseName.contains("drh")
-            let isMedical = lowercaseName.contains("klinik") || lowercaseName.contains("clinic") ||
-                            lowercaseName.contains("hospital") || lowercaseName.contains("rumah sakit") ||
-                            lowercaseName.contains("rs ") || lowercaseName.contains("puskesmas")
-            return isPetRelated && isMedical
+            return petKeywords.contains { lowercaseName.contains($0) }
         case .park:
             // Parks are allowed universally because Apple Maps cannot distinguish pet-friendly parks natively
             return true
