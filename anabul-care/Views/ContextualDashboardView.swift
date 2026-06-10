@@ -41,6 +41,57 @@ struct ContextualDashboardView: View {
         .ignoresSafeArea()
         .onAppear {
             viewModel.fetchPets()
+            
+            // FIX: Ask the viewModel for the pets array!
+            if let firstPet = viewModel.pets.first {
+                WatchConnectivityManager.shared.sendPetToWatch(
+                    petName: firstPet.name,
+                    species: firstPet.species,
+                    breed: firstPet.breed
+                )
+            }
+        }
+        // ⭐️ PASTED HERE: Listens for the Watch Manager's broadcast ⭐️
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ReceivedWatchData"))) { notification in
+            
+            // Extract the payload
+            if let payload = notification.userInfo,
+               let action = payload["action"] as? String,
+               action == "log_activity" {
+                
+                let petName = payload["petName"] as? String ?? ""
+                let activityType = payload["activityType"] as? String ?? ""
+                
+                print("🚨 IPHONE HEARD THE WATCH! Logging: \(activityType)")
+                
+                // 1. Find the matching pet on the iPhone
+                if let targetPet = viewModel.pets.first(where: { $0.name == petName }) {
+                    
+                    // 2. Create the ActivityLog
+                    let newLog = ActivityLog(
+                        timestamp: Date(),
+                        type: activityType,
+                        durationMinutes: 15, // Default or pass this from the watch
+                        detail: "Logged from Apple Watch"
+                    )
+                    
+                    // 3. Save it to the iPhone database
+                    newLog.pet = targetPet
+                    modelContext.insert(newLog)
+                    targetPet.activities.append(newLog)
+                    
+                    do {
+                        try modelContext.save()
+                        print("🚨 SUCCESS! WATCH ACTIVITY SAVED TO IPHONE DATABASE!")
+                        
+                        // 4. Force the UI to refresh to show the new checkmark
+                        viewModel.fetchPets()
+                        
+                    } catch {
+                        print("🚨 FATAL ERROR SAVING WATCH ACTIVITY: \(error)")
+                    }
+                }
+            }
         }
     }
     
@@ -72,6 +123,11 @@ struct ContextualDashboardView: View {
                                     Button {
                                         withAnimation {
                                             viewModel.selectedPetID = pet.id
+                                            WatchConnectivityManager.shared.sendPetToWatch(
+                                                petName: pet.name,
+                                                species: pet.species,
+                                                breed: pet.breed
+                                            )
                                         }
                                     } label: {
                                         HStack {
@@ -218,8 +274,6 @@ struct ContextualDashboardView: View {
         }
     }
 }
-
-
 
 struct EmptyPetStateView: View {
     @Binding var showingAddPet: Bool

@@ -41,6 +41,17 @@ public final class RoutineViewModel {
         }
     }
     
+    /// Forces a refresh of the pet's activities from the database, useful when returning from background.
+    public func refreshActivities() {
+        let petID = pet.id
+        let descriptor = FetchDescriptor<ActivityLog>(predicate: #Predicate { $0.pet?.id == petID })
+        if let freshLogs = try? modelContext.fetch(descriptor) {
+            pet.activities = freshLogs
+        }
+        updateTasks()
+    }
+
+    
     /// Selects a new date and refreshes the tasks.
     public func selectDate(_ date: Date) {
         self.selectedDate = Calendar.current.startOfDay(for: date)
@@ -70,6 +81,11 @@ public final class RoutineViewModel {
             // Delete existing log to unmark task as completed
             context.delete(existingLog)
             pet.activities.removeAll(where: { $0.id == existingLog.id })
+            
+            WatchConnectivityManager.shared.sendActivityDeletion(
+                            petName: pet.name,
+                            activityType: taskType
+                        )
         } else {
             // Create new log to mark task as completed
             let newLog = ActivityLog(
@@ -81,6 +97,11 @@ public final class RoutineViewModel {
             newLog.pet = pet
             context.insert(newLog)
             pet.activities.append(newLog)
+            
+            WatchConnectivityManager.shared.sendActivityToWatch(
+                            petName: pet.name,
+                            activityType: taskType
+                        )
         }
         
         // Force the @Observable macro to detect a change in the relationship

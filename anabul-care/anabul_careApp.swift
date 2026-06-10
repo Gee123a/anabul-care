@@ -12,6 +12,10 @@ import SwiftData
 struct anabul_careApp: App {
     @State private var isDatabaseReady = false
     
+    // MARK: - WatchOS Connectivity
+    // Initialize it immediately so it listens for the Apple Watch the second the app opens
+    @StateObject private var connectivity = WatchConnectivityManager.shared
+    
     init() {
         // Register the background task immediately on launch
         ClimateManager.shared.registerBackgroundTask(modelContainer: sharedModelContainer)
@@ -27,6 +31,7 @@ struct anabul_careApp: App {
             TaskPreference.self,
             TaskDeactivation.self,
         ])
+        // Uses the App Group so the Widget and WatchOS can access this same database
         let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
         
@@ -44,30 +49,24 @@ struct anabul_careApp: App {
             ZStack {
                 if isDatabaseReady {
                     // Replaced with ContentView to enable the Page-Swipe system
-                    ContextualDashboardView(modelContext: ModelContext(sharedModelContainer))
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    ContextualDashboardView(modelContext: sharedModelContainer.mainContext)
                 } else {
                     LaunchScreenView()
-                        .task {
-                            // 1. Wait for background seeding
-                            await DataManager.shared.seedData(modelContainer: sharedModelContainer)
-                            
-                            // 2. Fetch the newly seeded Toxicity Models and index them into iOS Spotlight
-                            let context = ModelContext(sharedModelContainer)
-                            let descriptor = FetchDescriptor<ToxicityModel>()
-                            if let hazards = try? context.fetch(descriptor) {
-                                SpotlightManager.shared.indexToxicityDatabase(items: hazards)
-                            }
-                            
-                            // 3. Initialize Climate & Location Services
-                            ClimateManager.shared.requestNotificationPermission()
-                            LocationManager.shared.requestPermission()
-                            LocationManager.shared.start()
-                            ClimateManager.shared.scheduleNextCheck()
-                            
-                            // 4. Dismiss Launch Screen smoothly
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                isDatabaseReady = true
+                        .onAppear {
+                            // 1. Let the splash screen render immediately
+                            // 2. Perform the heavy SwiftData seeding in the background
+                            Task(priority: .userInitiated) {
+                                await DataManager.shared.seedData(modelContainer: sharedModelContainer)
+                                
+                                // 3. Ensure a minimum splash screen duration so it doesn't flicker
+                                try? await Task.sleep(nanoseconds: 1_200_000_000) // 1.2 seconds
+                                
+                                // 4. Dismiss Launch Screen smoothly
+                                await MainActor.run {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        isDatabaseReady = true
+                                    }
+                                }
                             }
                         }
                 }
@@ -76,4 +75,3 @@ struct anabul_careApp: App {
         .modelContainer(sharedModelContainer)
     }
 }
-

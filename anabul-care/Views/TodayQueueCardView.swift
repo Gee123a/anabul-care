@@ -12,6 +12,7 @@ import WidgetKit
 struct TodayQueueCardView: View {
     @State private var viewModel: RoutineViewModel
     private let modelContext: ModelContext
+    @Environment(\.scenePhase) private var scenePhase
     
     init(pet: PetProfile, modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -60,6 +61,11 @@ struct TodayQueueCardView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 36, x: 0, y: 16)
         .sheet(item: $taskToEdit) { task in
             EditTaskTimeView(pet: viewModel.pet, task: task, date: viewModel.selectedDate, modelContext: modelContext)
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                viewModel.refreshActivities()
+            }
         }
     }
     

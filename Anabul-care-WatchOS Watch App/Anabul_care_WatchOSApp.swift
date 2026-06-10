@@ -10,31 +10,22 @@ import SwiftData
 
 @main
 struct Anabul_care_WatchOSApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            PetProfile.self,
-            ActivityLog.self,
-            SpeciesRuleModel.self,
-            ToxicityModel.self,
-            TidbitModel.self,
-        ])
-
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
-        let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
-
-        let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    // Starts listening for the iPhone immediately
+    @StateObject private var connectivity = WatchConnectivityManager.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        // Uses purely local Watch storage instead of the iPhone's App Group
+        .modelContainer(for: [
+            PetProfile.self,
+            ActivityLog.self,
+            SpeciesRuleModel.self,
+            ToxicityModel.self,
+            TidbitModel.self,
+            TaskPreference.self,
+            TaskDeactivation.self
+        ])
     }
 }

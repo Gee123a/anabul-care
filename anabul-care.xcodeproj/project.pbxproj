@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		20F99A3F2FDA00F500069947 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20F99A3E2FDA00F500069947 /* WatchConnectivity.framework */; };
 		56A3A9832FD0014400475152 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56A3A9822FD0014300475152 /* WidgetKit.framework */; };
 		56A3A9852FD0014400475152 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56A3A9842FD0014400475152 /* SwiftUI.framework */; };
 		56A3A9962FD0014600475152 /* Anabul-careWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 56A3A9802FD0014300475152 /* Anabul-careWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -84,6 +85,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		20F99A3C2FDA00D900069947 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
+		20F99A3E2FDA00F500069947 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.2.sdk/System/Library/Frameworks/WatchConnectivity.framework; sourceTree = DEVELOPER_DIR; };
 		566ACB782FBEE4D90046B347 /* anabul-care.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "anabul-care.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB872FBEE4E00046B347 /* anabul-careTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		566ACB912FBEE4E00046B347 /* anabul-careUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "anabul-careUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -146,6 +149,7 @@
 				Services/DataManager.swift,
 				Services/HabitLearningService.swift,
 				Services/RoutineRuleEngine.swift,
+				Services/WatchConnectivityManager.swift,
 			);
 			target = 56A3ABC62FD0180400475152 /* Anabul-care-WatchOS Watch App */;
 		};
@@ -231,6 +235,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				20F99A3F2FDA00F500069947 /* WatchConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +289,8 @@
 		56A3A9812FD0014300475152 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				20F99A3C2FDA00D900069947 /* WatchConnectivity.framework */,
+				20F99A3E2FDA00F500069947 /* WatchConnectivity.framework */,
 				56A3A9822FD0014300475152 /* WidgetKit.framework */,
 				56A3A9842FD0014400475152 /* SwiftUI.framework */,
 			);
@@ -784,7 +791,7 @@
 				CODE_SIGN_ENTITLEMENTS = "anabul-care/anabul-care.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Q5G563YDBB;
+				DEVELOPMENT_TEAM = Y5P2W8D83V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;
@@ -822,7 +829,7 @@
 				CODE_SIGN_ENTITLEMENTS = "anabul-care/anabul-care.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Q5G563YDBB;
+				DEVELOPMENT_TEAM = Y5P2W8D83V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;
@@ -1007,7 +1014,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Q5G563YDBB;
+				DEVELOPMENT_TEAM = Y5P2W8D83V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;
@@ -1042,7 +1049,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Q5G563YDBB;
+				DEVELOPMENT_TEAM = Y5P2W8D83V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;
