@@ -14,21 +14,7 @@ class RadarViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedCategory: POICategory = .all
     
-    // Internal subject to handle debounced region changes
-    private var regionChangeSubject = PassthroughSubject<MKCoordinateRegion, Never>()
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        // Setup debounce for map searches to prevent throttling
-        regionChangeSubject
-            .debounce(for: .seconds(0.8), scheduler: RunLoop.main)
-            .sink { [weak self] region in
-                Task {
-                    await self?.performSearch(in: region)
-                }
-            }
-            .store(in: &cancellables)
-    }
+    init() {}
     
     var filteredClinics: [ClinicModel] {
         clinics.filter { clinic in
@@ -36,11 +22,6 @@ class RadarViewModel: ObservableObject {
             let searchMatch = searchText.isEmpty || clinic.name.localizedCaseInsensitiveContains(searchText)
             return categoryMatch && searchMatch
         }
-    }
-
-    /// Triggered from the View when the camera finishes moving
-    func updateRegion(_ region: MKCoordinateRegion) {
-        regionChangeSubject.send(region)
     }
 
     func searchForRegion(query: String) async {
@@ -82,8 +63,11 @@ class RadarViewModel: ObservableObject {
             do {
                 let response = try await search.start()
                 for item in response.mapItems {
+                    let name = item.name ?? "Unknown"
+                    guard isRelevant(name: name, category: query.1) else { continue }
+                    
                     let clinic = ClinicModel(
-                        name: item.name ?? "Unknown",
+                        name: name,
                         coordinate: item.placemark.coordinate,
                         address: item.placemark.title ?? "",
                         phone: item.phoneNumber ?? "No Phone",
@@ -110,6 +94,37 @@ class RadarViewModel: ObservableObject {
         
         withAnimation {
             self.clinics = uniqueClinics
+        }
+    }
+    
+    private func isRelevant(name: String, category: POICategory) -> Bool {
+        let lowercaseName = name.lowercased()
+        let petKeywords = [
+            "pet", "hewan", "kucing", "anjing", "cat", "dog", "paw", "animal",
+            "boarding", "grooming", "penitipan", "vet", "klinik", "clinic",
+            "care", "drh", "dokter", "aquatic", "reptile", "bird", "burung",
+            "meow", "bark", "tail", "fur", "fauna"
+        ]
+        
+        switch category {
+        case .hotel:
+            if lowercaseName.contains("hotel") {
+                return petKeywords.contains { lowercaseName.contains($0) }
+            }
+            return petKeywords.contains { lowercaseName.contains($0) }
+            
+        case .vet:
+            let isVetOrPet = petKeywords.contains { lowercaseName.contains($0) } || lowercaseName.contains("drh")
+            if lowercaseName.contains("klinik") || lowercaseName.contains("clinic") || lowercaseName.contains("hospital") || lowercaseName.contains("rumah sakit") || lowercaseName.contains("rs ") || lowercaseName.contains("puskesmas") {
+                return isVetOrPet
+            }
+            return isVetOrPet
+            
+        case .park:
+            return true
+            
+        case .all:
+            return true
         }
     }
 }

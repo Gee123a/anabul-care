@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import WidgetKit
 
 @Observable
 public final class PetProfileViewModel {
@@ -29,6 +30,7 @@ public final class PetProfileViewModel {
     public func deletePet() {
         do {
             try repository.deletePet(pet)
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             print("PetProfileViewModel: Error deleting pet: \(error)")
         }
