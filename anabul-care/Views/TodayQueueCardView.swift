@@ -224,7 +224,7 @@ struct DateButton: View {
 }
 
 struct QueueRow: View {
-    var viewModel: RoutineViewModel
+    @Bindable var viewModel: RoutineViewModel
     let task: DailyTaskItem
     var onEdit: () -> Void
     

@@ -28,12 +28,10 @@ struct AnimatedMapPin: View {
 }
 
 struct PuskeswanRadarView: View {
-    @StateObject private var viewModel = RadarViewModel()
+    @State private var viewModel = RadarViewModel()
     @Binding var selectedTab: Int
     
     @State private var isZoomMenuExpanded = false
-    @State private var currentCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385)
-    @State private var currentDistance: Double = 5000
     @State private var showingMapsSelector = false
     
     var body: some View {
@@ -50,8 +48,8 @@ struct PuskeswanRadarView: View {
             }
             .mapStyle(.standard(elevation: .realistic, emphasis: .muted, pointsOfInterest: .excludingAll))
             .onMapCameraChange(frequency: .continuous) { context in
-                currentCenter = context.region.center
-                currentDistance = context.camera.distance
+                viewModel.currentCenter = context.region.center
+                viewModel.currentDistance = context.camera.distance
             }
             .onMapCameraChange(frequency: .onEnd) { context in
                             Task {
@@ -129,7 +127,7 @@ struct PuskeswanRadarView: View {
                     // Expandable Zoom Controls
                     VStack(spacing: 12) {
                         if isZoomMenuExpanded {
-                            Button(action: zoomIn) {
+                            Button(action: { viewModel.zoomIn() }) {
                                 Image(systemName: "plus.magnifyingglass")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(Color(hex: "FF6B33"))
@@ -140,7 +138,7 @@ struct PuskeswanRadarView: View {
                             }
                             .transition(.scale.combined(with: .opacity).combined(with: .offset(y: 20)))
                             
-                            Button(action: zoomOut) {
+                            Button(action: { viewModel.zoomOut() }) {
                                 Image(systemName: "minus.magnifyingglass")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(Color(hex: "FF6B33"))
@@ -270,12 +268,12 @@ struct PuskeswanRadarView: View {
         ) {
             Button("Apple Maps") {
                 if let clinic = viewModel.selectedClinic {
-                    openInAppleMaps(clinic: clinic)
+                    viewModel.openInAppleMaps(clinic: clinic)
                 }
             }
             Button("Google Maps") {
                 if let clinic = viewModel.selectedClinic {
-                    openInGoogleMaps(clinic: clinic)
+                    viewModel.openInGoogleMaps(clinic: clinic)
                 }
             }
             Button("Batal", role: .cancel) {}
@@ -285,52 +283,6 @@ struct PuskeswanRadarView: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: viewModel.selectedClinic)
-        }
-    }
-    
-    private func zoomIn() {
-        let newDistance = max(currentDistance * 0.4, 500)
-        withAnimation(.easeInOut(duration: 0.5)) {
-            viewModel.position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
-        }
-    }
-    
-    private func zoomOut() {
-        let newDistance = min(currentDistance * 2.5, 500000)
-        withAnimation(.easeInOut(duration: 0.5)) {
-            viewModel.position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
-        }
-    }
-    
-    private func openInAppleMaps(clinic: ClinicModel) {
-        if let mapItem = clinic.mapItem {
-            mapItem.openInMaps(launchOptions: [
-                MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-            ])
-        } else {
-            // Use non-deprecated iOS 26+ API: MKMapItem(location:address:)
-            let location = CLLocation(
-                latitude: clinic.coordinate.latitude,
-                longitude: clinic.coordinate.longitude
-            )
-            let mapItem = MKMapItem(location: location, address: nil)
-            mapItem.name = clinic.name
-            mapItem.openInMaps(launchOptions: [
-                MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-            ])
-        }
-    }
-    
-    private func openInGoogleMaps(clinic: ClinicModel) {
-        let lat = clinic.coordinate.latitude
-        let lon = clinic.coordinate.longitude
-        let appUrl = URL(string: "comgooglemaps://?daddr=\(lat),\(lon)&directionsmode=driving")!
-        let webUrl = URL(string: "https://www.google.com/maps/dir/?api=1&destination=\(lat),\(lon)&travelmode=driving")!
-        
-        UIApplication.shared.open(appUrl, options: [:]) { success in
-            if !success {
-                UIApplication.shared.open(webUrl, options: [:], completionHandler: nil)
-            }
         }
     }
 }

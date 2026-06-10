@@ -56,6 +56,9 @@ struct ContextualDashboardView: View {
                                 .foregroundColor(textGray)
                                 .tracking(0.4)
                                 .textCase(.uppercase)
+                                .onTapGesture(count: 3) {
+                                    ClimateManager.shared.triggerTestNotification()
+                                }
                         }
                         
                         Spacer()

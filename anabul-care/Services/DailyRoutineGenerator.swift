@@ -1,16 +1,31 @@
 import Foundation
 import SwiftData
 
+/// Represents a specific task in the daily routine for display.
 public struct DailyTaskItem: Identifiable {
     public let id = UUID()
+    /// The type of activity.
     public let type: LogType
+    /// Human-readable title of the task.
     public let title: String
+    /// Recommended time for the task (e.g., "08:00 AM").
     public let timeRecommendation: String
+    /// Descriptive instruction for the task.
     public let detail: String
+    /// SF Symbol icon name.
     public let icon: String
 }
 
+/// Service responsible for composing the daily routine for a pet.
+/// Orchestrates logic between base rules, modifiers, and user preferences.
 public struct DailyRoutineGenerator {
+    /// Generates a list of tasks for a pet on a specific date.
+    /// - Parameters:
+    ///   - pet: The pet profile to generate tasks for.
+    ///   - date: The target date (defaults to today).
+    ///   - preferences: User-defined timing overrides.
+    ///   - deactivations: Tasks that should be hidden.
+    /// - Returns: A sorted list of DailyTaskItem.
     public static func generate(for pet: PetProfile, on date: Date = Date(), preferences: [TaskPreference] = [], deactivations: [TaskDeactivation] = []) -> [DailyTaskItem] {
         let engine = RoutineRuleEngine.shared
         let species = pet.species.lowercased()

@@ -42,9 +42,9 @@ final class PetRepositoryTests: XCTestCase {
         let pet = PetProfile(name: "Rex", species: "dog", breed: "German Shepherd", dateOfBirth: Date(), weightKg: 10.0)
         
         // Act
-        let rmr = pet.rmr
+        let rer = pet.rer
         
         // Assert: 70 * (10 ^ 0.75) ≈ 393.6
-        XCTAssertEqual(rmr, 70.0 * pow(10.0, 0.75), accuracy: 0.1)
+        XCTAssertEqual(rer, 70.0 * pow(10.0, 0.75), accuracy: 0.1)
     }
 }
