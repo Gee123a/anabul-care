@@ -30,6 +30,8 @@ struct Anabul_care_WatchOSApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    @StateObject private var connectivity = WatchConnectivityManager.shared
 
     var body: some Scene {
         WindowGroup {
