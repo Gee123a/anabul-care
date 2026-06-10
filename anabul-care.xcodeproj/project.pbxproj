@@ -146,6 +146,7 @@
 				Services/DataManager.swift,
 				Services/HabitLearningService.swift,
 				Services/RoutineRuleEngine.swift,
+				Services/WatchConnectivityManager.swift,
 			);
 			target = 56A3ABC62FD0180400475152 /* Anabul-care-WatchOS Watch App */;
 		};
