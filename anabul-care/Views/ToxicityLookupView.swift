@@ -28,17 +28,19 @@ struct ToxicityLookupView: View {
                         
                         Spacer()
                         
+                        let levelColor = colorForDangerLevel(hazard.dangerLevel)
+                        
                         Text(hazard.dangerLevel.uppercased())
                             .font(.caption2)
                             .fontWeight(.bold)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(viewModel.colorForDangerLevel(hazard.dangerLevel).opacity(0.2))
-                            .foregroundColor(viewModel.colorForDangerLevel(hazard.dangerLevel))
+                            .background(levelColor.opacity(0.2))
+                            .foregroundColor(levelColor)
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
-                                    .stroke(viewModel.colorForDangerLevel(hazard.dangerLevel).opacity(0.5), lineWidth: 1)
+                                    .stroke(levelColor.opacity(0.5), lineWidth: 1)
                             )
                             .accessibilityLabel("Danger level: \(hazard.dangerLevel)")
                     }
@@ -69,6 +71,17 @@ struct ToxicityLookupView: View {
                     }
                 }
             }
+        }
+    }
+    
+    /// Maps danger level strings to SwiftUI colors.
+    private func colorForDangerLevel(_ level: String) -> Color {
+        switch level.lowercased() {
+        case "low": return .yellow
+        case "moderate": return .orange
+        case "high": return .red
+        case "critical": return .purple
+        default: return .gray
         }
     }
 }

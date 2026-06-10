@@ -6,11 +6,21 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
+import AppIntents
 
 @MainActor
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), petName: "Luna", completedCount: 3, totalCount: 6, species: "cat")
+        SimpleEntry(
+            date: Date(),
+            petName: "Luna",
+            completedCount: 3,
+            totalCount: 6,
+            species: "cat",
+            nextTaskName: "Morning Feeding",
+            nextTaskType: "feeding",
+            nextTaskIcon: "fork.knife"
+        )
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
@@ -63,12 +73,25 @@ struct Provider: TimelineProvider {
                     }
                 }.count
                 
+                let uncompletedTasks = tasks.filter { task in
+                    !pet.activities.contains { activity in
+                        activity.type == task.type.rawValue && Calendar.current.isDate(activity.timestamp, inSameDayAs: today)
+                    }
+                }
+                
+                let nextTaskName = uncompletedTasks.first?.title
+                let nextTaskType = uncompletedTasks.first?.type.rawValue
+                let nextTaskIcon = uncompletedTasks.first?.icon
+                
                 return SimpleEntry(
                     date: today,
                     petName: pet.name,
                     completedCount: completedCount,
                     totalCount: totalCount,
-                    species: pet.species
+                    species: pet.species,
+                    nextTaskName: nextTaskName,
+                    nextTaskType: nextTaskType,
+                    nextTaskIcon: nextTaskIcon
                 )
             }
         } catch {
@@ -76,7 +99,16 @@ struct Provider: TimelineProvider {
         }
         
         // Default fallback placeholder if no pets exist in the database yet
-        return SimpleEntry(date: Date(), petName: "Luna", completedCount: 3, totalCount: 6, species: "cat")
+        return SimpleEntry(
+            date: Date(),
+            petName: "Luna",
+            completedCount: 3,
+            totalCount: 6,
+            species: "cat",
+            nextTaskName: "Morning Feeding",
+            nextTaskType: "feeding",
+            nextTaskIcon: "fork.knife"
+        )
     }
 }
 
@@ -86,6 +118,9 @@ struct SimpleEntry: TimelineEntry {
     let completedCount: Int
     let totalCount: Int
     let species: String
+    let nextTaskName: String?
+    let nextTaskType: String?
+    let nextTaskIcon: String?
 }
 
 struct Anabul_careWidgetEntryView : View {
@@ -136,13 +171,33 @@ struct Anabul_careWidgetEntryView : View {
             
             Spacer()
             
-            Text("Log activity in app")
-                .font(.system(size: 10, weight: .bold, design: .rounded))
-                .frame(maxWidth: .infinity)
-                .frame(height: 28)
-                .background(tangerine)
-                .foregroundColor(.white)
-                .clipShape(Capsule())
+            if let taskName = entry.nextTaskName, let taskType = entry.nextTaskType {
+                Button(intent: LogActivityIntent(petName: entry.petName, activityType: taskType)) {
+                    HStack(spacing: 4) {
+                        if let icon = entry.nextTaskIcon {
+                            Image(systemName: icon)
+                                .font(.system(size: 10))
+                        }
+                        Text("Log \(taskName)")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 28)
+                    .background(tangerine)
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text("All Done! 🐾")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 28)
+                    .background(Color.gray.opacity(0.15))
+                    .foregroundColor(.secondary)
+                    .clipShape(Capsule())
+            }
         }
     }
     

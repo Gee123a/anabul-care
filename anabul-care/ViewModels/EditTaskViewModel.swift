@@ -29,6 +29,7 @@ public final class EditTaskViewModel {
         case .walk, .play: return base + "Lack of exercise can lead to obesity and behavioral issues."
         case .grooming: return base + "Regular grooming prevents skin issues and monitors for parasites."
         case .hydration: return base + "Hydration is essential for kidney function and overall health."
+        case .medication: return base + "Missing medication or supplements can lead to complications."
         }
     }
     

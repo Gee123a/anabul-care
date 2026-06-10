@@ -1,5 +1,6 @@
 import Foundation
 
+/// Data structure for a single task within a routine, as defined in metadata.
 public struct RoutineTask: Codable, Sendable {
     public let type: String
     public let title: String
@@ -8,6 +9,7 @@ public struct RoutineTask: Codable, Sendable {
     public let icon: String
 }
 
+/// Defines the conditions under which a routine modifier should be applied.
 public struct RoutineTrigger: Codable, Sendable {
     public let age_max_months: Int?
     public let age_min_months: Int?
@@ -15,6 +17,7 @@ public struct RoutineTrigger: Codable, Sendable {
     public let weekday: Int? // 1 = Sunday, 7 = Saturday
 }
 
+/// Defines an adjustment to the base routine (add, modify, or remove).
 public struct RoutineModifier: Codable, Sendable {
     public let id: String
     public let trigger: RoutineTrigger
@@ -26,6 +29,7 @@ public struct RoutineModifier: Codable, Sendable {
     public let new_icon: String?
 }
 
+/// Comprehensive registry of all metadata rules and routines.
 public struct DetailedMetadataRegistry: Codable, Sendable {
     public let species_rules: [SpeciesRule]
     public let behavioral_tidbits: [BehavioralTidbit]
@@ -34,7 +38,10 @@ public struct DetailedMetadataRegistry: Codable, Sendable {
     public let routine_modifiers: [RoutineModifier]?
 }
 
+/// The core engine that loads and provides access to routine rules and modifiers.
+/// Acts as the source of truth for species-specific and breed-specific logic.
 public class RoutineRuleEngine {
+    /// Shared singleton instance.
     public static let shared = RoutineRuleEngine()
     
     private var registry: DetailedMetadataRegistry?
@@ -43,6 +50,7 @@ public class RoutineRuleEngine {
         loadRegistry()
     }
     
+    /// Loads the metadata registry from the bundled JSON file.
     private func loadRegistry() {
         guard let url = Bundle.main.url(forResource: "MetadataRegistry", withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
@@ -58,14 +66,23 @@ public class RoutineRuleEngine {
         }
     }
     
+    /// Retrieves the default tasks for a given species.
+    /// - Parameter species: The species identifier.
+    /// - Returns: A list of base tasks.
     public func getBaseRoutine(for species: String) -> [RoutineTask] {
         return registry?.base_routines?[species] ?? []
     }
     
+    /// Retrieves traits associated with a specific breed.
+    /// - Parameters:
+    ///   - species: The species identifier.
+    ///   - breed: The breed name.
+    /// - Returns: A list of trait strings.
     public func getTraits(for species: String, breed: String) -> [String] {
         return registry?.breed_metadata?[species]?[breed] ?? []
     }
     
+    /// Returns all global routine modifiers.
     public func getModifiers() -> [RoutineModifier] {
         return registry?.routine_modifiers ?? []
     }

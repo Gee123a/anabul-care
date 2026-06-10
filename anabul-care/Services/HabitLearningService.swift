@@ -1,13 +1,20 @@
 import Foundation
 import SwiftData
 
+/// Service that analyzes activity logs to learn user habits and pet patterns.
+/// Suggests routine adjustments based on historical behavior.
 public class HabitLearningService {
+    /// Shared singleton instance.
     public static let shared = HabitLearningService()
     
     private init() {}
     
     /// Analyzes logs for a specific pet and task type to find a "habitual" time.
-    /// Returns a time string if a habit is detected, otherwise nil.
+    /// A habit is established if at least 3 logs cluster within a 60-minute window.
+    /// - Parameters:
+    ///   - pet: The pet profile to analyze.
+    ///   - taskType: The type of activity (RawValue of LogType).
+    /// - Returns: A formatted time string (e.g., "08:00 AM") if a habit is detected, otherwise nil.
     public func detectHabit(for pet: PetProfile, taskType: String) -> String? {
         let logs = pet.activities.filter { $0.type == taskType }
         
@@ -41,6 +48,7 @@ public class HabitLearningService {
         return nil
     }
     
+    /// Formats total minutes from midnight into a human-readable AM/PM string.
     private func formatMinutesToTimeString(_ totalMinutes: Int) -> String {
         let hour = totalMinutes / 60
         let minute = totalMinutes % 60
@@ -51,6 +59,7 @@ public class HabitLearningService {
 }
 
 extension Calendar {
+    /// Checks if a date falls within the previous N days from now.
     func isDate(_ date: Date, inNextDays days: Int) -> Bool {
         guard let threshold = self.date(byAdding: .day, value: -days, to: Date()) else { return false }
         return date >= threshold

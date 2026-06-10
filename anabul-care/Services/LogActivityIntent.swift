@@ -8,25 +8,42 @@ import SwiftData
 import Foundation
 import WidgetKit
 
-struct LogActivityIntent: AppIntent {
-    static var title: LocalizedStringResource = "Log Pet Activity"
-    static var description = IntentDescription("Log an activity like feeding, walking, or playing for your pet.")
+public struct LogActivityIntent: AppIntent {
+    public static var title: LocalizedStringResource = "Log Pet Activity"
+    public static var description = IntentDescription("Log an activity like feeding, walking, or playing for your pet.")
 
     @Parameter(title: "Pet Name")
-    var petName: String
+    public var petName: String
 
     @Parameter(title: "Activity Type")
-    var activityType: String // matches LogType raw values
+    public var activityType: String // matches LogType raw values
 
-    static var parameterSummary: some ParameterSummary {
+    public init() {}
+
+    public init(petName: String, activityType: String) {
+        self.petName = petName
+        self.activityType = activityType
+    }
+
+    public static var parameterSummary: some ParameterSummary {
         Summary("Log \(\.$activityType) for \(\.$petName)")
     }
 
     @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
+    public func perform() async throws -> some IntentResult & ProvidesDialog {
         // 1. Get the shared model container
-        let schema = Schema([PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self])
-        let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
+        let schema = Schema([
+            PetProfile.self,
+            ActivityLog.self,
+            SpeciesRuleModel.self,
+            ToxicityModel.self,
+            TidbitModel.self,
+            TaskPreference.self,
+            TaskDeactivation.self
+        ])
+        guard let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare") else {
+            return .result(dialog: "Sorry, I couldn't access your pet data right now.")
+        }
         let sharedStoreURL = groupURL.appendingPathComponent("anabulcare.sqlite")
         let modelConfiguration = ModelConfiguration(schema: schema, url: sharedStoreURL)
         

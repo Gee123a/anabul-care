@@ -17,7 +17,7 @@ struct AnimatedMapPin: View {
                 .frame(width: 26, height: 26)
                 .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
             
-            Image(systemName: iconForCategory(category))
+            Image(systemName: category.systemIcon)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(Color(hex: "FF6B33"))
         }
@@ -25,30 +25,19 @@ struct AnimatedMapPin: View {
             isPulsing = true
         }
     }
-    
-    private func iconForCategory(_ category: POICategory) -> String {
-        switch category {
-        case .vet: return "cross.case.fill"
-        case .hotel: return "house.lodge.fill"
-        case .park: return "tree.fill"
-        case .all: return "mappin"
-        }
-    }
 }
 
 struct PuskeswanRadarView: View {
-    @StateObject private var viewModel = RadarViewModel()
+    @State private var viewModel = RadarViewModel()
     @Binding var selectedTab: Int
     
     @State private var isZoomMenuExpanded = false
-    @State private var currentCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -7.2950, longitude: 112.7385)
-    @State private var currentDistance: Double = 5000
+    @State private var showingMapsSelector = false
     
     var body: some View {
         ZStack(alignment: .top) {
             
-            // FIXED: Added interactionModes: .zoom in the correct order before selection
-            Map(position: $viewModel.position, interactionModes: .zoom, selection: $viewModel.selectedClinic) {
+            Map(position: $viewModel.position, interactionModes: [.pan, .zoom], selection: $viewModel.selectedClinic) {
                 ForEach(viewModel.filteredClinics) { clinic in
                     Annotation(clinic.name, coordinate: clinic.coordinate) {
                         AnimatedMapPin(category: clinic.category)
@@ -59,8 +48,8 @@ struct PuskeswanRadarView: View {
             }
             .mapStyle(.standard(elevation: .realistic, emphasis: .muted, pointsOfInterest: .excludingAll))
             .onMapCameraChange(frequency: .continuous) { context in
-                currentCenter = context.region.center
-                currentDistance = context.camera.distance
+                viewModel.currentCenter = context.region.center
+                viewModel.currentDistance = context.camera.distance
             }
             .onMapCameraChange(frequency: .onEnd) { context in
                             Task {
@@ -68,6 +57,7 @@ struct PuskeswanRadarView: View {
                             }
                         }
             .ignoresSafeArea()
+            .background(MapGestureConfigurator())
             
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
@@ -137,7 +127,7 @@ struct PuskeswanRadarView: View {
                     // Expandable Zoom Controls
                     VStack(spacing: 12) {
                         if isZoomMenuExpanded {
-                            Button(action: zoomIn) {
+                            Button(action: { viewModel.zoomIn() }) {
                                 Image(systemName: "plus.magnifyingglass")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(Color(hex: "FF6B33"))
@@ -148,7 +138,7 @@ struct PuskeswanRadarView: View {
                             }
                             .transition(.scale.combined(with: .opacity).combined(with: .offset(y: 20)))
                             
-                            Button(action: zoomOut) {
+                            Button(action: { viewModel.zoomOut() }) {
                                 Image(systemName: "minus.magnifyingglass")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(Color(hex: "FF6B33"))
@@ -180,45 +170,84 @@ struct PuskeswanRadarView: View {
                 
                 if let clinic = viewModel.selectedClinic {
                     HStack(spacing: 16) {
+                        // Fixed size Category Icon container
                         ZStack {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(Color(hex: "FF6B33").opacity(0.15))
-                                .frame(width: 52, height: 52)
                             
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .stroke(Color(hex: "FF6B33").opacity(0.3), lineWidth: 1)
                             
-                            Image(systemName: iconForCategory(clinic.category))
+                            Image(systemName: clinic.category.systemIcon)
                                 .foregroundColor(Color(hex: "FF6B33"))
                                 .font(.system(size: 22))
                         }
+                        .frame(width: 52, height: 52)
                         
                         VStack(alignment: .leading, spacing: 4) {
+                            Text(clinic.category.rawValue.uppercased())
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(hex: "FF6B33"))
+                                .tracking(0.5)
+                            
                             Text(clinic.name)
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.black)
-                                .lineLimit(1)
-                            Text(clinic.phone)
-                                .font(.system(size: 14, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            if !clinic.address.isEmpty {
+                                Text(clinic.address)
+                                    .font(.system(size: 12, design: .rounded))
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                            
+                            // Phone Call Action
+                            if clinic.phone != "No Phone" {
+                                Button(action: {
+                                    if let url = URL(string: "tel://\(clinic.phone.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: ""))"),
+                                       UIApplication.shared.canOpenURL(url) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "phone.fill")
+                                            .font(.system(size: 11))
+                                        Text(clinic.phone)
+                                            .font(.system(size: 12, design: .rounded))
+                                    }
+                                    .foregroundColor(Color(hex: "FF6B33"))
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "phone.slash.fill")
+                                        .font(.system(size: 11))
+                                    Text("No Phone")
+                                        .font(.system(size: 12, design: .rounded))
+                                }
+                                .foregroundColor(.gray)
+                            }
                         }
                         
                         Spacer()
                         
+                        // Route Action
                         Button(action: {
-                            if let mapItem = clinic.mapItem {
-                                mapItem.openInMaps(launchOptions: [
-                                    MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-                                ])
-                            }
+                            showingMapsSelector = true
                         }) {
-                            Text("Route")
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 12)
-                                .background(Color(hex: "1A1A1A"))
-                                .clipShape(Capsule())
+                            VStack(spacing: 4) {
+                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                                    .font(.system(size: 18))
+                                Text("Route")
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(hex: "1A1A1A"))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
                     .padding(16)
@@ -231,46 +260,90 @@ struct PuskeswanRadarView: View {
                     .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+        }
+        .confirmationDialog(
+            "Pilih Aplikasi Peta",
+            isPresented: $showingMapsSelector,
+            titleVisibility: .visible
+        ) {
+            Button("Apple Maps") {
+                if let clinic = viewModel.selectedClinic {
+                    viewModel.openInAppleMaps(clinic: clinic)
+                }
+            }
+            Button("Google Maps") {
+                if let clinic = viewModel.selectedClinic {
+                    viewModel.openInGoogleMaps(clinic: clinic)
+                }
+            }
+            Button("Batal", role: .cancel) {}
+        } message: {
+            if let clinic = viewModel.selectedClinic {
+                Text("Dapatkan rute ke \(clinic.name)")
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: viewModel.selectedClinic)
-    }
-    
-    private func zoomIn() {
-        let newDistance = max(currentDistance * 0.4, 500)
-        withAnimation(.easeInOut(duration: 0.5)) {
-            viewModel.position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
-        }
-    }
-    
-    private func zoomOut() {
-        let newDistance = min(currentDistance * 2.5, 500000)
-        withAnimation(.easeInOut(duration: 0.5)) {
-            viewModel.position = .camera(MapCamera(centerCoordinate: currentCenter, distance: newDistance))
-        }
-    }
-    
-    private func iconForCategory(_ category: POICategory) -> String {
-        switch category {
-        case .vet: return "cross.case.fill"
-        case .hotel: return "house.lodge.fill"
-        case .park: return "tree.fill"
-        case .all: return "mappin"
         }
     }
 }
 
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let r, g, b: UInt64
-        if hex.count == 6 {
-            (r, g, b) = (int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        } else {
-            (r, g, b) = (1, 1, 0)
+
+
+// MARK: - Map Gesture Configurator (Forces 2-finger pan recursively on layout updates)
+struct MapGestureConfigurator: UIViewRepresentable {
+    func makeUIView(context: Context) -> GestureInterceptorView {
+        GestureInterceptorView()
+    }
+    
+    func updateUIView(_ uiView: GestureInterceptorView, context: Context) {}
+}
+
+class GestureInterceptorView: UIView {
+    private weak var parentMapView: MKMapView?
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if parentMapView == nil {
+            parentMapView = findMapView(from: self)
         }
-        self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: 1)
+        if let mapView = parentMapView {
+            configureGestures(in: mapView)
+        }
+    }
+    
+    private func findMapView(from view: UIView) -> MKMapView? {
+        if let superview = view.superview, let found = findDescendantMapView(in: superview) {
+            return found
+        }
+        if let window = view.window, let found = findDescendantMapView(in: window) {
+            return found
+        }
+        return nil
+    }
+    
+    private func findDescendantMapView(in view: UIView) -> MKMapView? {
+        if let mapView = view as? MKMapView {
+            return mapView
+        }
+        for subview in view.subviews {
+            if let found = findDescendantMapView(in: subview) {
+                return found
+            }
+        }
+        return nil
+    }
+    
+    private func configureGestures(in view: UIView) {
+        if let gestures = view.gestureRecognizers {
+            for gesture in gestures {
+                if let pan = gesture as? UIPanGestureRecognizer {
+                    pan.minimumNumberOfTouches = 2
+                    pan.maximumNumberOfTouches = 2
+                }
+            }
+        }
+        for subview in view.subviews {
+            configureGestures(in: subview)
+        }
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import WidgetKit
 
 @Observable
 public final class AddPetViewModel {
@@ -91,6 +92,7 @@ public final class AddPetViewModel {
                 )
                 try repository.addPet(newPet)
             }
+            WidgetCenter.shared.reloadAllTimelines()
             self.isSaved = true
         } catch {
             print("AddPetViewModel: Error saving pet: \(error)")

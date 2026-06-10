@@ -1,19 +1,25 @@
 import Foundation
 
-
+/// Service responsible for calculating metabolic requirements (RER and MER) for pets.
 struct MetabolismEngine {
     
-    /// Calculates the Resting Energy Requirement (RER)
-    /// Formula: 70 * (weight)^0.75 for Dogs/Cats, 145 * (weight)^0.75 for Hamsters
+    /// Calculates the Resting Energy Requirement (RER).
+    /// Formula: 70 * (weight)^0.75 for Dogs/Cats, 145 * (weight)^0.75 for Hamsters.
+    /// - Parameters:
+    ///   - weightKg: The weight of the pet in kilograms.
+    ///   - species: The species of the pet.
+    /// - Returns: The RER in calories.
     static func calculateRER(weightKg: Double, species: PetSpecies) -> Double {
         let constant: Double = (species == .hamster) ? 145.0 : 70.0
         return constant * pow(weightKg, 0.75)
     }
     
-    /// Calculates the Maintenance Energy Requirement (MER)
+    /// Calculates the Maintenance Energy Requirement (MER) based on species, age, and neutering status.
+    /// - Parameter pet: The pet profile to calculate MER for.
+    /// - Returns: The MER in calories.
     static func calculateMER(pet: PetProfile) -> Double {
         let rer = calculateRER(weightKg: pet.weightKg, species: pet.petSpecies)
-        let ageMonths = Calendar.current.dateComponents([.month], from: pet.dateOfBirth, to: Date()).month ?? 0
+        let ageMonths = pet.ageInMonths
 
         switch pet.petSpecies {
         case .dog:
@@ -26,15 +32,18 @@ struct MetabolismEngine {
             return ageMonths < 6 ? rer * 1.2 : rer * 1.0
         }
     }
-    }
+}
 
-    // Extend PetProfile to provide easy access to these calculations
-    extension PetProfile {
+// MARK: - PetProfile Extension
+
+extension PetProfile {
+    /// Convenience property to get the Resting Energy Requirement.
     var rer: Double {
         MetabolismEngine.calculateRER(weightKg: weightKg, species: petSpecies)
     }
 
+    /// Convenience property to get the target maintenance calories.
     var dailyTargetCalories: Double {
         MetabolismEngine.calculateMER(pet: self)
     }
-    }
+}
