@@ -23,6 +23,7 @@ struct ContextualDashboardView: View {
     private let primaryDark = Color(red: 28/255, green: 28/255, blue: 26/255)
     private let secondaryDark = Color(red: 92/255, green: 92/255, blue: 88/255)
     
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
     @State private var navigateToProfile = false
@@ -55,157 +56,163 @@ struct ContextualDashboardView: View {
         NavigationStack {
             // The main scrollable content area for the dashboard
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
+                HStack {
+                    if horizontalSizeClass == .regular { Spacer() }
                     
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(viewModel.currentDateString)
-                                .font(.system(size: 13, weight: .regular, design: .default))
-                                .foregroundColor(textGray)
-                                .tracking(0.4)
-                                .textCase(.uppercase)
-                                .onTapGesture(count: 3) {
-                                    ClimateManager.shared.triggerTestNotification()
-                                }
-                        }
+                    VStack(alignment: .leading, spacing: 24) {
                         
-                        Spacer()
-                        
-                        // PET SWITCHER MENU
-                        Menu {
-                            Section("Switch Pet") {
-                                ForEach(viewModel.pets) { pet in
-                                    Button {
-                                        withAnimation {
-                                            viewModel.selectedPetID = pet.id
-                                            WatchConnectivityManager.shared.sendPetToWatch(
-                                                petName: pet.name,
-                                                species: pet.species,
-                                                breed: pet.breed
-                                            )
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Text(pet.name)
-                                            if viewModel.selectedPetID == pet.id {
-                                                Image(systemName: "checkmark")
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(viewModel.currentDateString)
+                                    .font(.system(size: 13, weight: .regular, design: .default))
+                                    .foregroundColor(textGray)
+                                    .tracking(0.4)
+                                    .textCase(.uppercase)
+                                    .onTapGesture(count: 3) {
+                                        ClimateManager.shared.triggerTestNotification()
+                                    }
+                            }
+                            
+                            Spacer()
+                            
+                            // PET SWITCHER MENU
+                            Menu {
+                                Section("Switch Pet") {
+                                    ForEach(viewModel.pets) { pet in
+                                        Button {
+                                            withAnimation {
+                                                viewModel.selectedPetID = pet.id
+                                                WatchConnectivityManager.shared.sendPetToWatch(
+                                                    petName: pet.name,
+                                                    species: pet.species,
+                                                    breed: pet.breed
+                                                )
+                                            }
+                                        } label: {
+                                            HStack {
+                                                Text(pet.name)
+                                                if viewModel.selectedPetID == pet.id {
+                                                    Image(systemName: "checkmark")
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                
+                                Section {
+                                    Button {
+                                        navigateToProfile = true
+                                    } label: {
+                                        Label("View Profile", systemImage: "person.circle")
+                                    }
+                                    .disabled(viewModel.currentPet == nil)
+                                    
+                                    Button {
+                                        showingAddPet = true
+                                    } label: {
+                                        Label("Add New Pet", systemImage: "plus.circle")
+                                    }
+                                }
+                            } label: {
+                                if let pet = viewModel.currentPet {
+                                    ZStack(alignment: .bottomTrailing) {
+                                        Image(systemName: "pawprint.fill")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .padding(12)
+                                            .frame(width: 52, height: 52)
+                                            .background(Color.white)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1.5))
+                                            .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
+                                        
+                                        Circle()
+                                            .fill(Color(red: 155/255, green: 217/255, blue: 180/255))
+                                            .frame(width: 14, height: 14)
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                    }
+                                } else {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.1))
+                                        .frame(width: 52, height: 52)
+                                        .overlay(Image(systemName: "plus").foregroundColor(.gray))
+                                }
+                            }
+                        }
+                        .padding(.top, 20)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(viewModel.currentPet != nil ? "Good morning," : "Good morning!")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(primaryDark)
+                                .tracking(-0.5)
+                            
+                            if let pet = viewModel.currentPet {
+                                Text("\(pet.name) is up.")
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .foregroundColor(tangerine)
+                                    .tracking(-0.5)
+                                    .padding(.top, -14)
                             }
                             
-                            Section {
-                                Button {
-                                    navigateToProfile = true
-                                } label: {
-                                    Label("View Profile", systemImage: "person.circle")
-                                }
-                                .disabled(viewModel.currentPet == nil)
-                                
-                                Button {
-                                    showingAddPet = true
-                                } label: {
-                                    Label("Add New Pet", systemImage: "plus.circle")
-                                }
-                            }
-                        } label: {
-                            if let pet = viewModel.currentPet {
-                                ZStack(alignment: .bottomTrailing) {
-                                    Image(systemName: "pawprint.fill")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding(12)
-                                        .frame(width: 52, height: 52)
-                                        .background(Color.white)
-                                        .clipShape(Circle())
-                                        .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1.5))
-                                        .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 4)
-                                    
-                                    Circle()
-                                        .fill(Color(red: 155/255, green: 217/255, blue: 180/255))
-                                        .frame(width: 14, height: 14)
-                                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                                }
-                            } else {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.1))
-                                    .frame(width: 52, height: 52)
-                                    .overlay(Image(systemName: "plus").foregroundColor(.gray))
-                            }
+                            Text(viewModel.dynamicGreetingSubtext(for: viewModel.currentPet))
+                                .font(.system(size: 19, weight: .medium, design: .rounded))
+                                .foregroundColor(secondaryDark)
+                                .lineSpacing(4)
+                                .tracking(-0.2)
+                                .padding(.top, 4)
                         }
-                    }
-                    .padding(.top, 20)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(viewModel.currentPet != nil ? "Good morning," : "Good morning!")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(primaryDark)
-                            .tracking(-0.5)
+                        
+                        Button(action: { showingSafetyLookup.toggle() }) {
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.secondary)
+                                Text("Is it safe to feed \(viewModel.currentPet?.name ?? "Anabul")...")
+                                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Image(systemName: "exclamationmark.shield.fill")
+                                    .foregroundColor(.red)
+                                    .padding(8)
+                                    .background(Color.red.opacity(0.12))
+                                    .clipShape(Circle())
+                            }
+                            .padding(.horizontal, 16)
+                            .frame(height: 46)
+                            .background(Color.white)
+                            .clipShape(Capsule())
+                            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+                        }
+                        .buttonStyle(PressedScaleButtonStyle())
+                        
+                        HStack {
+                            Text("TODAY")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(primaryDark)
+                                .tracking(0.2)
+                            
+                            Spacer()
+                            
+                            Text("\(viewModel.todayTaskCount(for: viewModel.currentPet)) tasks")
+                                .font(.system(size: 13, weight: .regular, design: .default))
+                                .foregroundColor(textGray)
+                        }
+                        .padding(.top, 4)
                         
                         if let pet = viewModel.currentPet {
-                            Text("\(pet.name) is up.")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundColor(tangerine)
-                                .tracking(-0.5)
-                                .padding(.top, -14)
+                            TodayQueueCardView(pet: pet, modelContext: modelContext)
+                                .padding(.top, -12)
+                                .id(pet.id) // Ensure view reloads when pet changes
+                            
+                            FlashCardView(pet: pet)
+                                .id(pet.id)
+                        } else {
+                            EmptyPetStateView(showingAddPet: $showingAddPet)
                         }
-                        
-                        Text(viewModel.dynamicGreetingSubtext(for: viewModel.currentPet))
-                            .font(.system(size: 19, weight: .medium, design: .rounded))
-                            .foregroundColor(secondaryDark)
-                            .lineSpacing(4)
-                            .tracking(-0.2)
-                            .padding(.top, 4)
                     }
+                    .frame(maxWidth: horizontalSizeClass == .regular ? 650 : .infinity)
                     
-                    Button(action: { showingSafetyLookup.toggle() }) {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.secondary)
-                            Text("Is it safe to feed \(viewModel.currentPet?.name ?? "Anabul")...")
-                                .font(.system(size: 15, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .foregroundColor(.red)
-                                .padding(8)
-                                .background(Color.red.opacity(0.12))
-                                .clipShape(Circle())
-                        }
-                        .padding(.horizontal, 16)
-                        .frame(height: 46)
-                        .background(Color.white)
-                        .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
-                    }
-                    .buttonStyle(PressedScaleButtonStyle())
-                    
-                    HStack {
-                        Text("TODAY")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(primaryDark)
-                            .tracking(0.2)
-                        
-                        Spacer()
-                        
-                        Text("\(viewModel.todayTaskCount(for: viewModel.currentPet)) tasks")
-                            .font(.system(size: 13, weight: .regular, design: .default))
-                            .foregroundColor(textGray)
-                    }
-                    .padding(.top, 4)
-                    
-                    if let pet = viewModel.currentPet {
-                        TodayQueueCardView(pet: pet, modelContext: modelContext)
-                            .padding(.top, -12)
-                            .id(pet.id) // Ensure view reloads when pet changes
-                    } else {
-                        EmptyPetStateView(showingAddPet: $showingAddPet)
-                    }
-                    
-                    // Fixed rawValue issue here
-                    InlineInsightPanelView(targetSpecies: viewModel.currentPet?.species ?? "cat", modelContext: modelContext)
-                        .id(viewModel.currentPet?.id ?? UUID()) // Forces SwiftUI to completely rebuild the view when the pet ID changes
+                    if horizontalSizeClass == .regular { Spacer() }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
