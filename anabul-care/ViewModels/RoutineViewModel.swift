@@ -81,15 +81,10 @@ public final class RoutineViewModel {
             // Delete existing log to unmark task as completed
             context.delete(existingLog)
             pet.activities.removeAll(where: { $0.id == existingLog.id })
-            
-            WatchConnectivityManager.shared.sendActivityDeletion(
-                            petName: pet.name,
-                            activityType: taskType
-                        )
         } else {
             // Create new log to mark task as completed
             let newLog = ActivityLog(
-                timestamp: date,
+                timestamp: Date(), // Log at the actual current time
                 type: taskType,
                 durationMinutes: 15,
                 detail: task.detail
@@ -98,18 +93,26 @@ public final class RoutineViewModel {
             context.insert(newLog)
             pet.activities.append(newLog)
             
-            WatchConnectivityManager.shared.sendActivityToWatch(
-                            petName: pet.name,
-                            activityType: taskType
-                        )
+            // SMART LEARNING: Auto-adjust preferred time for tomorrow based on current click
+            let f = DateFormatter()
+            f.dateFormat = "h:mm a"
+            let currentTimeString = f.string(from: Date())
+            
+            repository.updatePreference(for: pet.id, taskType: taskType, preferredTime: currentTimeString, isManualOverride: true)
         }
-        
-        // Force the @Observable macro to detect a change in the relationship
-        pet.activities = pet.activities 
         
         // Save changes and refresh widgets
         try? context.save()
         WidgetCenter.shared.reloadAllTimelines()
+        
+        // SYNC TO WATCH: Push the full updated state (pets + preferences)
+        if let allPets = try? repository.fetchPets(), 
+           let allPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()) {
+            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+        }
+        
+        // Refresh local tasks
+        updateTasks()
     }
     
     /// Formatted string for month and year.

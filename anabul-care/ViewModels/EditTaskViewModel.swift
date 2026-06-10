@@ -48,6 +48,10 @@ public final class EditTaskViewModel {
                 let newPref = TaskPreference(petID: pet.id, taskType: task.type.rawValue, preferredTime: timeString, isManualOverride: true)
                 try repository.addPreference(newPref)
             }
+            
+            // SYNC TO WATCH: Update preferences on the watch
+            triggerSync()
+            
         } catch {
             print("EditTaskViewModel: Error saving preference: \(error)")
         }
@@ -58,6 +62,9 @@ public final class EditTaskViewModel {
             let preferences = try repository.fetchPreferences(for: pet.id)
             if let existing = preferences.first(where: { $0.taskType == task.type.rawValue }) {
                 try repository.deletePreference(existing)
+                
+                // SYNC TO WATCH: Reset preferences on the watch
+                triggerSync()
             }
         } catch {
             print("EditTaskViewModel: Error resetting preference: \(error)")
@@ -72,8 +79,18 @@ public final class EditTaskViewModel {
         )
         do {
             try repository.addDeactivation(deactivation)
+            
+            // SYNC TO WATCH: Removed task sync
+            triggerSync()
+            
         } catch {
             print("EditTaskViewModel: Error removing task: \(error)")
         }
     }
-}
+    
+    private func triggerSync() {
+        if let allPets = try? repository.fetchPets(),
+           let allPrefs = try? repository.fetchAllPreferences() {
+            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+        }
+    }}

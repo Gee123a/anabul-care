@@ -15,10 +15,12 @@ public protocol PetRepositoryProtocol {
     
     func fetchPreferences(for petID: UUID) throws -> [TaskPreference]
     func fetchDeactivations(for petID: UUID) throws -> [TaskDeactivation]
+    func fetchAllPreferences() throws -> [TaskPreference]
     
     func addPreference(_ preference: TaskPreference) throws
     func addDeactivation(_ deactivation: TaskDeactivation) throws
     func deletePreference(_ preference: TaskPreference) throws
+    func updatePreference(for petID: UUID, taskType: String, preferredTime: String, isManualOverride: Bool)
 }
 
 protocol ToxicityRepositoryProtocol {

@@ -15,7 +15,7 @@ struct ContextualDashboardView: View {
     
     init(modelContext: ModelContext) {
         let repository = PetRepository(context: modelContext)
-        _viewModel = State(initialValue: DashboardViewModel(repository: repository))
+        _viewModel = State(initialValue: DashboardViewModel(repository: repository, modelContext: modelContext))
     }
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
@@ -41,57 +41,12 @@ struct ContextualDashboardView: View {
         .ignoresSafeArea()
         .onAppear {
             viewModel.fetchPets()
-            
-            // FIX: Ask the viewModel for the pets array!
-            if let firstPet = viewModel.pets.first {
-                WatchConnectivityManager.shared.sendPetToWatch(
-                    petName: firstPet.name,
-                    species: firstPet.species,
-                    breed: firstPet.breed
-                )
-            }
+            viewModel.syncAllToWatch()
         }
-        // ⭐️ PASTED HERE: Listens for the Watch Manager's broadcast ⭐️
+        // Delegates all Watch payload handling to the ViewModel
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ReceivedWatchData"))) { notification in
-            
-            // Extract the payload
-            if let payload = notification.userInfo,
-               let action = payload["action"] as? String,
-               action == "log_activity" {
-                
-                let petName = payload["petName"] as? String ?? ""
-                let activityType = payload["activityType"] as? String ?? ""
-                
-                print("🚨 IPHONE HEARD THE WATCH! Logging: \(activityType)")
-                
-                // 1. Find the matching pet on the iPhone
-                if let targetPet = viewModel.pets.first(where: { $0.name == petName }) {
-                    
-                    // 2. Create the ActivityLog
-                    let newLog = ActivityLog(
-                        timestamp: Date(),
-                        type: activityType,
-                        durationMinutes: 15, // Default or pass this from the watch
-                        detail: "Logged from Apple Watch"
-                    )
-                    
-                    // 3. Save it to the iPhone database
-                    newLog.pet = targetPet
-                    modelContext.insert(newLog)
-                    targetPet.activities.append(newLog)
-                    
-                    do {
-                        try modelContext.save()
-                        print("🚨 SUCCESS! WATCH ACTIVITY SAVED TO IPHONE DATABASE!")
-                        
-                        // 4. Force the UI to refresh to show the new checkmark
-                        viewModel.fetchPets()
-                        
-                    } catch {
-                        print("🚨 FATAL ERROR SAVING WATCH ACTIVITY: \(error)")
-                    }
-                }
-            }
+            guard let payload = notification.userInfo as? [String: Any] else { return }
+            viewModel.handleWatchPayload(payload)
         }
     }
     

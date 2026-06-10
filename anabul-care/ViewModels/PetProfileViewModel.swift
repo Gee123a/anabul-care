@@ -31,6 +31,12 @@ public final class PetProfileViewModel {
         do {
             try repository.deletePet(pet)
             WidgetCenter.shared.reloadAllTimelines()
+            
+            // SYNC TO WATCH: Push the full updated state after deletion
+            if let allPets = try? repository.fetchPets(),
+               let allPrefs = try? repository.fetchAllPreferences() {
+                WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+            }
         } catch {
             print("PetProfileViewModel: Error deleting pet: \(error)")
         }

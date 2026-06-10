@@ -79,8 +79,9 @@ struct ToxicityIntent: AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         do {
             let schema = Schema([
-                Item.self, PetProfile.self, ActivityLog.self,
-                SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self
+                PetProfile.self, ActivityLog.self,
+                SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self,
+                TaskPreference.self, TaskDeactivation.self
             ])
             // FIXED: Using consistent App Group ID
             let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.Gee.anabulcare")!
