@@ -41,6 +41,17 @@ public final class RoutineViewModel {
         }
     }
     
+    /// Forces a refresh of the pet's activities from the database, useful when returning from background.
+    public func refreshActivities() {
+        let petID = pet.id
+        let descriptor = FetchDescriptor<ActivityLog>(predicate: #Predicate { $0.pet?.id == petID })
+        if let freshLogs = try? modelContext.fetch(descriptor) {
+            pet.activities = freshLogs
+        }
+        updateTasks()
+    }
+
+    
     /// Selects a new date and refreshes the tasks.
     public func selectDate(_ date: Date) {
         self.selectedDate = Calendar.current.startOfDay(for: date)
