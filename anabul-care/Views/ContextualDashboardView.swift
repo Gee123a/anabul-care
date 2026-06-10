@@ -5,11 +5,11 @@
 //  Created by Nicholas Gerwin Mawardji on 28/05/26.
 //
 
-
 import SwiftUI
 import SwiftData
 
 struct ContextualDashboardView: View {
+    // SwiftData environment context for database operations
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: DashboardViewModel
     
@@ -29,14 +29,15 @@ struct ContextualDashboardView: View {
     @State private var selectedTab = 0
     
     var body: some View {
+        // TabView controls the page-style swiping between the dashboard and the map
         TabView(selection: $selectedTab) {
             dashboardPage
-                .tag(0)
+                .tag(0) // Tag assigns an index to the page so swipe gestures can target it
             
             PuskeswanRadarView(selectedTab: $selectedTab)
                 .tag(1)
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+        .tabViewStyle(.page(indexDisplayMode: .never)) // Hides the default page dots at the bottom
         .ignoresSafeArea()
         .onAppear {
             viewModel.fetchPets()
@@ -46,6 +47,7 @@ struct ContextualDashboardView: View {
     @ViewBuilder
     private var dashboardPage: some View {
         NavigationStack {
+            // The main scrollable content area for the dashboard
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     
@@ -192,12 +194,14 @@ struct ContextualDashboardView: View {
                     
                     // Fixed rawValue issue here
                     InlineInsightPanelView(targetSpecies: viewModel.currentPet?.species ?? "cat", modelContext: modelContext)
-                        .id(viewModel.currentPet?.id ?? UUID())
+                        .id(viewModel.currentPet?.id ?? UUID()) // Forces SwiftUI to completely rebuild the view when the pet ID changes
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
             .background(Color(red: 0.98, green: 0.98, blue: 0.97))
+            
+            // Handles programmatic routing to the pet profile view via the Pet Switcher menu
             .navigationDestination(isPresented: $navigateToProfile) {
                 if let pet = viewModel.currentPet {
                     PetProfileView(pet: pet, modelContext: modelContext)
