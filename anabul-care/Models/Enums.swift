@@ -15,3 +15,9 @@ public enum LogType: String, Codable, CaseIterable {
     case play = "play"
     case hydration = "hydration"
 }
+
+public enum LifeStage: String, Codable, CaseIterable {
+    case puppyKitten = "puppyKitten"
+    case adult = "adult"
+    case senior = "senior"
+}

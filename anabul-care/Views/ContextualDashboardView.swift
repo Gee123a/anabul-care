@@ -11,8 +11,12 @@ import SwiftData
 
 struct ContextualDashboardView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var viewModel: DashboardViewModel
     
-    @Query(sort: \PetProfile.name) private var pets: [PetProfile]
+    init(modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: DashboardViewModel(repository: repository))
+    }
     
     private let tangerine = Color(red: 255/255, green: 107/255, blue: 51/255)
     private let textGray = Color(red: 138/255, green: 138/255, blue: 133/255)
@@ -21,15 +25,7 @@ struct ContextualDashboardView: View {
     
     @State private var showingAddPet = false
     @State private var showingSafetyLookup = false
-    @State private var selectedPetID: UUID?
     @State private var navigateToProfile = false
-    
-    private var currentPet: PetProfile? {
-        if let id = selectedPetID {
-            return pets.first { $0.id == id }
-        }
-        return pets.first
-    }
     @State private var selectedTab = 0
     
     var body: some View {
@@ -48,14 +44,7 @@ struct ContextualDashboardView: View {
         .background(TwoFingerSwipeRecognizer(selectedTab: $selectedTab))
         .ignoresSafeArea()
         .onAppear {
-            if selectedPetID == nil {
-                selectedPetID = pets.first?.id
-            }
-        }
-        .onChange(of: pets) {
-            if selectedPetID == nil {
-                selectedPetID = pets.first?.id
-            }
+            viewModel.fetchPets()
         }
     }
     
@@ -67,7 +56,7 @@ struct ContextualDashboardView: View {
                     
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(currentDateString)
+                            Text(viewModel.currentDateString)
                                 .font(.system(size: 13, weight: .regular, design: .default))
                                 .foregroundColor(textGray)
                                 .tracking(0.4)
@@ -79,15 +68,15 @@ struct ContextualDashboardView: View {
                         // PET SWITCHER MENU
                         Menu {
                             Section("Switch Pet") {
-                                ForEach(pets) { pet in
+                                ForEach(viewModel.pets) { pet in
                                     Button {
                                         withAnimation {
-                                            selectedPetID = pet.id
+                                            viewModel.selectedPetID = pet.id
                                         }
                                     } label: {
                                         HStack {
                                             Text(pet.name)
-                                            if selectedPetID == pet.id {
+                                            if viewModel.selectedPetID == pet.id {
                                                 Image(systemName: "checkmark")
                                             }
                                         }
@@ -101,7 +90,7 @@ struct ContextualDashboardView: View {
                                 } label: {
                                     Label("View Profile", systemImage: "person.circle")
                                 }
-                                .disabled(currentPet == nil)
+                                .disabled(viewModel.currentPet == nil)
                                 
                                 Button {
                                     showingAddPet = true
@@ -110,7 +99,7 @@ struct ContextualDashboardView: View {
                                 }
                             }
                         } label: {
-                            if let pet = currentPet {
+                            if let pet = viewModel.currentPet {
                                 ZStack(alignment: .bottomTrailing) {
                                     Image(systemName: "pawprint.fill")
                                         .resizable()
@@ -138,12 +127,12 @@ struct ContextualDashboardView: View {
                     .padding(.top, 20)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(currentPet != nil ? "Good morning," : "Good morning!")
+                        Text(viewModel.currentPet != nil ? "Good morning," : "Good morning!")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(primaryDark)
                             .tracking(-0.5)
                         
-                        if let pet = currentPet {
+                        if let pet = viewModel.currentPet {
                             Text("\(pet.name) is up.")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(tangerine)
@@ -151,7 +140,7 @@ struct ContextualDashboardView: View {
                                 .padding(.top, -14)
                         }
                         
-                        Text(dynamicGreetingSubtext(for: currentPet))
+                        Text(viewModel.dynamicGreetingSubtext(for: viewModel.currentPet))
                             .font(.system(size: 19, weight: .medium, design: .rounded))
                             .foregroundColor(secondaryDark)
                             .lineSpacing(4)
@@ -163,7 +152,7 @@ struct ContextualDashboardView: View {
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.secondary)
-                            Text("Is it safe to feed \(currentPet?.name ?? "Anabul")...")
+                            Text("Is it safe to feed \(viewModel.currentPet?.name ?? "Anabul")...")
                                 .font(.system(size: 15, weight: .medium, design: .rounded))
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -189,14 +178,14 @@ struct ContextualDashboardView: View {
                         
                         Spacer()
                         
-                        Text("\(todayTaskCount(for: currentPet)) tasks")
+                        Text("\(viewModel.todayTaskCount(for: viewModel.currentPet)) tasks")
                             .font(.system(size: 13, weight: .regular, design: .default))
                             .foregroundColor(textGray)
                     }
                     .padding(.top, 4)
                     
-                    if let pet = currentPet {
-                        TodayQueueCardView(pet: pet)
+                    if let pet = viewModel.currentPet {
+                        TodayQueueCardView(pet: pet, modelContext: modelContext)
                             .padding(.top, -12)
                             .id(pet.id) // Ensure view reloads when pet changes
                     } else {
@@ -204,41 +193,25 @@ struct ContextualDashboardView: View {
                     }
                     
                     // Fixed rawValue issue here
-                    InlineInsightPanelView(targetSpecies: currentPet?.species ?? "cat")
-                        .id(currentPet?.id ?? UUID())
+                    InlineInsightPanelView(targetSpecies: viewModel.currentPet?.species ?? "cat", modelContext: modelContext)
+                        .id(viewModel.currentPet?.id ?? UUID())
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
             .background(Color(red: 0.98, green: 0.98, blue: 0.97))
             .navigationDestination(isPresented: $navigateToProfile) {
-                if let pet = currentPet {
-                    PetProfileView(pet: pet)
+                if let pet = viewModel.currentPet {
+                    PetProfileView(pet: pet, modelContext: modelContext)
                 }
             }
             .sheet(isPresented: $showingAddPet) {
-                AddPetView()
+                AddPetView(modelContext: modelContext)
             }
             .sheet(isPresented: $showingSafetyLookup) {
-                ToxicityLookupView()
+                ToxicityLookupView(modelContext: modelContext)
             }
         }
-    }
-    
-    private var currentDateString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE · MMM d"
-        return formatter.string(from: Date())
-    }
-    
-    private func todayTaskCount(for pet: PetProfile?) -> Int {
-        guard let pet = pet else { return 0 }
-        return DailyRoutineGenerator.generate(for: pet).count
-    }
-    
-    private func dynamicGreetingSubtext(for pet: PetProfile?) -> String {
-        guard let pet = pet else { return "Morning sunlight helps regulate sleep cycles for your companions." }
-        return "Did you know morning sunlight helps regulate \(pet.name)'s sleep cycle?"
     }
 }
 

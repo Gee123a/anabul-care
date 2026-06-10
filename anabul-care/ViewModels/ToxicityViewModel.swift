@@ -2,17 +2,29 @@ import SwiftUI
 import SwiftData
 import Combine
 
-@MainActor
-class ToxicityViewModel: ObservableObject {
-    // 1. Remove the = "" default value here so we can inject it
-    @Published var searchText: String
+@Observable
+public final class ToxicityViewModel {
+    public var searchText: String
+    public var hazards: [ToxicityModel] = []
     
-    // 2. Add this initializer so the View can pass the Spotlight text in!
-    init(initialText: String = "") {
+    private let modelContext: ModelContext
+    
+    public init(initialText: String = "", modelContext: ModelContext) {
         self.searchText = initialText
+        self.modelContext = modelContext
+        fetchHazards()
     }
     
-    func filterHazards(_ hazards: [ToxicityModel]) -> [ToxicityModel] {
+    public func fetchHazards() {
+        let descriptor = FetchDescriptor<ToxicityModel>(sortBy: [SortDescriptor(\.keyword)])
+        do {
+            self.hazards = try modelContext.fetch(descriptor)
+        } catch {
+            print("ToxicityViewModel: Error fetching hazards: \(error)")
+        }
+    }
+    
+    public var filteredHazards: [ToxicityModel] {
         if searchText.isEmpty {
             return hazards
         } else {
@@ -20,7 +32,7 @@ class ToxicityViewModel: ObservableObject {
         }
     }
     
-    func colorForDangerLevel(_ level: String) -> Color {
+    public func colorForDangerLevel(_ level: String) -> Color {
         switch level.lowercased() {
         case "low": return .yellow
         case "moderate": return .orange

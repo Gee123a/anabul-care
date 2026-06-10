@@ -10,9 +10,14 @@ import SwiftData
 
 struct PetProfileView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext // Added to handle database deletion
+    @Environment(\.modelContext) private var modelContext
     
-    let pet: PetProfile
+    @State private var viewModel: PetProfileViewModel
+    
+    init(pet: PetProfile, modelContext: ModelContext) {
+        let repository = PetRepository(context: modelContext)
+        _viewModel = State(initialValue: PetProfileViewModel(pet: pet, repository: repository))
+    }
     
     // State variables for our new actions
     @State private var showingEditPet = false
@@ -50,7 +55,7 @@ struct PetProfileView: View {
                         }
                         
                         VStack(spacing: 4) {
-                            Text(pet.name)
+                            Text(viewModel.pet.name)
                                 .font(.system(size: 30, weight: .black, design: .rounded))
                                 .foregroundColor(primaryDark)
                                 .tracking(-0.6)
@@ -58,7 +63,7 @@ struct PetProfileView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "sparkles")
                                     .foregroundColor(tangerine)
-                                Text("\(pet.species.capitalized)")
+                                Text("\(viewModel.pet.species.capitalized)")
                                     .font(.system(size: 15, weight: .medium, design: .rounded))
                                     .foregroundColor(secondaryDark)
                             }
@@ -68,8 +73,8 @@ struct PetProfileView: View {
                     
                     // 2. STATS ROW (Bento Cards)
                     HStack(spacing: 12) {
-                        StatCard(icon: "birthday.cake.fill", label: "AGE", value: "3 Yrs")
-                        StatCard(icon: "scalemass.fill", label: "WEIGHT", value: "4.2 kg")
+                        StatCard(icon: "birthday.cake.fill", label: "AGE", value: viewModel.formattedAge)
+                        StatCard(icon: "scalemass.fill", label: "WEIGHT", value: viewModel.formattedWeight)
                         StatCard(icon: "syringe.fill", label: "VACCINES", value: "Up to Date")
                     }
                     .padding(.horizontal, 20)
@@ -142,21 +147,21 @@ struct PetProfileView: View {
             
             // Delete Confirmation Dialog to prevent accidental data loss
             .confirmationDialog(
-                "Delete \(pet.name)?",
+                "Delete \(viewModel.pet.name)?",
                 isPresented: $showingDeleteConfirmation,
                 titleVisibility: .visible
             ) {
                 Button("Delete", role: .destructive) {
-                    modelContext.delete(pet)
+                    viewModel.deletePet()
                     dismiss()
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("This action cannot be undone and will permanently delete all of \(pet.name)'s activity logs and data.")
+                Text("This action cannot be undone and will permanently delete all of \(viewModel.pet.name)'s activity logs and data.")
             }
             
             .sheet(isPresented: $showingEditPet) {
-                AddPetView() // Remove petToEdit since the initializer doesn't support it yet
+                AddPetView(petToEdit: viewModel.pet, modelContext: modelContext)
             }
         }
     }
