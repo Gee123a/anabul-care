@@ -11,7 +11,12 @@ import CoreLocation
 final class LocationManagerTests: XCTestCase {
     
     func testConcurrentGetLocation() async throws {
-        let locationManager = LocationManager.shared
+        // 1. Create a fresh instance instead of using `.shared` to avoid carrying over cached locations from previous tests
+        let locationManager = LocationManager()
+        
+        // 2. Prevent the simulator from bypassing our 200ms sleep and injecting San Francisco
+        locationManager.isMockedForTesting = true
+        locationManager.resetTestState()
         
         let expectation = XCTestExpectation(description: "All concurrent tasks resumed")
         expectation.expectedFulfillmentCount = 10
