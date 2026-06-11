@@ -28,7 +28,7 @@ public class HabitLearningService {
         
         // For simplicity in this prototype, we'll look at the hour/minute of all logs
         // and see if there's a cluster.
-        let times = logs.map { log -> Int in
+        let times = recentLogs.map { log -> Int in
             let components = Calendar.current.dateComponents([.hour, .minute], from: log.timestamp)
             return (components.hour ?? 0) * 60 + (components.minute ?? 0)
         }

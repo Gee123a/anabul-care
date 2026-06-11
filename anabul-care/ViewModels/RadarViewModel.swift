@@ -65,9 +65,16 @@ public final class RadarViewModel {
             
             // If Apple finds a matching region, update the camera to fly to that coordinate
             if let firstItem = response.mapItems.first {
+                let centerCoordinate: CLLocationCoordinate2D
+                if #available(iOS 26.0, *) {
+                    centerCoordinate = firstItem.location.coordinate
+                } else {
+                    centerCoordinate = firstItem.placemark.coordinate
+                }
+                
                 withAnimation {
                     self.position = .camera(MapCamera(
-                        centerCoordinate: firstItem.placemark.coordinate,
+                        centerCoordinate: centerCoordinate,
                         distance: 8000
                     ))
                 }
@@ -107,11 +114,21 @@ public final class RadarViewModel {
                     // Pass the data through the Keyword Shield to ensure it's actually pet-related
                     guard isRelevant(name: name, category: query.1) else { continue }
                     
+                    let coordinate: CLLocationCoordinate2D
+                    let addressString: String
+                    if #available(iOS 26.0, *) {
+                        coordinate = item.location.coordinate
+                        addressString = item.placemark.title ?? ""
+                    } else {
+                        coordinate = item.placemark.coordinate
+                        addressString = item.placemark.title ?? ""
+                    }
+                    
                     // Package the MapKit data into our custom ClinicModel format
                     let clinic = ClinicModel(
                         name: name,
-                        coordinate: item.placemark.coordinate,
-                        address: item.placemark.title ?? "",
+                        coordinate: coordinate,
+                        address: addressString,
                         phone: item.phoneNumber ?? "No Phone",
                         category: query.1,
                         mapItem: item // Store the raw MKMapItem to use later for routing
@@ -196,7 +213,11 @@ public final class RadarViewModel {
             mapItem = existing
         } else {
             let location = CLLocation(latitude: clinic.coordinate.latitude, longitude: clinic.coordinate.longitude)
-            mapItem = MKMapItem(placemark: MKPlacemark(coordinate: location.coordinate))
+            if #available(iOS 26.0, *) {
+                mapItem = MKMapItem(location: location, address: nil)
+            } else {
+                mapItem = MKMapItem(placemark: MKPlacemark(coordinate: location.coordinate))
+            }
             mapItem.name = clinic.name
         }
         

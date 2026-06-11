@@ -28,9 +28,9 @@ final class LocationManagerTests: XCTestCase {
         for _ in 0..<10 {
             Task {
                 let location = await locationManager.getLocation()
-                resultsLock.lock()
-                results.append(location)
-                resultsLock.unlock()
+                resultsLock.withLock {
+                    results.append(location)
+                }
                 expectation.fulfill()
             }
         }
@@ -54,10 +54,9 @@ final class LocationManagerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 5.0)
         
         // Verify we got the correct location in all tasks without crashes or race conditions
-        resultsLock.lock()
-        let count = results.count
-        let nonNilResults = results.compactMap { $0 }
-        resultsLock.unlock()
+        let (count, nonNilResults) = resultsLock.withLock {
+            (results.count, results.compactMap { $0 })
+        }
         
         XCTAssertEqual(count, 10, "Should have received 10 results")
         XCTAssertEqual(nonNilResults.count, 10, "Should have 10 non-nil locations")

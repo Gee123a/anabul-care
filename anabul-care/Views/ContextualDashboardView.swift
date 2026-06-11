@@ -114,7 +114,7 @@ struct ContextualDashboardView: View {
                                     }
                                 }
                             } label: {
-                                if let pet = viewModel.currentPet {
+                                if viewModel.currentPet != nil {
                                     ZStack(alignment: .bottomTrailing) {
                                         Image(systemName: "pawprint.fill")
                                             .resizable()

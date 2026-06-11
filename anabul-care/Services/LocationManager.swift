@@ -32,21 +32,33 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         manager.startUpdatingLocation()
     }
     
-    func getLocation() async -> CLLocation? {
+    private func getCachedLocationAndPrepareRequest() -> (CLLocation?, Bool) {
         lock.lock()
+        defer { lock.unlock() }
         if let location = lastLocation {
-            lock.unlock()
-            return location
+            return (location, false)
+        }
+        let shouldRequest = !isRequestingLocation
+        if shouldRequest {
+            isRequestingLocation = true
+        }
+        return (nil, shouldRequest)
+    }
+    
+    private func appendContinuation(_ continuation: CheckedContinuation<CLLocation?, Never>) {
+        lock.lock()
+        defer { lock.unlock() }
+        continuations.append(continuation)
+    }
+    
+    func getLocation() async -> CLLocation? {
+        let (cached, shouldRequest) = getCachedLocationAndPrepareRequest()
+        if let cached = cached {
+            return cached
         }
         
         return await withCheckedContinuation { continuation in
-            continuations.append(continuation)
-            
-            let shouldRequest = !isRequestingLocation
-            if shouldRequest {
-                isRequestingLocation = true
-            }
-            lock.unlock()
+            appendContinuation(continuation)
             
             if shouldRequest {
                 // Must call CLLocationManager methods on main actor/thread since it's an NSObject delegate
