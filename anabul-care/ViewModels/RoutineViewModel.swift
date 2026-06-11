@@ -65,24 +65,34 @@ public final class RoutineViewModel {
     
     /// Checks if a specific task has been completed (logged) for a given date.
     public func isTaskCompleted(_ task: DailyTaskItem, on date: Date) -> Bool {
-        pet.activities.contains { 
-            $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) 
+        let tasksOfType = dailyTasks.filter { $0.type == task.type }
+        guard let taskIndex = tasksOfType.firstIndex(where: { $0.id == task.id }) else {
+            return false
         }
+        let logCount = pet.activities.filter {
+            $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date)
+        }.count
+        return taskIndex < logCount
     }
     
     /// Toggles the completion status of a task by adding or removing an ActivityLog.
     public func toggleTask(_ task: DailyTaskItem, on date: Date) {
         let taskType = task.type.rawValue
         let context = pet.modelContext ?? modelContext
+        let completed = isTaskCompleted(task, on: date)
         
-        if let existingLog = pet.activities.first(where: { 
-            $0.type == taskType && Calendar.current.isDate($0.timestamp, inSameDayAs: date) 
-        }) {
-            // Delete existing log to unmark task as completed
-            context.delete(existingLog)
-            pet.activities.removeAll(where: { $0.id == existingLog.id })
+        let dayLogs = pet.activities.filter {
+            $0.type == taskType && Calendar.current.isDate($0.timestamp, inSameDayAs: date)
+        }.sorted(by: { $0.timestamp < $1.timestamp })
+        
+        if completed {
+            // Uncheck: delete the last log
+            if let lastLog = dayLogs.last {
+                context.delete(lastLog)
+                pet.activities.removeAll(where: { $0.id == lastLog.id })
+            }
         } else {
-            // Create new log to mark task as completed
+            // Check: Create new log to mark task as completed
             let newLog = ActivityLog(
                 timestamp: Date(), // Log at the actual current time
                 type: taskType,
@@ -97,7 +107,6 @@ public final class RoutineViewModel {
             let f = DateFormatter()
             f.dateFormat = "h:mm a"
             let currentTimeString = f.string(from: Date())
-            
             repository.updatePreference(for: pet.id, taskType: taskType, preferredTime: currentTimeString, isManualOverride: true)
         }
         

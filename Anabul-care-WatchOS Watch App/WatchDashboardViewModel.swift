@@ -29,12 +29,16 @@ final class WatchDashboardViewModel {
         dailyTasks = DailyRoutineGenerator.generate(for: pet, preferences: prefs, deactivations: deacts)
     }
 
-    /// Returns true if a given task has been logged for today.
     func isTaskCompleted(_ task: DailyTaskItem) -> Bool {
         let today = Calendar.current.startOfDay(for: Date())
-        return pet.activities.contains { activity in
+        let tasksOfType = dailyTasks.filter { $0.type == task.type }
+        guard let taskIndex = tasksOfType.firstIndex(where: { $0.id == task.id }) else {
+            return false
+        }
+        let logCount = pet.activities.filter { activity in
             activity.type == task.type.rawValue &&
             Calendar.current.isDate(activity.timestamp, inSameDayAs: today)
-        }
+        }.count
+        return taskIndex < logCount
     }
 }
