@@ -104,15 +104,55 @@ public final class DashboardViewModel {
         modelContext.insert(newLog)
         targetPet.activities.append(newLog)
 
-        // Smart habit learning: record the actual logged time
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        repository.updatePreference(
-            for: targetPet.id,
-            taskType: activityType,
-            preferredTime: formatter.string(from: Date()),
-            isManualOverride: true
-        )
+        // Smart habit learning: find the closest scheduled task of that type within 2 hours
+        let now = Date()
+        let prefs = (try? repository.fetchPreferences(for: targetPet.id)) ?? []
+        let deacts = (try? repository.fetchDeactivations(for: targetPet.id)) ?? []
+        let todayTasks = DailyRoutineGenerator.generate(for: targetPet, preferences: prefs, deactivations: deacts)
+        
+        let matchingTasks = todayTasks.filter { $0.type.rawValue == activityType }
+        var closestTask: DailyTaskItem? = nil
+        var smallestDiff = Int.max
+        
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        
+        let calendar = Calendar.current
+        let currentComponents = calendar.dateComponents([.hour, .minute], from: now)
+        let curHour = currentComponents.hour ?? 0
+        let curMin = currentComponents.minute ?? 0
+        let curTotalMinutes = curHour * 60 + curMin
+        
+        for task in matchingTasks {
+            if let recDate = f.date(from: task.timeRecommendation) {
+                let recComponents = calendar.dateComponents([.hour, .minute], from: recDate)
+                let recHour = recComponents.hour ?? 0
+                let recMin = recComponents.minute ?? 0
+                let recTotalMinutes = recHour * 60 + recMin
+                
+                let diff = abs(curTotalMinutes - recTotalMinutes)
+                let absoluteDiff = min(diff, 1440 - diff)
+                
+                if absoluteDiff < smallestDiff {
+                    smallestDiff = absoluteDiff
+                    closestTask = task
+                }
+            }
+        }
+        
+        if let task = closestTask, smallestDiff <= 120 {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "h:mm a"
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            let specificKey = "\(activityType)_\(task.timeRecommendation)"
+            repository.updatePreference(
+                for: targetPet.id,
+                taskType: specificKey,
+                preferredTime: formatter.string(from: now),
+                isManualOverride: true
+            )
+        }
 
         do {
             try modelContext.save()

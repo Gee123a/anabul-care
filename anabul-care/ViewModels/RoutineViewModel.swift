@@ -75,6 +75,23 @@ public final class RoutineViewModel {
         return taskIndex < logCount
     }
     
+    private func isWithinTwoHours(currentTime: Date, recommendationTimeStr: String) -> Bool {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        guard let recommendationDate = f.date(from: recommendationTimeStr) else { return false }
+        let calendar = Calendar.current
+        let currentComponents = calendar.dateComponents([.hour, .minute], from: currentTime)
+        let recComponents = calendar.dateComponents([.hour, .minute], from: recommendationDate)
+        guard let curHour = currentComponents.hour, let curMin = currentComponents.minute,
+              let recHour = recComponents.hour, let recMin = recComponents.minute else { return false }
+        let curTotalMinutes = curHour * 60 + curMin
+        let recTotalMinutes = recHour * 60 + recMin
+        let diff = abs(curTotalMinutes - recTotalMinutes)
+        let absoluteDiff = min(diff, 1440 - diff)
+        return absoluteDiff <= 120
+    }
+    
     /// Toggles the completion status of a task by adding or removing an ActivityLog.
     public func toggleTask(_ task: DailyTaskItem, on date: Date) {
         let taskType = task.type.rawValue
@@ -103,11 +120,16 @@ public final class RoutineViewModel {
             context.insert(newLog)
             pet.activities.append(newLog)
             
-            // SMART LEARNING: Auto-adjust preferred time for tomorrow based on current click
-            let f = DateFormatter()
-            f.dateFormat = "h:mm a"
-            let currentTimeString = f.string(from: Date())
-            repository.updatePreference(for: pet.id, taskType: taskType, preferredTime: currentTimeString, isManualOverride: true)
+            // SMART LEARNING: Auto-adjust preferred time for tomorrow based on current click (only within 2h)
+            let now = Date()
+            if isWithinTwoHours(currentTime: now, recommendationTimeStr: task.timeRecommendation) {
+                let f = DateFormatter()
+                f.dateFormat = "h:mm a"
+                f.locale = Locale(identifier: "en_US_POSIX")
+                let currentTimeString = f.string(from: now)
+                let specificKey = "\(taskType)_\(task.timeRecommendation)"
+                repository.updatePreference(for: pet.id, taskType: specificKey, preferredTime: currentTimeString, isManualOverride: true)
+            }
         }
         
         // Save changes and refresh widgets
