@@ -93,6 +93,14 @@ public final class AddPetViewModel {
                 try repository.addPet(newPet)
             }
             WidgetCenter.shared.reloadAllTimelines()
+            
+            // SYNC TO WATCH: Push the full updated state after saving a pet
+            if let allPets = try? repository.fetchPets(),
+               let allPrefs = try? repository.fetchAllPreferences(),
+               let allDeacts = try? repository.fetchAllDeactivations() {
+                WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
+            }
+            
             self.isSaved = true
         } catch {
             print("AddPetViewModel: Error saving pet: \(error)")

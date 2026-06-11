@@ -55,6 +55,18 @@ final class PetRepository: PetRepositoryProtocol {
         return try context.fetch(descriptor)
     }
     
+    /// Fetches all task preferences in the database.
+    func fetchAllPreferences() throws -> [TaskPreference] {
+        let descriptor = FetchDescriptor<TaskPreference>()
+        return try context.fetch(descriptor)
+    }
+    
+    /// Fetches all task deactivations in the database.
+    func fetchAllDeactivations() throws -> [TaskDeactivation] {
+        let descriptor = FetchDescriptor<TaskDeactivation>()
+        return try context.fetch(descriptor)
+    }
+    
     /// Adds a new timing preference.
     func addPreference(_ preference: TaskPreference) throws {
         context.insert(preference)
@@ -71,5 +83,22 @@ final class PetRepository: PetRepositoryProtocol {
     func deletePreference(_ preference: TaskPreference) throws {
         context.delete(preference)
         try save()
+    }
+    
+    /// Updates or creates a timing preference for a specific task.
+    func updatePreference(for petID: UUID, taskType: String, preferredTime: String, isManualOverride: Bool) {
+        do {
+            let preferences = try fetchPreferences(for: petID)
+            if let existing = preferences.first(where: { $0.taskType == taskType }) {
+                existing.preferredTime = preferredTime
+                existing.isManualOverride = isManualOverride
+            } else {
+                let newPref = TaskPreference(petID: petID, taskType: taskType, preferredTime: preferredTime, isManualOverride: isManualOverride)
+                context.insert(newPref)
+            }
+            try save()
+        } catch {
+            print("PetRepository: Error updating preference: \(error)")
+        }
     }
 }

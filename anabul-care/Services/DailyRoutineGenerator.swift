@@ -65,11 +65,15 @@ public struct DailyRoutineGenerator {
         // 4. Apply Personalization (Manual Overrides & Habit Learning)
         for i in 0..<tasks.count {
             let taskType = tasks[i].type.rawValue
+            let originalTime = tasks[i].timeRecommendation
+            let specificKey = "\(taskType)_\(originalTime)"
 
-            // Priority 1: Manual User Override
-            if let manual = preferences.first(where: { $0.taskType == taskType && $0.isManualOverride }) {
+            // Priority 1: Manual User Override (Specific time key first, then generic type fallback)
+            if let manual = preferences.first(where: { $0.taskType == specificKey && $0.isManualOverride }) {
                 tasks[i] = updatedTime(for: tasks[i], newTime: manual.preferredTime)
-            } 
+            } else if let manualGeneral = preferences.first(where: { $0.taskType == taskType && $0.isManualOverride }) {
+                tasks[i] = updatedTime(for: tasks[i], newTime: manualGeneral.preferredTime)
+            }
             // Priority 2: Habit Learning
             else if let habitTime = HabitLearningService.shared.detectHabit(for: pet, taskType: taskType) {
                 tasks[i] = updatedTime(for: tasks[i], newTime: habitTime)

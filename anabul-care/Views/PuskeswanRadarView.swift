@@ -29,6 +29,7 @@ struct AnimatedMapPin: View {
 }
 
 struct PuskeswanRadarView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var viewModel = RadarViewModel()
     @Binding var selectedTab: Int
     
@@ -99,84 +100,107 @@ struct PuskeswanRadarView: View {
                     .overlay(Capsule().stroke(Color.white.opacity(0.4), lineWidth: 1))
                     .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
                     
-                    Menu {
-                        Picker("Kategori", selection: $viewModel.selectedCategory) {
-                            ForEach(POICategory.allCases, id: \.self) { category in
-                                Text(category.rawValue).tag(category)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color.white)
-                            .frame(width: 48, height: 48)
-                            .background(Color(hex: "FF6B33"))
-                            .clipShape(Circle())
-                            .shadow(color: Color(hex: "FF6B33").opacity(0.3), radius: 10, x: 0, y: 4)
-                    }
-                }
-                
-                HStack {
-                    Spacer()
+                    // Toggle Radar / List Button
                     Button(action: {
-                        // .userLocation forces the camera to snap back to the user's GPS position
-                        viewModel.position = .userLocation(fallback: .automatic)
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            selectedTab = 0 // Transition back to dashboard
+                        }
                     }) {
-                        Image(systemName: "location.fill")
-                            .font(.system(size: 18))
+                        Image(systemName: "house.fill")
+                            .font(.system(size: 20))
                             .foregroundColor(Color(hex: "FF6B33"))
                             .frame(width: 48, height: 48)
-                            .background(.ultraThinMaterial)
+                            .background(Color.white)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.4), lineWidth: 1))
-                            .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+                            .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 4)
                     }
                 }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 60)
-            
-            VStack {
+                .padding(.horizontal, 20)
+                .padding(.top, 64)
+                
+                // CATEGORY SELECTOR CAROUSEL
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(POICategory.allCases, id: \.self) { category in
+                            Button(action: {
+                                withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
+                                    viewModel.selectedCategory = category
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: category.systemIcon)
+                                        .font(.system(size: 13, weight: .bold))
+                                    Text(category.rawValue.capitalized)
+                                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(viewModel.selectedCategory == category ? Color(hex: "FF6B33") : Color.white)
+                                .foregroundColor(viewModel.selectedCategory == category ? .white : Color(hex: "1C1C1A"))
+                                .clipShape(Capsule())
+                                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                
                 Spacer()
                 
-                HStack(alignment: .bottom) {
+                // FLOATING ZOOM BUTTONS (replaces standard controls, moves up when bottom sheet displays)
+                HStack {
                     Spacer()
-                    
-                    // Expandable Zoom Controls
                     VStack(spacing: 12) {
-                        if isZoomMenuExpanded {
-                            Button(action: { viewModel.zoomIn() }) {
-                                Image(systemName: "plus.magnifyingglass")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(Color(hex: "FF6B33"))
-                                    .frame(width: 48, height: 48)
-                                    .background(.ultraThinMaterial)
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.4), lineWidth: 1))
-                            }
-                            .transition(.scale.combined(with: .opacity).combined(with: .offset(y: 20)))
-                            
-                            Button(action: { viewModel.zoomOut() }) {
-                                Image(systemName: "minus.magnifyingglass")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(Color(hex: "FF6B33"))
-                                    .frame(width: 48, height: 48)
-                                    .background(.ultraThinMaterial)
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.4), lineWidth: 1))
-                            }
-                            .transition(.scale.combined(with: .opacity).combined(with: .offset(y: 10)))
-                        }
-                        
+                        // Expandable Zoom Menu Button
                         Button(action: {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                 isZoomMenuExpanded.toggle()
                             }
                         }) {
-                            Image(systemName: isZoomMenuExpanded ? "xmark" : "magnifyingglass")
-                                .font(.system(size: 18, weight: .bold))
+                            Image(systemName: "plus.magnifyingglass")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(Color(hex: "FF6B33"))
+                                .frame(width: 52, height: 52)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 4)
+                        }
+                        
+                        // Expanded Zoom controls
+                        if isZoomMenuExpanded {
+                            VStack(spacing: 8) {
+                                Button(action: { viewModel.zoomIn() }) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(Color(hex: "1C1C1A"))
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.white)
+                                        .clipShape(Circle())
+                                }
+                                
+                                Button(action: { viewModel.zoomOut() }) {
+                                    Image(systemName: "minus")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(Color(hex: "1C1C1A"))
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.white)
+                                        .clipShape(Circle())
+                                }
+                            }
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale),
+                                removal: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale)
+                            ))
+                        }
+                        
+                        // Recenter user GPS position button
+                        Button(action: {
+                            viewModel.position = .userLocation(fallback: .automatic)
+                        }) {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 20))
                                 .foregroundColor(Color.white)
-                                .frame(width: 54, height: 54)
+                                .frame(width: 52, height: 52)
                                 .background(Color(hex: "1C1C1A"))
                                 .clipShape(Circle())
                                 .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
@@ -187,95 +211,102 @@ struct PuskeswanRadarView: View {
                 .padding(.bottom, 20)
                 
                 if let clinic = viewModel.selectedClinic {
-                    HStack(spacing: 16) {
-                        // Fixed size Category Icon container
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color(hex: "FF6B33").opacity(0.15))
-                            
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color(hex: "FF6B33").opacity(0.3), lineWidth: 1)
-                            
-                            Image(systemName: clinic.category.systemIcon)
-                                .foregroundColor(Color(hex: "FF6B33"))
-                                .font(.system(size: 22))
-                        }
-                        .frame(width: 52, height: 52)
+                    HStack {
+                        if horizontalSizeClass == .regular { Spacer() }
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(clinic.category.rawValue.uppercased())
-                                .font(.system(size: 9, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(hex: "FF6B33"))
-                                .tracking(0.5)
-                            
-                            Text(clinic.name)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundColor(.primary)
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                            
-                            if !clinic.address.isEmpty {
-                                Text(clinic.address)
-                                    .font(.system(size: 12, design: .rounded))
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
+                        HStack(spacing: 16) {
+                            // Fixed size Category Icon container
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color(hex: "FF6B33").opacity(0.15))
+                                
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(Color(hex: "FF6B33").opacity(0.3), lineWidth: 1)
+                                
+                                Image(systemName: clinic.category.systemIcon)
+                                    .foregroundColor(Color(hex: "FF6B33"))
+                                    .font(.system(size: 22))
                             }
+                            .frame(width: 52, height: 52)
                             
-                            // Phone Call Action
-                            if clinic.phone != "No Phone" {
-                                Button(action: {
-                                    if let url = URL(string: "tel://\(clinic.phone.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: ""))"),
-                                       UIApplication.shared.canOpenURL(url) {
-                                        UIApplication.shared.open(url)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(clinic.category.rawValue.uppercased())
+                                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(hex: "FF6B33"))
+                                    .tracking(0.5)
+                                
+                                Text(clinic.name)
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundColor(.primary)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                
+                                if !clinic.address.isEmpty {
+                                    Text(clinic.address)
+                                        .font(.system(size: 12, design: .rounded))
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                }
+                                
+                                // Phone Call Action
+                                if clinic.phone != "No Phone" {
+                                    Button(action: {
+                                        if let url = URL(string: "tel://\(clinic.phone.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: ""))"),
+                                           UIApplication.shared.canOpenURL(url) {
+                                            UIApplication.shared.open(url)
+                                        }
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "phone.fill")
+                                                .font(.system(size: 11))
+                                            Text(clinic.phone)
+                                                .font(.system(size: 12, design: .rounded))
+                                        }
+                                        .foregroundColor(Color(hex: "FF6B33"))
                                     }
-                                }) {
+                                    .buttonStyle(.plain)
+                                } else {
                                     HStack(spacing: 4) {
-                                        Image(systemName: "phone.fill")
+                                        Image(systemName: "phone.slash.fill")
                                             .font(.system(size: 11))
-                                        Text(clinic.phone)
+                                        Text("No Phone")
                                             .font(.system(size: 12, design: .rounded))
                                     }
-                                    .foregroundColor(Color(hex: "FF6B33"))
+                                    .foregroundColor(.gray)
                                 }
-                                .buttonStyle(.plain)
-                            } else {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "phone.slash.fill")
-                                        .font(.system(size: 11))
-                                    Text("No Phone")
-                                        .font(.system(size: 12, design: .rounded))
+                            }
+                            
+                            Spacer()
+                            
+                            // Route Action
+                            Button(action: {
+                                showingMapsSelector = true
+                            }) {
+                                VStack(spacing: 4) {
+                                    Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                                        .font(.system(size: 18))
+                                    Text("Route")
+                                        .font(.system(size: 11, weight: .bold, design: .rounded))
                                 }
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color(hex: "1A1A1A"))
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             }
                         }
+                        .padding(16)
+                        .background(Color.white.opacity(0.85))
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.6), lineWidth: 1))
+                        .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                        .frame(maxWidth: horizontalSizeClass == .regular ? 450 : .infinity)
                         
-                        Spacer()
-                        
-                        // Route Action
-                        Button(action: {
-                            showingMapsSelector = true
-                        }) {
-                            VStack(spacing: 4) {
-                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                                    .font(.system(size: 18))
-                                Text("Route")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color(hex: "1A1A1A"))
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        }
+                        if horizontalSizeClass == .regular { Spacer() }
                     }
-                    .padding(16)
-                    .background(Color.white.opacity(0.85))
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.6), lineWidth: 1))
                     .padding(.horizontal, 20)
                     .padding(.bottom, 24)
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
         }

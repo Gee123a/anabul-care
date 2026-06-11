@@ -5,43 +5,42 @@
 //  Created by Nicholas Gerwin Mawardji on 11/06/26.
 //
 
-import SwiftData
 import SwiftUI
 import WatchKit
 
 struct WatchLogActivityView: View {
-    @Environment(\.modelContext) private var modelContext
-    let pet: PetProfile
 
-    // Activity types matching your widget
-    let activities = [
-        ("Fed", "bowl.fill", Color.orange),
-        ("Hydrated", "drop.fill", Color.blue),
-        ("Walked", "figure.walk", Color.green),
-        ("Medication", "cross.pills.fill", Color.red),
+    @State private var viewModel: WatchLogViewModel
+
+    // Activity definitions are UI data — correctly live in the View
+    private let activities: [(type: String, icon: String, color: Color)] = [
+        (type: "feeding",    icon: "fork.knife",  color: .orange),
+        (type: "hydration",  icon: "drop.fill",      color: .blue),
+        (type: "walk",       icon: "figure.walk",    color: .green),
+        (type: "medication", icon: "pills.fill",     color: .red)
     ]
+
+    init(pet: PetProfile) {
+        _viewModel = State(initialValue: WatchLogViewModel(pet: pet))
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(activities, id: \.0) { activity in
+                ForEach(activities, id: \.type) { activity in
                     Button {
-                        logActivity(type: activity.0)
+                        // Business logic lives in ViewModel; haptic is UI-layer
+                        viewModel.logActivity(type: activity.type)
+                        WKInterfaceDevice.current().play(.success)
                     } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: activity.1)
+                            Image(systemName: activity.icon)
                                 .font(.title3)
-                                .foregroundColor(activity.2)
+                                .foregroundColor(activity.color)
                                 .frame(width: 24)
 
-                            Text(activity.0)
-                                .font(
-                                    .system(
-                                        .body,
-                                        design: .rounded,
-                                        weight: .medium
-                                    )
-                                )
+                            Text(activity.type.capitalized)
+                                .font(.system(.body, design: .rounded, weight: .medium))
 
                             Spacer()
                         }
@@ -51,39 +50,6 @@ struct WatchLogActivityView: View {
             }
             .navigationTitle("Log Action")
             .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-
-    private func logActivity(type: String) {
-        // 1. Initialize using your app's actual ActivityLog properties
-        let newLog = ActivityLog(
-            timestamp: Date(),
-            type: type,  // Or map this to your exact LogType.rawValue if needed
-            durationMinutes: 15,
-            detail: "Logged from Apple Watch"
-        )
-
-        // 2. Safely link the log to the specific pet profile
-        newLog.pet = pet
-
-        // 3. Insert into the SwiftData context
-        modelContext.insert(newLog)
-
-        do {
-            try modelContext.save()
-
-            // 4. Send the log to the iPhone immediately via WatchConnectivity
-            WatchConnectivityManager.shared.sendActivityLogToPhone(
-                activityType: type,
-                petName: pet.name
-            )
-
-            // 5. Trigger a success vibration on the user's wrist
-            WKInterfaceDevice.current().play(.success)
-
-        } catch {
-            print("Failed to save WatchOS log: \(error)")
-            WKInterfaceDevice.current().play(.failure)  // Trigger error vibration
         }
     }
 }

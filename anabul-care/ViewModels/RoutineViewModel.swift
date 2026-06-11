@@ -65,26 +65,53 @@ public final class RoutineViewModel {
     
     /// Checks if a specific task has been completed (logged) for a given date.
     public func isTaskCompleted(_ task: DailyTaskItem, on date: Date) -> Bool {
-        pet.activities.contains { 
-            $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date) 
+        let tasksOfType = dailyTasks.filter { $0.type == task.type }
+        guard let taskIndex = tasksOfType.firstIndex(where: { $0.id == task.id }) else {
+            return false
         }
+        let logCount = pet.activities.filter {
+            $0.type == task.type.rawValue && Calendar.current.isDate($0.timestamp, inSameDayAs: date)
+        }.count
+        return taskIndex < logCount
+    }
+    
+    private func isWithinTwoHours(currentTime: Date, recommendationTimeStr: String) -> Bool {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        guard let recommendationDate = f.date(from: recommendationTimeStr) else { return false }
+        let calendar = Calendar.current
+        let currentComponents = calendar.dateComponents([.hour, .minute], from: currentTime)
+        let recComponents = calendar.dateComponents([.hour, .minute], from: recommendationDate)
+        guard let curHour = currentComponents.hour, let curMin = currentComponents.minute,
+              let recHour = recComponents.hour, let recMin = recComponents.minute else { return false }
+        let curTotalMinutes = curHour * 60 + curMin
+        let recTotalMinutes = recHour * 60 + recMin
+        let diff = abs(curTotalMinutes - recTotalMinutes)
+        let absoluteDiff = min(diff, 1440 - diff)
+        return absoluteDiff <= 120
     }
     
     /// Toggles the completion status of a task by adding or removing an ActivityLog.
     public func toggleTask(_ task: DailyTaskItem, on date: Date) {
         let taskType = task.type.rawValue
         let context = pet.modelContext ?? modelContext
+        let completed = isTaskCompleted(task, on: date)
         
-        if let existingLog = pet.activities.first(where: { 
-            $0.type == taskType && Calendar.current.isDate($0.timestamp, inSameDayAs: date) 
-        }) {
-            // Delete existing log to unmark task as completed
-            context.delete(existingLog)
-            pet.activities.removeAll(where: { $0.id == existingLog.id })
+        let dayLogs = pet.activities.filter {
+            $0.type == taskType && Calendar.current.isDate($0.timestamp, inSameDayAs: date)
+        }.sorted(by: { $0.timestamp < $1.timestamp })
+        
+        if completed {
+            // Uncheck: delete the last log
+            if let lastLog = dayLogs.last {
+                context.delete(lastLog)
+                pet.activities.removeAll(where: { $0.id == lastLog.id })
+            }
         } else {
-            // Create new log to mark task as completed
+            // Check: Create new log to mark task as completed
             let newLog = ActivityLog(
-                timestamp: date,
+                timestamp: Date(), // Log at the actual current time
                 type: taskType,
                 durationMinutes: 15,
                 detail: task.detail
@@ -92,14 +119,32 @@ public final class RoutineViewModel {
             newLog.pet = pet
             context.insert(newLog)
             pet.activities.append(newLog)
+            
+            // SMART LEARNING: Auto-adjust preferred time for tomorrow based on current click (only within 2h)
+            let now = Date()
+            if isWithinTwoHours(currentTime: now, recommendationTimeStr: task.timeRecommendation) {
+                let f = DateFormatter()
+                f.dateFormat = "h:mm a"
+                f.locale = Locale(identifier: "en_US_POSIX")
+                let currentTimeString = f.string(from: now)
+                let specificKey = "\(taskType)_\(task.timeRecommendation)"
+                repository.updatePreference(for: pet.id, taskType: specificKey, preferredTime: currentTimeString, isManualOverride: true)
+            }
         }
-        
-        // Force the @Observable macro to detect a change in the relationship
-        pet.activities = pet.activities 
         
         // Save changes and refresh widgets
         try? context.save()
         WidgetCenter.shared.reloadAllTimelines()
+        
+        // SYNC TO WATCH: Push the full updated state (pets + preferences + deactivations)
+        if let allPets = try? repository.fetchPets(), 
+           let allPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()),
+           let allDeacts = try? modelContext.fetch(FetchDescriptor<TaskDeactivation>()) {
+            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
+        }
+        
+        // Refresh local tasks
+        updateTasks()
     }
     
     /// Formatted string for month and year.
