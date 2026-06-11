@@ -14,7 +14,7 @@ struct WatchLogActivityView: View {
 
     // Activity definitions are UI data — correctly live in the View
     private let activities: [(type: String, icon: String, color: Color)] = [
-        (type: "feeding",    icon: "dog.bowl.fill",  color: .orange),
+        (type: "feeding",    icon: "fork.knife",  color: .orange),
         (type: "hydration",  icon: "drop.fill",      color: .blue),
         (type: "walk",       icon: "figure.walk",    color: .green),
         (type: "medication", icon: "pills.fill",     color: .red)

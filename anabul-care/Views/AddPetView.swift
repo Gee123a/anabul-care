@@ -64,7 +64,7 @@ struct AddPetView: View {
                         VStack(spacing: 20) {
                             PremiumTextField(
                                 title: "Nama",
-                                placeholder: "Siapa namanya?",
+                                placeholder: "What's their name?",
                                 text: $viewModel.name,
                                 icon: "tag.fill",
                                 isFocused: focusedField == .name,
@@ -73,12 +73,12 @@ struct AddPetView: View {
                             .focused($focusedField, equals: .name)
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("SPESIES")
+                                Text("SPECIES")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(.secondary)
                                     .padding(.leading, 4)
                                 
-                                Picker("Spesies", selection: $viewModel.species) {
+                                Picker("Species", selection: $viewModel.species) {
                                     ForEach(PetSpecies.allCases, id: \.self) { species in
                                         Label(species.rawValue.capitalized, systemImage: iconForSpecies(species)).tag(species)
                                     }
@@ -91,7 +91,7 @@ struct AddPetView: View {
                             }
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("RAS / BREED")
+                                Text("RACE / BREED")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(focusedField == .breed ? tangerine : .secondary)
                                     .padding(.leading, 4)
@@ -108,7 +108,7 @@ struct AddPetView: View {
                                             .foregroundColor(viewModel.breed.isEmpty ? .secondary.opacity(0.8) : tangerine)
                                             .frame(width: 20)
                                         
-                                        Text(viewModel.breed.isEmpty ? "Pilih ras..." : viewModel.breed)
+                                        Text(viewModel.breed.isEmpty ? "Select race..." : viewModel.breed)
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
                                             .foregroundColor(viewModel.breed.isEmpty ? .secondary : .primary)
                                         
@@ -145,14 +145,14 @@ struct AddPetView: View {
                         
                         // 3. PHYSICAL DETAILS CARD
                         VStack(spacing: 20) {
-                            DatePicker("Tanggal Lahir", selection: $viewModel.dateOfBirth, in: ...Date(), displayedComponents: .date)
+                            DatePicker("Birth Date", selection: $viewModel.dateOfBirth, in: ...Date(), displayedComponents: .date)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .tint(tangerine)
                             
                             Divider()
                             
                             HStack {
-                                Label("Berat", systemImage: "scalemass.fill")
+                                Label("Weight", systemImage: "scalemass.fill")
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundColor(focusedField == .weight ? tangerine : .primary)
                                 
@@ -173,9 +173,9 @@ struct AddPetView: View {
                             
                             Toggle(isOn: $viewModel.isNeutered) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Sudah Steril")
+                                    Text("Neutered?")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    Text("Penting untuk perhitungan MER")
+                                    Text("Important for MER calculations")
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                 }
@@ -190,7 +190,7 @@ struct AddPetView: View {
                         // 4. ACTION BUTTON
                         Button(action: viewModel.savePet) {
                             HStack {
-                                Text(viewModel.petToEdit == nil ? "Simpan Profil" : "Perbarui Profil")
+                                Text(viewModel.petToEdit == nil ? "Save Profile" : "Update Profile")
                                 Image(systemName: "checkmark.seal.fill")
                             }
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -210,11 +210,11 @@ struct AddPetView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle(viewModel.petToEdit == nil ? "Tambah Anabul" : "Edit Anabul")
+            .navigationTitle(viewModel.petToEdit == nil ? "Add Anabul" : "Edit Anabul")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Batal") { dismiss() }
+                    Button("Cancel") { dismiss() }
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
