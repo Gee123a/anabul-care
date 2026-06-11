@@ -40,30 +40,15 @@ struct ContentView: View {
                 .tabViewStyle(.page)
             }
         }
-        
+        .onAppear {
+            WatchConnectivityManager.shared.requestFullSyncFromPhone()
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ReceivedWatchData"))) { notification in
             print("🚨 CONTENT VIEW HEARD THE NOTIFICATION!")
             
-            if let payload = notification.userInfo {
-                print("🚨 PAYLOAD EXTRACTED: \(payload)")
-                
-                if let action = payload["action"] as? String, action == "sync_pet" {
-                    let name = payload["name"] as? String ?? "Unknown"
-                    let species = payload["species"] as? String ?? "Dog"
-                    let breed = payload["breed"] as? String ?? "Unknown"
-                    let weight = payload["weight"] as? Double ?? 0.0
-                    let newWatchPet = PetProfile(name: name, species: species, breed: breed, dateOfBirth: Date(), weightKg: weight)
-                    modelContext.insert(newWatchPet)
-                    
-                    do {
-                        try modelContext.save()
-                        print("🚨 SUCCESS! PET SAVED TO WATCH DATABASE!")
-                    } catch {
-                        print("🚨 FATAL ERROR SAVING PET ON WATCH: \(error)")
-                    }
-                } else {
-                    print("🚨 ACTION WAS NOT SYNC_PET")
-                }
+            if let payload = notification.userInfo as? [String: Any] {
+                let viewModel = WatchSyncViewModel(modelContext: modelContext)
+                viewModel.handlePayload(payload)
             }
         }
     }
@@ -71,8 +56,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self], inMemory: true)    
+        .modelContainer(for: [PetProfile.self, ActivityLog.self, SpeciesRuleModel.self, ToxicityModel.self, TidbitModel.self], inMemory: true)
             
     }
-        
-                

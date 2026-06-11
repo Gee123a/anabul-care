@@ -43,10 +43,16 @@ final class WatchSyncViewModel {
     ) {
         print("WatchSyncViewModel: Processing full state sync…")
 
-        // 1. Clear stale data
-        try? modelContext.delete(model: ActivityLog.self)
-        try? modelContext.delete(model: PetProfile.self)
-        try? modelContext.delete(model: TaskPreference.self)
+        // 1. Clear stale data safely
+        if let oldLogs = try? modelContext.fetch(FetchDescriptor<ActivityLog>()) {
+            oldLogs.forEach { modelContext.delete($0) }
+        }
+        if let oldPets = try? modelContext.fetch(FetchDescriptor<PetProfile>()) {
+            oldPets.forEach { modelContext.delete($0) }
+        }
+        if let oldPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()) {
+            oldPrefs.forEach { modelContext.delete($0) }
+        }
 
         // 2. Rebuild Pets and their ActivityLogs
         for petDict in petsData {

@@ -95,6 +95,23 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
 
     // MARK: - Activity Logging (Watch -> Phone)
     
+    /// Requests a full state sync from the iPhone upon Watch startup.
+    func requestFullSyncFromPhone() {
+        let payload: [String: Any] = [
+            "action": "request_full_sync",
+            "timestamp": Date().timeIntervalSince1970
+        ]
+        
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(payload, replyHandler: nil) { error in
+                print("🚨 MANAGER: Failed to send full sync request: \(error.localizedDescription)")
+            }
+        } else {
+            WCSession.default.transferUserInfo(payload)
+            print("🚨 MANAGER: Queued full sync request")
+        }
+    }
+    
     /// Sends a request from the Watch to the Phone to log a specific activity.
     func sendActivityLogToPhone(activityType: String, petName: String) {
         let payload: [String: Any] = [

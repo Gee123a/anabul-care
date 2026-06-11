@@ -66,12 +66,21 @@ public final class DashboardViewModel {
     /// Called by the View's `.onReceive` — the View passes the raw payload
     /// and this ViewModel decides what to do with it.
     public func handleWatchPayload(_ payload: [String: Any]) {
-        guard let action = payload["action"] as? String,
-              action == "log_activity" else { return }
-
-        let petName = payload["petName"] as? String ?? ""
-        let activityType = payload["activityType"] as? String ?? ""
-        logActivityFromWatch(petName: petName, activityType: activityType)
+        guard let action = payload["action"] as? String else { return }
+        
+        switch action {
+        case "request_full_sync":
+            print("DashboardViewModel: Received full sync request from Watch")
+            syncAllToWatch()
+            
+        case "log_activity":
+            let petName = payload["petName"] as? String ?? ""
+            let activityType = payload["activityType"] as? String ?? ""
+            logActivityFromWatch(petName: petName, activityType: activityType)
+            
+        default:
+            break
+        }
     }
 
     /// Creates and persists an ActivityLog received from the Watch,
