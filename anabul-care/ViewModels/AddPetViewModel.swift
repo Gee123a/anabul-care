@@ -96,8 +96,9 @@ public final class AddPetViewModel {
             
             // SYNC TO WATCH: Push the full updated state after saving a pet
             if let allPets = try? repository.fetchPets(),
-               let allPrefs = try? repository.fetchAllPreferences() {
-                WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+               let allPrefs = try? repository.fetchAllPreferences(),
+               let allDeacts = try? repository.fetchAllDeactivations() {
+                WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
             }
             
             self.isSaved = true

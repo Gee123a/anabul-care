@@ -28,7 +28,7 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
     
     /// Bundles all relevant pet data and sends it to the watch to ensure a perfect mirror.
     /// This method is called whenever the phone's state changes.
-    func syncFullStateToWatch(pets: [PetProfile], preferences: [TaskPreference]) {
+    func syncFullStateToWatch(pets: [PetProfile], preferences: [TaskPreference], deactivations: [TaskDeactivation]) {
         guard WCSession.default.activationState == .activated else { return }
         
         let petsData = pets.map { pet in
@@ -43,7 +43,7 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
                     "id": $0.id.uuidString,
                     "type": $0.type,
                     "timestamp": $0.timestamp.timeIntervalSince1970,
-                    "detail": $0.detail ?? ""
+                    "detail": $0.detail
                 ]}
             ]
         }
@@ -55,10 +55,17 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
             "isManualOverride": $0.isManualOverride
         ]}
         
+        let deactsData = deactivations.map { [
+            "petID": $0.petID.uuidString,
+            "taskType": $0.taskType,
+            "date": $0.date?.timeIntervalSince1970 ?? 0.0
+        ]}
+        
         let payload: [String: Any] = [
             "action": "full_state_sync",
             "pets": petsData,
             "preferences": prefsData,
+            "deactivations": deactsData,
             "timestamp": Date().timeIntervalSince1970
         ]
         

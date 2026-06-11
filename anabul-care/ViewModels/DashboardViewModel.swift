@@ -127,7 +127,8 @@ public final class DashboardViewModel {
     /// Call on launch and after any state mutation.
     public func syncAllToWatch() {
         guard let allPets = try? repository.fetchPets(),
-              let allPrefs = try? repository.fetchAllPreferences() else { return }
-        WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+              let allPrefs = try? repository.fetchAllPreferences(),
+              let allDeacts = try? repository.fetchAllDeactivations() else { return }
+        WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
     }
 }

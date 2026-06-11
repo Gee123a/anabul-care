@@ -61,6 +61,12 @@ final class PetRepository: PetRepositoryProtocol {
         return try context.fetch(descriptor)
     }
     
+    /// Fetches all task deactivations in the database.
+    func fetchAllDeactivations() throws -> [TaskDeactivation] {
+        let descriptor = FetchDescriptor<TaskDeactivation>()
+        return try context.fetch(descriptor)
+    }
+    
     /// Adds a new timing preference.
     func addPreference(_ preference: TaskPreference) throws {
         context.insert(preference)

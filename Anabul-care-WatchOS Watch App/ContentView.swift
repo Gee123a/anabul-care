@@ -35,7 +35,9 @@ struct ContentView: View {
                 // WatchOS Native Horizontal Paging
                 TabView {
                     WatchDashboardView(pet: pets.first!)
+                        .id(pets.first!.persistentModelID)
                     WatchLogActivityView(pet: pets.first!)
+                        .id(pets.first!.persistentModelID)
                 }
                 .tabViewStyle(.page)
             }

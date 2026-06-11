@@ -105,10 +105,11 @@ public final class RoutineViewModel {
         try? context.save()
         WidgetCenter.shared.reloadAllTimelines()
         
-        // SYNC TO WATCH: Push the full updated state (pets + preferences)
+        // SYNC TO WATCH: Push the full updated state (pets + preferences + deactivations)
         if let allPets = try? repository.fetchPets(), 
-           let allPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()) {
-            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+           let allPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()),
+           let allDeacts = try? modelContext.fetch(FetchDescriptor<TaskDeactivation>()) {
+            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
         }
         
         // Refresh local tasks

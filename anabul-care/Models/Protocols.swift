@@ -16,6 +16,7 @@ public protocol PetRepositoryProtocol {
     func fetchPreferences(for petID: UUID) throws -> [TaskPreference]
     func fetchDeactivations(for petID: UUID) throws -> [TaskDeactivation]
     func fetchAllPreferences() throws -> [TaskPreference]
+    func fetchAllDeactivations() throws -> [TaskDeactivation]
     
     func addPreference(_ preference: TaskPreference) throws
     func addDeactivation(_ deactivation: TaskDeactivation) throws

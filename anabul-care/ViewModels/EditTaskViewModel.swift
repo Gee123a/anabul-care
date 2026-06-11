@@ -90,7 +90,8 @@ public final class EditTaskViewModel {
     
     private func triggerSync() {
         if let allPets = try? repository.fetchPets(),
-           let allPrefs = try? repository.fetchAllPreferences() {
-            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs)
+           let allPrefs = try? repository.fetchAllPreferences(),
+           let allDeacts = try? repository.fetchAllDeactivations() {
+            WatchConnectivityManager.shared.syncFullStateToWatch(pets: allPets, preferences: allPrefs, deactivations: allDeacts)
         }
     }}

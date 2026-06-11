@@ -27,7 +27,8 @@ final class WatchSyncViewModel {
         case "full_state_sync":
             let petsData = payload["pets"] as? [[String: Any]] ?? []
             let prefsData = payload["preferences"] as? [[String: Any]] ?? []
-            rebuildDatabase(petsData: petsData, prefsData: prefsData)
+            let deactsData = payload["deactivations"] as? [[String: Any]] ?? []
+            rebuildDatabase(petsData: petsData, prefsData: prefsData, deactsData: deactsData)
         default:
             print("WatchSyncViewModel: Unhandled action '\(action)'")
         }
@@ -39,7 +40,8 @@ final class WatchSyncViewModel {
     /// from the iPhone's authoritative state payload.
     private func rebuildDatabase(
         petsData: [[String: Any]],
-        prefsData: [[String: Any]]
+        prefsData: [[String: Any]],
+        deactsData: [[String: Any]]
     ) {
         print("WatchSyncViewModel: Processing full state sync…")
 
@@ -52,6 +54,9 @@ final class WatchSyncViewModel {
         }
         if let oldPrefs = try? modelContext.fetch(FetchDescriptor<TaskPreference>()) {
             oldPrefs.forEach { modelContext.delete($0) }
+        }
+        if let oldDeacts = try? modelContext.fetch(FetchDescriptor<TaskDeactivation>()) {
+            oldDeacts.forEach { modelContext.delete($0) }
         }
 
         // 2. Rebuild Pets and their ActivityLogs
@@ -81,6 +86,20 @@ final class WatchSyncViewModel {
                 isManualOverride: manual
             )
             modelContext.insert(pref)
+        }
+
+        // 4. Rebuild TaskDeactivations
+        for deactDict in deactsData {
+            let petID = UUID(uuidString: deactDict["petID"] as? String ?? "") ?? UUID()
+            let type = deactDict["taskType"] as? String ?? ""
+            let timeVal = deactDict["date"] as? Double ?? 0.0
+            let date = timeVal > 0.0 ? Date(timeIntervalSince1970: timeVal) : nil
+            let deact = TaskDeactivation(
+                petID: petID,
+                taskType: type,
+                date: date
+            )
+            modelContext.insert(deact)
         }
 
         try? modelContext.save()

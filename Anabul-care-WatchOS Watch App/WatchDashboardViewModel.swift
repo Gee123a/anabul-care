@@ -24,7 +24,9 @@ final class WatchDashboardViewModel {
 
     /// Regenerates today's task list for the current pet.
     func loadTasks() {
-        dailyTasks = DailyRoutineGenerator.generate(for: pet)
+        let prefs = (try? pet.modelContext?.fetch(FetchDescriptor<TaskPreference>())) ?? []
+        let deacts = (try? pet.modelContext?.fetch(FetchDescriptor<TaskDeactivation>())) ?? []
+        dailyTasks = DailyRoutineGenerator.generate(for: pet, preferences: prefs, deactivations: deacts)
     }
 
     /// Returns true if a given task has been logged for today.
