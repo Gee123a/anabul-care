@@ -3,6 +3,7 @@
 UML_DIAGRAM_CODE.md
 FigmaDesign.md
 *.md
+!README.md
 .DS_Store
 **/.DS_Store
 *.pbxproj
@@ -10,5 +11,4 @@ anabul-care.xcodeproj/project.pbxproj
 anabul-care.xcodeproj/project.xcworkspace/xcuserdata/niki.xcuserdatad/UserInterfaceState.xcuserstate
 .DS_Store
 anabul-care/Deliverables.zip
-/build/XCBuildData
 /build

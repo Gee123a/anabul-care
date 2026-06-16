@@ -791,7 +791,7 @@
 				CODE_SIGN_ENTITLEMENTS = "anabul-care/anabul-care.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y5P2W8D83V;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;
@@ -829,7 +829,7 @@
 				CODE_SIGN_ENTITLEMENTS = "anabul-care/anabul-care.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y5P2W8D83V;
+				DEVELOPMENT_TEAM = Q5G563YDBB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.anabulcare.climateCheck;

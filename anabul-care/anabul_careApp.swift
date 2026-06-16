@@ -16,6 +16,7 @@ struct anabul_careApp: App {
     init() {
         // Register the background task immediately on launch
         ClimateManager.shared.registerBackgroundTask(modelContainer: sharedModelContainer)
+        WatchConnectivityManager.shared.modelContainer = sharedModelContainer
     }
     
     var sharedModelContainer: ModelContainer = {
