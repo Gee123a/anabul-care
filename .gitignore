@@ -3,6 +3,7 @@
 UML_DIAGRAM_CODE.md
 FigmaDesign.md
 *.md
+!README.md
 .DS_Store
 **/.DS_Store
 *.pbxproj
